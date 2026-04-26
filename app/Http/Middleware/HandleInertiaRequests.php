@@ -35,6 +35,8 @@ class HandleInertiaRequests extends Middleware
      */
     public function share(Request $request): array
     {
+        $appUrl = rtrim(config('app.url', $request->getSchemeAndHttpHost()), '/');
+
         return [
             ...parent::share($request),
             'name' => config('app.name'),
@@ -42,6 +44,8 @@ class HandleInertiaRequests extends Middleware
                 'user' => $request->user(),
             ],
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
+            'appUrl' => $appUrl,
+            'currentUrl' => '/'.ltrim($request->path(), '/'),
         ];
     }
 }

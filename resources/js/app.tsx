@@ -1,5 +1,6 @@
 import { createInertiaApp } from '@inertiajs/react';
 import FloatingMenu from '@/components/floating-menu';
+import { SubscribeModalProvider } from '@/components/subscribe-modal';
 import { Toaster } from '@/components/ui/sonner';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { initializeTheme } from '@/hooks/use-appearance';
@@ -14,6 +15,7 @@ createInertiaApp({
     layout: (name) => {
         switch (true) {
             case name === 'welcome':
+            case name.startsWith('guest/'):
                 return null;
             case name.startsWith('auth/'):
                 return AuthLayout;
@@ -27,9 +29,11 @@ createInertiaApp({
     withApp(app) {
         return (
             <TooltipProvider delayDuration={0}>
-                {app}
-                <FloatingMenu />
-                <Toaster />
+                <SubscribeModalProvider>
+                    {app}
+                    <FloatingMenu />
+                    <Toaster />
+                </SubscribeModalProvider>
             </TooltipProvider>
         );
     },
