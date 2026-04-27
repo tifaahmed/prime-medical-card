@@ -1,4 +1,6 @@
+import { useCallback } from 'react';
 import { useSubscribeModal } from '@/components/subscribe-modal';
+import { useDragScroll } from './use-drag-scroll';
 
 type SpecialOffer = {
     title: string;
@@ -55,6 +57,29 @@ const OFFERS: SpecialOffer[] = [
 
 export default function SpecialOffers() {
     const { open } = useSubscribeModal();
+    const { ref: trackRef, handlers } = useDragScroll<HTMLDivElement>();
+
+    const scrollByCard = useCallback(
+        (direction: 1 | -1) => {
+            const el = trackRef.current;
+            if (!el) {
+                return;
+            }
+            const card = el.firstElementChild as HTMLElement | null;
+            if (!card) {
+                return;
+            }
+            const styles = getComputedStyle(el);
+            const gap = parseFloat(styles.columnGap || '0') || 0;
+            const step = card.getBoundingClientRect().width + gap;
+            const isRTL = styles.direction === 'rtl';
+            el.scrollBy({
+                left: (isRTL ? -1 : 1) * direction * step,
+                behavior: 'smooth',
+            });
+        },
+        [trackRef],
+    );
 
     return (
         <section
@@ -79,10 +104,60 @@ export default function SpecialOffers() {
                     </p>
                 </div>
 
-                <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-                    {OFFERS.map((offer) => (
-                        <OfferCard key={offer.title} offer={offer} />
-                    ))}
+                <div className="relative mt-12">
+                    <div
+                        ref={trackRef}
+                        {...handlers}
+                        className="hide-scrollbar flex cursor-grab snap-x snap-mandatory gap-5 overflow-x-auto scroll-smooth pb-4 [&.is-dragging]:cursor-grabbing [&.is-dragging>*]:pointer-events-none"
+                    >
+                        {OFFERS.map((offer) => (
+                            <div
+                                key={offer.title}
+                                className="w-[85%] shrink-0 snap-start sm:w-[calc(50%-0.625rem)] lg:w-[calc(25%-0.9375rem)]"
+                            >
+                                <OfferCard offer={offer} />
+                            </div>
+                        ))}
+                    </div>
+
+                    <div className="mt-6 flex items-center justify-center gap-3">
+                        <button
+                            type="button"
+                            onClick={() => scrollByCard(-1)}
+                            aria-label="السابق"
+                            className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-[rgba(11,46,44,0.15)] bg-white text-[var(--teal-900)] shadow-sm transition hover:border-[var(--teal-900)] hover:bg-[var(--teal-900)] hover:text-[var(--cream)]"
+                        >
+                            <svg
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth={2.5}
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                className="h-4 w-4"
+                            >
+                                <path d="M9 6l6 6-6 6" />
+                            </svg>
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => scrollByCard(1)}
+                            aria-label="التالي"
+                            className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-[rgba(11,46,44,0.15)] bg-white text-[var(--teal-900)] shadow-sm transition hover:border-[var(--teal-900)] hover:bg-[var(--teal-900)] hover:text-[var(--cream)]"
+                        >
+                            <svg
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth={2.5}
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                className="h-4 w-4"
+                            >
+                                <path d="M15 6l-6 6 6 6" />
+                            </svg>
+                        </button>
+                    </div>
                 </div>
 
                 <div className="mt-12 flex flex-col items-center justify-center gap-4 rounded-3xl bg-[var(--teal-900)] p-8 text-center sm:flex-row sm:gap-6 sm:text-start">
@@ -115,6 +190,13 @@ export default function SpecialOffers() {
                     </button>
                 </div>
             </div>
+
+            <style
+                dangerouslySetInnerHTML={{
+                    __html: `.hide-scrollbar { scrollbar-width: none; }
+                    .hide-scrollbar::-webkit-scrollbar { display: none; }`,
+                }}
+            />
         </section>
     );
 }
@@ -123,7 +205,7 @@ function OfferCard({ offer }: { offer: SpecialOffer }) {
     const { open } = useSubscribeModal();
 
     return (
-        <article className="group relative flex flex-col gap-4 overflow-hidden rounded-3xl border border-[rgba(11,46,44,0.08)] bg-white p-6 shadow-[0_18px_40px_-30px_rgba(11,46,44,0.5)] transition hover:-translate-y-1 hover:shadow-[0_28px_55px_-30px_rgba(11,46,44,0.6)]">
+        <article className="group relative flex h-full flex-col gap-4 overflow-hidden rounded-3xl border border-[rgba(11,46,44,0.08)] bg-white p-6 shadow-[0_18px_40px_-30px_rgba(11,46,44,0.5)] transition hover:-translate-y-1 hover:shadow-[0_28px_55px_-30px_rgba(11,46,44,0.6)]">
             <div
                 className="absolute inset-x-0 top-0 h-1.5"
                 style={{ background: offer.accent }}

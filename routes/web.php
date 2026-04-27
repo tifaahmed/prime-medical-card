@@ -62,6 +62,10 @@ Route::get('/partners/{id}', function (string $id) {
 })->name('partner.show');
 Route::inertia('/contact', 'guest/contact')->name('contact');
 
+Route::get('/card/{number}', function (string $number) {
+    return inertia('guest/member-card', ['number' => $number]);
+})->where('number', '[0-9]+')->name('member.card');
+
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::inertia('dashboard', 'dashboard')->name('dashboard');
 });

@@ -183,7 +183,7 @@ export default function FloatingLogos({ count = 50 }: { count?: number }) {
         }
 
         const isMobile = window.matchMedia('(max-width: 640px)').matches;
-        const totalCount = isMobile ? 12 : Math.max(count, MIN_COUNT);
+        const totalCount = isMobile ? 6 : Math.max(count, MIN_COUNT);
 
         const wanderers: Wanderer[] = [];
         let width = container.offsetWidth || window.innerWidth;
@@ -221,7 +221,7 @@ export default function FloatingLogos({ count = 50 }: { count?: number }) {
             el.appendChild(circle);
             el.appendChild(label);
 
-            const size = rand(44, 78);
+            const size = isMobile ? rand(32, 52) : rand(44, 78);
             const { vx, vy } = initVelocity();
             const w: Wanderer = {
                 el,

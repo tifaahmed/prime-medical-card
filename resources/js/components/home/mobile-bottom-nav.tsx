@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useCurrentUrl } from '@/hooks/use-current-url';
 import { EnvelopeIcon, HomeIcon, InfoIcon, UsersIcon } from './icons';
 
 type NavItem = {
@@ -26,7 +26,10 @@ const ITEMS: NavItem[] = [
 ];
 
 export default function MobileBottomNav() {
-    const [active, setActive] = useState('home');
+    const { isCurrentUrl, isCurrentOrParentUrl } = useCurrentUrl();
+
+    const isActive = (href: string) =>
+        href === '/' ? isCurrentUrl(href) : isCurrentOrParentUrl(href);
 
     return (
         <nav className="mobile-bottom-nav" aria-label="التنقل السريع">
@@ -37,10 +40,9 @@ export default function MobileBottomNav() {
                         href={item.href}
                         className={
                             'mobile-nav-item' +
-                            (active === item.key ? ' active' : '')
+                            (isActive(item.href) ? ' active' : '')
                         }
                         aria-label={item.label}
-                        onClick={() => setActive(item.key)}
                     >
                         <div className="mobile-nav-icon">{item.icon}</div>
                         <span>{item.label}</span>

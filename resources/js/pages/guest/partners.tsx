@@ -1,5 +1,6 @@
 import { Link, usePage } from '@inertiajs/react';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import FloatingActions from '@/components/floating-actions';
 import FloatingLogos from '@/components/floating-logos';
 import SeoHead, { breadcrumbSchema } from '@/components/seo-head';
@@ -171,30 +172,30 @@ export default function Partners() {
                 <AnnounceBar />
                 <SiteNav authUser={authUser} />
 
-                <section className="relative z-[2] overflow-hidden bg-[var(--teal-900)] py-16 sm:py-24">
+                <section className="relative z-[2] overflow-hidden bg-[var(--teal-900)] py-1.5 sm:py-24">
                     <div className="absolute inset-0 -z-0 opacity-30">
                         <div className="absolute -right-32 top-12 h-72 w-72 rounded-full bg-[var(--amber-500)] blur-3xl" />
                         <div className="absolute -left-24 bottom-0 h-72 w-72 rounded-full bg-[var(--teal-500)] blur-3xl" />
                     </div>
                     <div className="container relative z-10">
                         <div className="mx-auto max-w-3xl text-center">
-                            <span className="inline-flex items-center rounded-full bg-[rgba(247,242,234,0.08)] px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.18em] text-[var(--amber-400)]">
+                            <span className="hidden items-center rounded-full bg-[rgba(247,242,234,0.08)] px-3 py-0.5 text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--amber-400)] sm:inline-flex sm:px-4 sm:py-1.5 sm:text-xs">
                                 +٣٠٠٠ شريك طبي
                             </span>
-                            <h1 className="mt-4 text-4xl font-bold leading-tight text-[var(--cream)] sm:text-5xl lg:text-6xl">
+                            <h1 className="text-xs font-bold leading-tight text-[var(--cream)] sm:mt-4 sm:text-5xl lg:text-6xl">
                                 ابحث عن{' '}
                                 <em className="font-serif text-[var(--amber-400)]">
                                     أقرب شريك طبي
                                 </em>{' '}
                                 لك
                             </h1>
-                            <p className="mt-5 text-base leading-relaxed text-[rgba(247,242,234,0.75)] sm:text-lg">
+                            <p className="mt-2 hidden text-xs leading-relaxed text-[rgba(247,242,234,0.75)] sm:mt-5 sm:block sm:text-lg">
                                 مستشفيات، صيدليات، معامل تحاليل، مراكز أشعة،
                                 عيادات أسنان، وبصريات في كل محافظات مصر — كلها
                                 ببطاقة واحدة.
                             </p>
 
-                            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+                            <div className="mt-1 flex flex-row gap-1.5 sm:mt-8 sm:gap-3">
                                 <div className="relative flex-1">
                                     <SearchIcon />
                                     <input
@@ -204,26 +205,14 @@ export default function Partners() {
                                             setQuery(e.target.value)
                                         }
                                         placeholder="ابحث باسم الشريك أو الخدمة..."
-                                        className="w-full rounded-full border border-[rgba(247,242,234,0.15)] bg-[rgba(247,242,234,0.08)] py-3.5 pe-5 ps-12 text-sm text-[var(--cream)] placeholder:text-[rgba(247,242,234,0.5)] outline-none transition focus:border-[var(--amber-400)] focus:bg-[rgba(247,242,234,0.12)]"
+                                        className="w-full rounded-full border border-[rgba(247,242,234,0.15)] bg-[rgba(247,242,234,0.08)] py-1.5 pe-5 ps-12 text-xs text-[var(--cream)] placeholder:text-[rgba(247,242,234,0.5)] outline-none transition focus:border-[var(--amber-400)] focus:bg-[rgba(247,242,234,0.12)] sm:py-3.5 sm:text-sm"
                                     />
                                 </div>
-                                <select
+                                <GovernorateCombobox
                                     value={activeGov}
-                                    onChange={(e) =>
-                                        setActiveGov(e.target.value)
-                                    }
-                                    className="rounded-full border border-[rgba(247,242,234,0.15)] bg-[rgba(247,242,234,0.08)] px-5 py-3.5 text-sm font-semibold text-[var(--cream)] outline-none transition focus:border-[var(--amber-400)]"
-                                >
-                                    {GOVERNORATES.map((g) => (
-                                        <option
-                                            key={g}
-                                            value={g}
-                                            className="text-[var(--ink)]"
-                                        >
-                                            {g}
-                                        </option>
-                                    ))}
-                                </select>
+                                    onChange={setActiveGov}
+                                    options={GOVERNORATES}
+                                />
                             </div>
                         </div>
                     </div>
@@ -393,7 +382,18 @@ function PartnerCard({
     onContact: () => void;
 }) {
     return (
-        <article className="group flex h-full flex-col gap-3 rounded-3xl border border-[rgba(11,46,44,0.08)] bg-white p-3 transition hover:-translate-y-1 hover:shadow-[0_28px_55px_-30px_rgba(11,46,44,0.5)] sm:gap-4 sm:p-6">
+        <article
+            role="button"
+            tabIndex={0}
+            onClick={onContact}
+            onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    onContact();
+                }
+            }}
+            className="group flex h-full cursor-pointer flex-col gap-3 rounded-3xl border border-[rgba(11,46,44,0.08)] bg-white p-3 transition hover:-translate-y-1 hover:border-[var(--teal-700)] hover:shadow-[0_28px_55px_-30px_rgba(11,46,44,0.5)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--teal-700)] sm:gap-4 sm:p-6"
+        >
             <div className="flex items-start justify-between gap-2">
                 <div
                     className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl text-sm font-bold text-white sm:h-14 sm:w-14 sm:text-base"
@@ -439,12 +439,312 @@ function PartnerCard({
                 </button>
                 <Link
                     href={`/partners/${partner.id}`}
+                    onClick={(e) => e.stopPropagation()}
                     className="inline-flex flex-1 items-center justify-center gap-1 rounded-full border border-[rgba(11,46,44,0.15)] px-2 py-2 text-[11px] font-semibold text-[var(--teal-900)] transition hover:border-[var(--teal-700)] sm:gap-2 sm:px-4 sm:py-2.5 sm:text-xs"
                 >
                     تفاصيل
                 </Link>
             </div>
         </article>
+    );
+}
+
+function fuzzyScore(query: string, target: string): number | null {
+    const q = query.trim();
+    if (!q) {
+        return 0;
+    }
+    if (target === q) {
+        return 1000;
+    }
+    if (target.startsWith(q)) {
+        return 500 - target.length;
+    }
+    const sub = target.indexOf(q);
+    if (sub !== -1) {
+        return 300 - sub - target.length;
+    }
+    let ti = 0;
+    let matched = 0;
+    let firstIdx = -1;
+    for (const ch of q) {
+        const idx = target.indexOf(ch, ti);
+        if (idx === -1) {
+            return null;
+        }
+        if (firstIdx === -1) {
+            firstIdx = idx;
+        }
+        matched++;
+        ti = idx + 1;
+    }
+    return matched > 0 ? 100 - firstIdx - (target.length - matched) : null;
+}
+
+type Ranked = { value: string; score: number };
+
+function GovernorateCombobox({
+    value,
+    onChange,
+    options,
+}: {
+    value: string;
+    onChange: (v: string) => void;
+    options: string[];
+}) {
+    const [open, setOpen] = useState(false);
+    const [query, setQuery] = useState('');
+    const [highlight, setHighlight] = useState(0);
+    const [rect, setRect] = useState<DOMRect | null>(null);
+    const triggerRef = useRef<HTMLButtonElement>(null);
+    const panelRef = useRef<HTMLDivElement>(null);
+    const inputRef = useRef<HTMLInputElement>(null);
+    const listRef = useRef<HTMLUListElement>(null);
+
+    const ranked: Ranked[] = useMemo(() => {
+        const q = query.trim();
+        if (!q) {
+            return options.map((o) => ({ value: o, score: 0 }));
+        }
+        return options
+            .map((o) => ({ value: o, score: fuzzyScore(q, o) }))
+            .filter((r): r is Ranked => r.score !== null)
+            .sort((a, b) => b.score - a.score);
+    }, [query, options]);
+
+    useLayoutEffect(() => {
+        if (!open) {
+            return;
+        }
+        const update = () => {
+            const r = triggerRef.current?.getBoundingClientRect();
+            if (r) {
+                setRect(r);
+            }
+        };
+        update();
+        window.addEventListener('resize', update);
+        window.addEventListener('scroll', update, true);
+        return () => {
+            window.removeEventListener('resize', update);
+            window.removeEventListener('scroll', update, true);
+        };
+    }, [open]);
+
+    useEffect(() => {
+        if (!open) {
+            return;
+        }
+        const onDoc = (e: MouseEvent) => {
+            const t = e.target as Node;
+            if (
+                !triggerRef.current?.contains(t) &&
+                !panelRef.current?.contains(t)
+            ) {
+                setOpen(false);
+            }
+        };
+        document.addEventListener('mousedown', onDoc);
+        return () => document.removeEventListener('mousedown', onDoc);
+    }, [open]);
+
+    useEffect(() => {
+        if (open) {
+            setQuery('');
+            const i = options.indexOf(value);
+            setHighlight(i >= 0 ? i : 0);
+            requestAnimationFrame(() => inputRef.current?.focus());
+        }
+    }, [open, options, value]);
+
+    useEffect(() => {
+        setHighlight(0);
+    }, [query]);
+
+    useEffect(() => {
+        if (!open) {
+            return;
+        }
+        const node = listRef.current?.children[highlight] as
+            | HTMLElement
+            | undefined;
+        node?.scrollIntoView({ block: 'nearest' });
+    }, [highlight, open]);
+
+    const onKey = (e: React.KeyboardEvent) => {
+        if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            setHighlight((h) => Math.min(h + 1, ranked.length - 1));
+        } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            setHighlight((h) => Math.max(h - 1, 0));
+        } else if (e.key === 'Enter') {
+            e.preventDefault();
+            const item = ranked[highlight];
+            if (item) {
+                onChange(item.value);
+                setOpen(false);
+            }
+        } else if (e.key === 'Escape') {
+            e.preventDefault();
+            setOpen(false);
+            triggerRef.current?.focus();
+        }
+    };
+
+    const panel = open && rect
+        ? createPortal(
+              <div
+                  ref={panelRef}
+                  dir="rtl"
+                  style={{
+                      position: 'fixed',
+                      top: rect.bottom + 8,
+                      right: window.innerWidth - rect.right,
+                      width: Math.max(rect.width, 288),
+                      maxWidth: 'calc(100vw - 1.5rem)',
+                      ['--ink' as string]: '#0a1a19',
+                      ['--ink-soft' as string]: '#3d4948',
+                      ['--cream' as string]: '#f7f2ea',
+                      ['--teal-900' as string]: '#0b2e2c',
+                      ['--teal-700' as string]: '#1a544f',
+                      ['--amber-100' as string]: '#fbead2',
+                      fontFamily:
+                          "'Tajawal', system-ui, -apple-system, sans-serif",
+                      color: '#0a1a19',
+                  }}
+                  className="z-[100] overflow-hidden rounded-2xl border border-[rgba(11,46,44,0.1)] bg-white text-[var(--ink)] shadow-[0_24px_50px_-20px_rgba(11,46,44,0.45)]"
+              >
+                  <div className="border-b border-[rgba(11,46,44,0.08)] p-2">
+                      <div className="relative">
+                          <SearchIconSm />
+                          <input
+                              ref={inputRef}
+                              type="search"
+                              value={query}
+                              onChange={(e) => setQuery(e.target.value)}
+                              onKeyDown={onKey}
+                              placeholder="ابحث عن محافظة..."
+                              className="w-full rounded-xl border border-[rgba(11,46,44,0.1)] bg-[rgba(11,46,44,0.03)] py-2 pe-3 ps-9 text-sm text-[var(--ink)] outline-none placeholder:text-[var(--ink-soft)] focus:border-[var(--teal-700)] focus:bg-white"
+                          />
+                      </div>
+                  </div>
+
+                  <ul
+                      ref={listRef}
+                      role="listbox"
+                      className="max-h-64 overflow-y-auto p-1"
+                  >
+                      {ranked.length === 0 ? (
+                          <li className="px-3 py-4 text-center text-xs text-[var(--ink-soft)]">
+                              لا توجد محافظات مطابقة
+                          </li>
+                      ) : (
+                          ranked.map((item, i) => {
+                              const selected = item.value === value;
+                              const active = i === highlight;
+                              return (
+                                  <li key={item.value}>
+                                      <button
+                                          type="button"
+                                          role="option"
+                                          aria-selected={selected}
+                                          onMouseEnter={() => setHighlight(i)}
+                                          onClick={() => {
+                                              onChange(item.value);
+                                              setOpen(false);
+                                          }}
+                                          className={
+                                              'flex w-full items-center justify-between gap-2 rounded-xl px-3 py-2 text-start text-sm transition ' +
+                                              (active
+                                                  ? 'bg-[var(--teal-900)] text-[var(--cream)]'
+                                                  : 'text-[var(--ink)] hover:bg-[var(--amber-100)]')
+                                          }
+                                      >
+                                          <span className="truncate">
+                                              {item.value}
+                                          </span>
+                                          {selected && <CheckIconSm />}
+                                      </button>
+                                  </li>
+                              );
+                          })
+                      )}
+                  </ul>
+              </div>,
+              document.body,
+          )
+        : null;
+
+    return (
+        <div className="relative">
+            <button
+                ref={triggerRef}
+                type="button"
+                onClick={() => setOpen((o) => !o)}
+                aria-haspopup="listbox"
+                aria-expanded={open}
+                className={
+                    'inline-flex w-full items-center justify-between gap-2 rounded-full border px-5 py-1.5 text-xs font-semibold text-[var(--cream)] outline-none transition sm:w-auto sm:py-3.5 sm:text-sm ' +
+                    (open
+                        ? 'border-[var(--amber-400)] bg-[rgba(247,242,234,0.12)]'
+                        : 'border-[rgba(247,242,234,0.15)] bg-[rgba(247,242,234,0.08)] hover:bg-[rgba(247,242,234,0.12)]')
+                }
+            >
+                <span className="inline-flex items-center gap-2">
+                    <PinIconSm />
+                    <span className="whitespace-nowrap">{value}</span>
+                </span>
+                <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth={2.5}
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className={
+                        'h-3.5 w-3.5 text-[rgba(247,242,234,0.65)] transition ' +
+                        (open ? 'rotate-180' : '')
+                    }
+                >
+                    <polyline points="6 9 12 15 18 9" />
+                </svg>
+            </button>
+            {panel}
+        </div>
+    );
+}
+
+function SearchIconSm() {
+    return (
+        <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={2}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="pointer-events-none absolute right-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[var(--ink-soft)]"
+        >
+            <circle cx="11" cy="11" r="8" />
+            <line x1="21" y1="21" x2="16.65" y2="16.65" />
+        </svg>
+    );
+}
+
+function CheckIconSm() {
+    return (
+        <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={2.5}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="h-3.5 w-3.5 shrink-0"
+        >
+            <polyline points="20 6 9 17 4 12" />
+        </svg>
     );
 }
 
@@ -531,11 +831,11 @@ function ContactModal({
             role="dialog"
             aria-modal="true"
             aria-label={partner.name}
-            className="fixed inset-0 z-[200] flex items-end justify-center bg-black/70 p-0 backdrop-blur-sm sm:items-center sm:p-4"
+            className="fixed inset-0 z-[200] flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm"
             onClick={onClose}
         >
             <div
-                className="relative w-full max-w-md overflow-hidden rounded-t-3xl bg-white shadow-2xl sm:rounded-3xl"
+                className="relative w-full max-w-md overflow-hidden rounded-3xl bg-white shadow-2xl"
                 onClick={(e) => e.stopPropagation()}
                 dir="rtl"
             >
@@ -559,24 +859,20 @@ function ContactModal({
                     </svg>
                 </button>
 
-                <div
-                    className="flex h-32 items-center justify-center sm:h-40"
-                    style={{
-                        background: `linear-gradient(135deg, ${partner.accent}, ${partner.accent}cc)`,
-                    }}
-                >
-                    {partner.image ? (
+                {partner.image && (
+                    <div
+                        className="flex h-32 items-center justify-center sm:h-40"
+                        style={{
+                            background: `linear-gradient(135deg, ${partner.accent}, ${partner.accent}cc)`,
+                        }}
+                    >
                         <img
                             src={partner.image}
                             alt={partner.name}
                             className="h-full w-full object-cover"
                         />
-                    ) : (
-                        <span className="text-3xl font-bold text-white sm:text-4xl">
-                            {partner.initials}
-                        </span>
-                    )}
-                </div>
+                    </div>
+                )}
 
                 <div className="space-y-4 p-5 sm:p-6">
                     <div>

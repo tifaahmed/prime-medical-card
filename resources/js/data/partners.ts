@@ -7,6 +7,15 @@ export type PartnerCategory =
     | 'بصريات'
     | 'علاج طبيعي';
 
+export type PartnerBranch = {
+    name: string;
+    address: string;
+    phone?: string;
+    hours?: string;
+    image?: string;
+    mapQuery?: string;
+};
+
 export type Partner = {
     id: string;
     name: string;
@@ -23,6 +32,7 @@ export type Partner = {
     address?: string;
     subject?: string;
     image?: string;
+    locations?: PartnerBranch[];
 };
 
 export const ALL = 'جميع التخصصات';
@@ -44,6 +54,32 @@ export const PARTNERS: Partner[] = [
         email: 'info@salamhospital.com',
         address: 'كورنيش المعادي، القاهرة',
         subject: 'مستشفى متعدد التخصصات',
+        locations: [
+            {
+                name: 'فرع المعادي (الرئيسي)',
+                address: 'كورنيش النيل، المعادي، القاهرة',
+                phone: '+20223456789',
+                hours: 'يفتح ٢٤ ساعة',
+                image: 'https://images.unsplash.com/photo-1586773860418-d37222d8fce3?w=600&q=80',
+                mapQuery: 'مستشفى السلام الدولي المعادي',
+            },
+            {
+                name: 'فرع مدينة نصر',
+                address: 'شارع مكرم عبيد، مدينة نصر، القاهرة',
+                phone: '+20226678123',
+                hours: '٨ ص — ١٠ م',
+                image: 'https://images.unsplash.com/photo-1538108149393-fbbd81895907?w=600&q=80',
+                mapQuery: 'مستشفى السلام الدولي مدينة نصر',
+            },
+            {
+                name: 'فرع مصر الجديدة',
+                address: 'شارع الميرغني، مصر الجديدة، القاهرة',
+                phone: '+20224451221',
+                hours: '٩ ص — ٩ م',
+                image: 'https://images.unsplash.com/photo-1551076805-e1869033e561?w=600&q=80',
+                mapQuery: 'مستشفى السلام الدولي مصر الجديدة',
+            },
+        ],
     },
     {
         id: 'dar-al-fouad',
@@ -76,6 +112,40 @@ export const PARTNERS: Partner[] = [
         email: 'info@cleopatrahospital.com',
         address: 'صلاح سالم، القاهرة',
         subject: 'مستشفى تخصصي متكامل',
+        locations: [
+            {
+                name: 'فرع صلاح سالم',
+                address: 'شارع صلاح سالم، القاهرة',
+                phone: '+20226789012',
+                hours: 'يفتح ٢٤ ساعة',
+                image: 'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?w=600&q=80',
+                mapQuery: 'مستشفى كليوباترا صلاح سالم',
+            },
+            {
+                name: 'فرع التجمع الخامس',
+                address: 'الحي الأول، التجمع الخامس، القاهرة',
+                phone: '+20226789020',
+                hours: '٨ ص — ١٢ م',
+                image: 'https://images.unsplash.com/photo-1504439468489-c8920d796a29?w=600&q=80',
+                mapQuery: 'مستشفى كليوباترا التجمع الخامس',
+            },
+            {
+                name: 'فرع المهندسين',
+                address: 'شارع جامعة الدول العربية، المهندسين، الجيزة',
+                phone: '+20226789031',
+                hours: '٩ ص — ١٠ م',
+                image: 'https://images.unsplash.com/photo-1587351021355-a479a299d2f9?w=600&q=80',
+                mapQuery: 'مستشفى كليوباترا المهندسين',
+            },
+            {
+                name: 'فرع المعادي',
+                address: 'شارع ٩، المعادي، القاهرة',
+                phone: '+20226789045',
+                hours: '٨ ص — ١١ م',
+                image: 'https://images.unsplash.com/photo-1612277795421-9bc7706a4a34?w=600&q=80',
+                mapQuery: 'مستشفى كليوباترا المعادي',
+            },
+        ],
     },
     {
         id: 'el-ezaby',
@@ -285,6 +355,326 @@ export const PARTNERS: Partner[] = [
         address: 'سيدي جابر، الإسكندرية',
         subject: 'علاج إصابات وعلاج طبيعي',
     },
+    {
+        id: 'mansoura-university-hospital',
+        name: 'مستشفى جامعة المنصورة',
+        category: 'مستشفيات',
+        governorate: 'الدقهلية',
+        branches: 1,
+        discount: 'حتى ٥٠٪',
+        description: 'مستشفى جامعي بكل التخصصات الطبية والجراحية.',
+        accent: '#236b64',
+        initials: 'منص',
+        phone: '+20502244668',
+        whatsapp: '+201007778899',
+        email: 'info@mansoura-uh.com',
+        address: 'شارع الجمهورية، المنصورة',
+        subject: 'مستشفى جامعي شامل',
+    },
+    {
+        id: 'tanta-medical',
+        name: 'مركز طنطا الطبي',
+        category: 'مستشفيات',
+        governorate: 'الغربية',
+        branches: 2,
+        discount: 'حتى ٤٥٪',
+        description: 'رعاية طبية متكاملة في وسط الدلتا.',
+        accent: '#1a544f',
+        initials: 'طن',
+        phone: '+20403322110',
+        whatsapp: '+201008889900',
+        email: 'care@tantamed.com',
+        address: 'شارع الجيش، طنطا',
+        subject: 'مستشفى متعدد التخصصات',
+    },
+    {
+        id: 'asyut-hospital',
+        name: 'مستشفى أسيوط الجامعي',
+        category: 'مستشفيات',
+        governorate: 'أسيوط',
+        branches: 1,
+        discount: 'حتى ٤٠٪',
+        description: 'أكبر مستشفى تخصصي في صعيد مصر.',
+        accent: '#0b2e2c',
+        initials: 'أسي',
+        phone: '+20882233445',
+        whatsapp: '+201009990011',
+        email: 'contact@asyut-uh.com',
+        address: 'شارع الجامعة، أسيوط',
+        subject: 'مستشفى مرجعي للصعيد',
+    },
+    {
+        id: 'rushdy-pharmacy',
+        name: 'صيدليات رشدي',
+        category: 'صيدليات',
+        governorate: 'الإسكندرية',
+        branches: 28,
+        discount: 'حتى ٢٢٪',
+        description: 'فروع منتشرة في الإسكندرية والساحل الشمالي.',
+        accent: '#d68228',
+        initials: 'رش',
+        phone: '+20334455778',
+        whatsapp: '+20334455778',
+        email: 'help@rushdypharm.com',
+        address: 'فروع في الإسكندرية ومرسى مطروح',
+        subject: 'صيدليات إقليمية',
+    },
+    {
+        id: '19011-pharmacy',
+        name: 'صيدليات ١٩٠١١',
+        category: 'صيدليات',
+        governorate: 'متعدد',
+        branches: 90,
+        discount: 'حتى ٣٠٪',
+        description: 'توصيل أدوية ومستلزمات طبية خلال ٣٠ دقيقة.',
+        accent: '#e8a84a',
+        initials: '١٩',
+        phone: '+2019011',
+        whatsapp: '+2019011',
+        email: 'support@19011pharm.com',
+        address: 'فروع في القاهرة والجيزة والإسكندرية',
+        subject: 'صيدليات وتوصيل سريع',
+    },
+    {
+        id: 'mansoura-pharma',
+        name: 'صيدليات الدلتا',
+        category: 'صيدليات',
+        governorate: 'الدقهلية',
+        branches: 14,
+        discount: 'حتى ١٨٪',
+        description: 'سلسلة صيدليات تخدم محافظات الدلتا.',
+        accent: '#236b64',
+        initials: 'دل',
+        phone: '+20502288773',
+        whatsapp: '+20502288773',
+        email: 'info@deltapharma.com',
+        address: 'فروع في الدقهلية والغربية',
+        subject: 'سلسلة صيدليات الدلتا',
+    },
+    {
+        id: 'ibn-sina-labs',
+        name: 'معامل ابن سينا',
+        category: 'تحاليل',
+        governorate: 'الجيزة',
+        branches: 22,
+        discount: 'حتى ٤٢٪',
+        description: 'تحاليل دم ووظائف الكبد والكلى بأسعار مخفضة.',
+        accent: '#1a544f',
+        initials: 'سي',
+        phone: '+20235511223',
+        whatsapp: '+201001234567',
+        email: 'lab@ibnsinalabs.com',
+        address: 'الدقي، الجيزة',
+        subject: 'تحاليل دورية وعينات',
+    },
+    {
+        id: 'speed-lab',
+        name: 'معامل سبيد لاب',
+        category: 'تحاليل',
+        governorate: 'الإسكندرية',
+        branches: 16,
+        discount: 'حتى ٣٨٪',
+        description: 'نتائج فورية خلال ٢٤ ساعة وسحب عينات منزلي.',
+        accent: '#2e867e',
+        initials: 'سب',
+        phone: '+20334477882',
+        whatsapp: '+20334477882',
+        email: 'fast@speedlab.com',
+        address: 'فروع في الإسكندرية',
+        subject: 'تحاليل سريعة',
+    },
+    {
+        id: 'al-tomohat-radiology',
+        name: 'مركز الطموحات للأشعة',
+        category: 'أشعة',
+        governorate: 'الجيزة',
+        branches: 4,
+        discount: 'حتى ٤٨٪',
+        description: 'أشعة عادية ومقطعية ورنين بأحدث الأجهزة.',
+        accent: '#236b64',
+        initials: 'طم',
+        phone: '+20237744556',
+        whatsapp: '+201002345678',
+        email: 'book@altomohat.com',
+        address: 'فيصل، الجيزة',
+        subject: 'تصوير طبي شامل',
+    },
+    {
+        id: 'delta-imaging',
+        name: 'مركز الدلتا للأشعة',
+        category: 'أشعة',
+        governorate: 'الدقهلية',
+        branches: 2,
+        discount: 'حتى ٤٢٪',
+        description: 'سونار وأشعة مقطعية بدقة عالية في المنصورة.',
+        accent: '#0b2e2c',
+        initials: 'دل',
+        phone: '+20502299443',
+        whatsapp: '+201003456789',
+        email: 'info@deltaimaging.com',
+        address: 'وسط المنصورة، الدقهلية',
+        subject: 'أشعة وتصوير',
+    },
+    {
+        id: 'south-radiology',
+        name: 'مركز الجنوب التخصصي للأشعة',
+        category: 'أشعة',
+        governorate: 'أسيوط',
+        branches: 1,
+        discount: 'حتى ٤٠٪',
+        description: 'رنين مغناطيسي ومقطعية متقدمة في أسيوط.',
+        accent: '#d68228',
+        initials: 'جن',
+        phone: '+20882277441',
+        whatsapp: '+201004567890',
+        email: 'contact@south-radiology.com',
+        address: 'الفتح، أسيوط',
+        subject: 'تصوير طبي بالصعيد',
+    },
+    {
+        id: 'pearl-dental',
+        name: 'مراكز بيرل لطب الأسنان',
+        category: 'أسنان',
+        governorate: 'القاهرة',
+        branches: 7,
+        discount: 'حتى ٦٥٪',
+        description: 'تجميل وزراعة وتقويم أسنان للكبار والأطفال.',
+        accent: '#e8a84a',
+        initials: 'بي',
+        phone: '+20225599887',
+        whatsapp: '+201005678901',
+        email: 'hello@pearldental.com',
+        address: 'التجمع الخامس، القاهرة',
+        subject: 'عيادات أسنان متكاملة',
+    },
+    {
+        id: 'sky-dental',
+        name: 'عيادات سكاي ديسكفري للأسنان',
+        category: 'أسنان',
+        governorate: 'الإسكندرية',
+        branches: 3,
+        discount: 'حتى ٥٥٪',
+        description: 'حشو تجميلي وابتسامة هوليوود وأسنان أطفال.',
+        accent: '#236b64',
+        initials: 'سك',
+        phone: '+20336688990',
+        whatsapp: '+201006789012',
+        email: 'care@skydental.com',
+        address: 'سان ستيفانو، الإسكندرية',
+        subject: 'تجميل وزراعة أسنان',
+    },
+    {
+        id: 'green-dental',
+        name: 'عيادة جرين للأسنان',
+        category: 'أسنان',
+        governorate: 'الغربية',
+        branches: 2,
+        discount: 'حتى ٥٠٪',
+        description: 'علاج جذور وتركيبات بأسعار مدعومة لأعضاء الكارت.',
+        accent: '#1a544f',
+        initials: 'جر',
+        phone: '+20402233556',
+        whatsapp: '+201007890123',
+        email: 'info@greendental.com',
+        address: 'شارع البحر، طنطا',
+        subject: 'عيادات أسنان للعائلة',
+    },
+    {
+        id: 'eye-vision',
+        name: 'مركز آي فيجن للعيون',
+        category: 'بصريات',
+        governorate: 'الجيزة',
+        branches: 6,
+        discount: 'حتى ٥٠٪',
+        description: 'فحص نظر مجاني مع شراء أي نظارة طبية.',
+        accent: '#2e867e',
+        initials: 'آي',
+        phone: '+20237755669',
+        whatsapp: '+201008901234',
+        email: 'shop@eyevision.com',
+        address: 'الشيخ زايد، الجيزة',
+        subject: 'بصريات وفحص نظر',
+    },
+    {
+        id: 'optix',
+        name: 'بصريات أوبتكس',
+        category: 'بصريات',
+        governorate: 'الإسكندرية',
+        branches: 9,
+        discount: 'حتى ٤٢٪',
+        description: 'نظارات شمسية وطبية ماركات عالمية.',
+        accent: '#d68228',
+        initials: 'أو',
+        phone: '+20335577443',
+        whatsapp: '+20335577443',
+        email: 'sales@optixoptics.com',
+        address: 'سموحة، الإسكندرية',
+        subject: 'نظارات وعدسات',
+    },
+    {
+        id: 'lens-house',
+        name: 'دار العدسات',
+        category: 'بصريات',
+        governorate: 'الدقهلية',
+        branches: 4,
+        discount: 'حتى ٣٥٪',
+        description: 'عدسات لاصقة طبية وتجميلية بأسعار مخفضة.',
+        accent: '#236b64',
+        initials: 'عد',
+        phone: '+20502277665',
+        whatsapp: '+20502277665',
+        email: 'order@lenshouse.com',
+        address: 'وسط المنصورة، الدقهلية',
+        subject: 'عدسات لاصقة',
+    },
+    {
+        id: 'recover-physio',
+        name: 'مركز ريكوفر للعلاج الطبيعي',
+        category: 'علاج طبيعي',
+        governorate: 'الجيزة',
+        branches: 3,
+        discount: 'حتى ٤٨٪',
+        description: 'برامج تأهيل ما بعد العمليات وآلام الظهر.',
+        accent: '#0b2e2c',
+        initials: 'ري',
+        phone: '+20237788114',
+        whatsapp: '+201009012345',
+        email: 'book@recoverphysio.com',
+        address: 'المهندسين، الجيزة',
+        subject: 'علاج طبيعي وتأهيل',
+    },
+    {
+        id: 'move-better',
+        name: 'مركز موڤ بيتر للعلاج الطبيعي',
+        category: 'علاج طبيعي',
+        governorate: 'القاهرة',
+        branches: 2,
+        discount: 'حتى ٤٠٪',
+        description: 'علاج إصابات الرياضيين وآلام الرقبة.',
+        accent: '#e8a84a',
+        initials: 'مو',
+        phone: '+20225588114',
+        whatsapp: '+201000123456',
+        email: 'hi@movebetter.com',
+        address: 'مدينة نصر، القاهرة',
+        subject: 'علاج إصابات الملاعب',
+    },
+    {
+        id: 'delta-physio',
+        name: 'مركز الدلتا للعلاج الطبيعي',
+        category: 'علاج طبيعي',
+        governorate: 'الغربية',
+        branches: 2,
+        discount: 'حتى ٤٠٪',
+        description: 'إعادة تأهيل وعلاج طبيعي بأسعار مدعومة.',
+        accent: '#236b64',
+        initials: 'دل',
+        phone: '+20402266998',
+        whatsapp: '+20402266998',
+        email: 'care@deltaphysio.com',
+        address: 'شارع المديرية، طنطا',
+        subject: 'علاج طبيعي بالدلتا',
+    },
 ];
 
 export const GOVERNORATES = [
@@ -294,4 +684,128 @@ export const GOVERNORATES = [
 
 export function findPartner(id: string): Partner | undefined {
     return PARTNERS.find((p) => p.id === id);
+}
+
+const AREAS_BY_GOVERNORATE: Record<string, string[]> = {
+    القاهرة: [
+        'المعادي',
+        'مدينة نصر',
+        'مصر الجديدة',
+        'الدقي',
+        'وسط البلد',
+        'التجمع الخامس',
+    ],
+    الجيزة: [
+        'المهندسين',
+        'الدقي',
+        'الشيخ زايد',
+        '٦ أكتوبر',
+        'فيصل',
+        'الهرم',
+    ],
+    الإسكندرية: [
+        'سموحة',
+        'سيدي جابر',
+        'سان ستيفانو',
+        'محرم بك',
+        'المنتزه',
+        'العجمي',
+    ],
+    الدقهلية: ['وسط المنصورة', 'طلخا', 'ميت غمر', 'جمصة'],
+    الغربية: ['طنطا', 'المحلة الكبرى', 'كفر الزيات'],
+    أسيوط: ['أسيوط الجديدة', 'الفتح', 'منفلوط'],
+    متعدد: [
+        'مدينة نصر، القاهرة',
+        'سموحة، الإسكندرية',
+        'المهندسين، الجيزة',
+        'وسط المنصورة، الدقهلية',
+        'طنطا، الغربية',
+        'شارع الجامعة، أسيوط',
+    ],
+};
+
+const STOCK_BRANCH_IMAGES: Record<PartnerCategory, string[]> = {
+    مستشفيات: [
+        'https://images.unsplash.com/photo-1586773860418-d37222d8fce3?w=600&q=80',
+        'https://images.unsplash.com/photo-1538108149393-fbbd81895907?w=600&q=80',
+        'https://images.unsplash.com/photo-1551076805-e1869033e561?w=600&q=80',
+        'https://images.unsplash.com/photo-1587351021355-a479a299d2f9?w=600&q=80',
+    ],
+    صيدليات: [
+        'https://images.unsplash.com/photo-1576602976047-174e57a47881?w=600&q=80',
+        'https://images.unsplash.com/photo-1631549916768-4119b2e5f926?w=600&q=80',
+        'https://images.unsplash.com/photo-1587854692152-cbe660dbde88?w=600&q=80',
+        'https://images.unsplash.com/photo-1583912086296-be5b665036d3?w=600&q=80',
+    ],
+    تحاليل: [
+        'https://images.unsplash.com/photo-1579154204601-01588f351e67?w=600&q=80',
+        'https://images.unsplash.com/photo-1614935151651-0bea6508db6b?w=600&q=80',
+        'https://images.unsplash.com/photo-1582719471384-894fbb16e074?w=600&q=80',
+        'https://images.unsplash.com/photo-1581594693702-fbdc51b2763b?w=600&q=80',
+    ],
+    أشعة: [
+        'https://images.unsplash.com/photo-1530026405186-ed1f139313f8?w=600&q=80',
+        'https://images.unsplash.com/photo-1516549655169-df83a0774514?w=600&q=80',
+        'https://images.unsplash.com/photo-1559757175-08b32404cf16?w=600&q=80',
+        'https://images.unsplash.com/photo-1631815588090-d1bcbe9b4b67?w=600&q=80',
+    ],
+    أسنان: [
+        'https://images.unsplash.com/photo-1606811971618-4486d14f3f99?w=600&q=80',
+        'https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?w=600&q=80',
+        'https://images.unsplash.com/photo-1629909613654-28e377c37b09?w=600&q=80',
+        'https://images.unsplash.com/photo-1609840114035-3c981b782dfe?w=600&q=80',
+    ],
+    بصريات: [
+        'https://images.unsplash.com/photo-1574258495973-f010dfbb5371?w=600&q=80',
+        'https://images.unsplash.com/photo-1577803645773-f96470509666?w=600&q=80',
+        'https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=600&q=80',
+        'https://images.unsplash.com/photo-1556306535-0f09a537f0a3?w=600&q=80',
+    ],
+    'علاج طبيعي': [
+        'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=600&q=80',
+        'https://images.unsplash.com/photo-1571902943202-507ec2618e8f?w=600&q=80',
+        'https://images.unsplash.com/photo-1591343395082-e120087004b4?w=600&q=80',
+        'https://images.unsplash.com/photo-1581595220892-b0739db3ba8c?w=600&q=80',
+    ],
+};
+
+const DEFAULT_HOURS_BY_CATEGORY: Record<PartnerCategory, string> = {
+    مستشفيات: 'يفتح ٢٤ ساعة',
+    صيدليات: '٩ ص — ١ ص',
+    تحاليل: '٧ ص — ٩ م',
+    أشعة: '٨ ص — ١٠ م',
+    أسنان: '١٠ ص — ١٠ م',
+    بصريات: '١٠ ص — ١٠ م',
+    'علاج طبيعي': '٩ ص — ٩ م',
+};
+
+export function getPartnerLocations(partner: Partner): PartnerBranch[] {
+    if (partner.locations && partner.locations.length > 0) {
+        return partner.locations;
+    }
+    if (partner.branches < 2) {
+        return [];
+    }
+
+    const areas =
+        AREAS_BY_GOVERNORATE[partner.governorate] ??
+        AREAS_BY_GOVERNORATE['متعدد'];
+    const images = STOCK_BRANCH_IMAGES[partner.category];
+    const hours = DEFAULT_HOURS_BY_CATEGORY[partner.category];
+    const count = Math.min(partner.branches, areas.length);
+
+    return Array.from({ length: count }, (_, i) => {
+        const area = areas[i];
+        const isMain = i === 0;
+        const cityForAddress =
+            partner.governorate === 'متعدد' ? '' : `، ${partner.governorate}`;
+        return {
+            name: isMain ? `${area} (الرئيسي)` : `فرع ${area}`,
+            address: `${area}${cityForAddress}`,
+            phone: partner.phone,
+            hours,
+            image: images[i % images.length],
+            mapQuery: `${partner.name} ${area}`,
+        };
+    });
 }

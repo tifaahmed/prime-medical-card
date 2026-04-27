@@ -20,6 +20,9 @@ export function useMarqueeScroll<T extends HTMLElement>({
             return;
         }
 
+        const isRTL = getComputedStyle(el).direction === 'rtl';
+        const dirSign = isRTL ? -1 : 1;
+
         let raf = 0;
         let hovered = false;
         let dragActive = false;
@@ -39,12 +42,22 @@ export function useMarqueeScroll<T extends HTMLElement>({
                 return;
             }
 
-            if (el.scrollLeft >= half) {
-                el.scrollLeft -= half;
-                startScroll -= half;
-            } else if (el.scrollLeft < 0) {
-                el.scrollLeft += half;
-                startScroll += half;
+            if (isRTL) {
+                if (el.scrollLeft <= -half) {
+                    el.scrollLeft += half;
+                    startScroll += half;
+                } else if (el.scrollLeft > 0) {
+                    el.scrollLeft -= half;
+                    startScroll -= half;
+                }
+            } else {
+                if (el.scrollLeft >= half) {
+                    el.scrollLeft -= half;
+                    startScroll -= half;
+                } else if (el.scrollLeft < 0) {
+                    el.scrollLeft += half;
+                    startScroll += half;
+                }
             }
         };
 
@@ -61,7 +74,7 @@ export function useMarqueeScroll<T extends HTMLElement>({
                 const idle = !dragActive && !(pauseOnHover && hovered);
 
                 if (idle) {
-                    el.scrollLeft += speed;
+                    el.scrollLeft += speed * dirSign;
                     wrap();
                 }
             }

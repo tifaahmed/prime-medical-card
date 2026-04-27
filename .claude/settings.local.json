@@ -33,7 +33,8 @@
       "Bash(ssh-keygen -t ed25519 -C \"recovery-2026-04-25\" -f ~/.ssh/github_recovery -N \"\")",
       "Bash(ssh -i ~/.ssh/github_recovery -o StrictHostKeyChecking=accept-new -o IdentitiesOnly=yes -T git@github.com)",
       "Bash(echo \"after=$?\")",
-      "Bash(php *)"
+      "Bash(php *)",
+      "Bash(awk *)"
     ]
   }
 }

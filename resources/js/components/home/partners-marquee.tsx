@@ -77,7 +77,10 @@ const PARTNER_OFFERS: PartnerOffer[] = [
 ];
 
 export default function PartnersMarquee() {
-    const ref = useMarqueeScroll<HTMLDivElement>({ speed: 0.55 });
+    const ref = useMarqueeScroll<HTMLDivElement>({
+        speed: 0.55,
+        pauseOnHover: false,
+    });
     const loopOffers = [...PARTNER_OFFERS, ...PARTNER_OFFERS];
 
     return (
@@ -94,8 +97,8 @@ export default function PartnersMarquee() {
                         أحدث عروض الشركاء الطبيين
                     </h2>
                     <p className="mt-3 max-w-2xl text-sm leading-relaxed text-[rgba(247,242,234,0.7)] sm:text-base">
-                        مرر بمؤشر الفأرة فوق العروض لإيقافها مؤقتاً، أو اسحبها
-                        لاستعراض كل الخصومات الحصرية.
+                        اسحب يميناً ويساراً لاستعراض كل الخصومات الحصرية من
+                        شركائنا الطبيين.
                     </p>
                 </div>
             </div>

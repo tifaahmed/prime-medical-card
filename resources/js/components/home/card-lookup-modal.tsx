@@ -1,3 +1,4 @@
+import { router } from '@inertiajs/react';
 import { useEffect, useRef, useState } from 'react';
 import { ArrowLeftIcon, CardIcon } from './icons';
 
@@ -30,8 +31,8 @@ export default function CardLookupModal({ onClose }: { onClose: () => void }) {
         }
 
         setError(null);
-        // TODO: wire to the backend once the endpoint is ready
         onClose();
+        router.visit(`/card/${digits}`);
     };
 
     return (

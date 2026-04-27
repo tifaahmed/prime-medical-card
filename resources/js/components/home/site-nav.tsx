@@ -10,6 +10,7 @@ type AuthUser = { name: string } | null;
 
 export default function SiteNav({ authUser }: { authUser: AuthUser }) {
     const [cardOpen, setCardOpen] = useState(false);
+    const [hidden, setHidden] = useState(false);
     const { open: openSubscribe } = useSubscribeModal();
 
     useEffect(() => {
@@ -25,9 +26,40 @@ export default function SiteNav({ authUser }: { authUser: AuthUser }) {
         };
     }, [cardOpen]);
 
+    useEffect(() => {
+        let lastY = window.scrollY;
+        let ticking = false;
+
+        const update = () => {
+            const y = window.scrollY;
+            const delta = y - lastY;
+
+            if (y < 80) {
+                setHidden(false);
+            } else if (delta > 6) {
+                setHidden(true);
+            } else if (delta < -6) {
+                setHidden(false);
+            }
+
+            lastY = y;
+            ticking = false;
+        };
+
+        const onScroll = () => {
+            if (!ticking) {
+                ticking = true;
+                requestAnimationFrame(update);
+            }
+        };
+
+        window.addEventListener('scroll', onScroll, { passive: true });
+        return () => window.removeEventListener('scroll', onScroll);
+    }, []);
+
     return (
         <>
-            <nav className="topnav">
+            <nav className={`topnav${hidden ? ' is-hidden' : ''}`}>
                 <div className="container nav-inner">
                     <BrandLogo />
 

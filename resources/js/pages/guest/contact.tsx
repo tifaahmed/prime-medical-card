@@ -106,7 +106,7 @@ export default function Contact() {
                             </p>
                         </div>
 
-                        <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+                        <div className="mt-12 grid grid-cols-2 gap-3 sm:gap-6 lg:grid-cols-4">
                             <ContactCard
                                 title="اتصل بنا"
                                 value={PHONE_DISPLAY}
@@ -231,6 +231,8 @@ export default function Contact() {
                                                 type="text"
                                                 placeholder="موضوع الاستفسار"
                                                 required
+                                                multiline
+                                                rows={5}
                                             />
                                             <button
                                                 type="submit"
@@ -332,13 +334,20 @@ function Field({
     type,
     placeholder,
     required,
+    multiline,
+    rows,
 }: {
     label: string;
     name: string;
     type: string;
     placeholder?: string;
     required?: boolean;
+    multiline?: boolean;
+    rows?: number;
 }) {
+    const sharedClasses =
+        'w-full border border-[rgba(11,46,44,0.15)] bg-[#f7f2ea] px-4 py-3 text-sm text-[#0a1a19] outline-none transition focus:border-[#236b64] focus:bg-white focus:ring-2 focus:ring-[#7fb3ad]';
+
     return (
         <div>
             <label
@@ -347,32 +356,71 @@ function Field({
             >
                 {label}
             </label>
-            <input
-                id={name}
-                name={name}
-                type={type}
-                placeholder={placeholder}
-                required={required}
-                className="w-full rounded-full border border-[rgba(11,46,44,0.15)] bg-[#f7f2ea] px-4 py-3 text-sm text-[#0a1a19] outline-none transition focus:border-[#236b64] focus:bg-white focus:ring-2 focus:ring-[#7fb3ad]"
-            />
+            {multiline ? (
+                <textarea
+                    id={name}
+                    name={name}
+                    placeholder={placeholder}
+                    required={required}
+                    rows={rows ?? 4}
+                    className={`${sharedClasses} resize-y rounded-2xl leading-relaxed`}
+                />
+            ) : (
+                <input
+                    id={name}
+                    name={name}
+                    type={type}
+                    placeholder={placeholder}
+                    required={required}
+                    className={`${sharedClasses} rounded-full`}
+                />
+            )}
         </div>
     );
 }
 
 function SocialLinks() {
+    const items: {
+        Icon: typeof FacebookIcon;
+        label: string;
+        className: string;
+        style?: React.CSSProperties;
+    }[] = [
+        {
+            Icon: FacebookIcon,
+            label: 'Facebook',
+            className: 'bg-[#1877F2] hover:bg-[#1466d6]',
+        },
+        {
+            Icon: InstagramIcon,
+            label: 'Instagram',
+            className: 'hover:brightness-110',
+            style: {
+                background:
+                    'linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%)',
+            },
+        },
+        {
+            Icon: TwitterIcon,
+            label: 'Twitter',
+            className: 'bg-black hover:bg-[#222]',
+        },
+        {
+            Icon: YoutubeIcon,
+            label: 'YouTube',
+            className: 'bg-[#FF0000] hover:bg-[#d90000]',
+        },
+    ];
+
     return (
         <div className="flex items-center gap-2">
-            {[
-                { Icon: FacebookIcon, label: 'Facebook' },
-                { Icon: InstagramIcon, label: 'Instagram' },
-                { Icon: TwitterIcon, label: 'Twitter' },
-                { Icon: YoutubeIcon, label: 'YouTube' },
-            ].map(({ Icon, label }) => (
+            {items.map(({ Icon, label, className, style }) => (
                 <a
                     key={label}
                     href="#"
                     aria-label={label}
-                    className="flex h-9 w-9 items-center justify-center rounded-full bg-[#0b2e2c] text-white transition hover:bg-[#12403d]"
+                    style={style}
+                    className={`flex h-9 w-9 items-center justify-center rounded-full text-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md ${className}`}
                 >
                     <Icon className="h-4 w-4" />
                 </a>
