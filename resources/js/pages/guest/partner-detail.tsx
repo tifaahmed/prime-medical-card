@@ -260,7 +260,9 @@ export default function PartnerDetail() {
                                     href={`tel:${partner.phone}`}
                                     className="inline-flex items-center gap-1 hover:text-white"
                                 >
-                                    <PhoneIcon />
+                                    <span className="inline-block h-3 w-3">
+                                        <PhoneIcon />
+                                    </span>
                                     {partner.phone}
                                 </a>
                             </div>
@@ -271,7 +273,9 @@ export default function PartnerDetail() {
                                 href={`tel:${partner.phone}`}
                                 className="inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-2 text-xs font-bold text-[var(--teal-900)] shadow-sm transition hover:bg-white/90"
                             >
-                                <PhoneIcon />
+                                <span className="inline-block h-3.5 w-3.5">
+                                    <PhoneIcon />
+                                </span>
                                 اتصل
                             </a>
                             <a
@@ -280,7 +284,9 @@ export default function PartnerDetail() {
                                 rel="noopener noreferrer"
                                 className="inline-flex items-center gap-1.5 rounded-full bg-[#25D366] px-3 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-[#1fb358]"
                             >
-                                <WhatsAppIcon />
+                                <span className="inline-block h-3.5 w-3.5">
+                                    <WhatsAppIcon />
+                                </span>
                                 واتساب
                             </a>
                             <button
@@ -289,7 +295,9 @@ export default function PartnerDetail() {
                                 aria-label="مشاركة"
                                 className="grid h-8 w-8 place-items-center rounded-full bg-white/20 text-white ring-1 ring-white/30 backdrop-blur-md transition hover:bg-white/30"
                             >
-                                <ShareIcon />
+                                <span className="inline-block h-3.5 w-3.5">
+                                    <ShareIcon />
+                                </span>
                             </button>
                             <button
                                 type="button"
@@ -299,7 +307,9 @@ export default function PartnerDetail() {
                                 }
                                 className="grid h-8 w-8 place-items-center rounded-full bg-white/20 text-white ring-1 ring-white/30 backdrop-blur-md transition hover:bg-white/30"
                             >
-                                {copied ? <CheckIcon /> : <LinkIcon />}
+                                <span className="inline-block h-3.5 w-3.5">
+                                    {copied ? <CheckIcon /> : <LinkIcon />}
+                                </span>
                             </button>
                             <button
                                 type="button"
@@ -309,13 +319,15 @@ export default function PartnerDetail() {
                                 }
                                 className="grid h-8 w-8 place-items-center rounded-full bg-white/20 text-white ring-1 ring-white/30 backdrop-blur-md transition hover:bg-white/30"
                             >
-                                <HeartIcon filled={saved} />
+                                <span className="inline-block h-3.5 w-3.5">
+                                    <HeartIcon filled={saved} />
+                                </span>
                             </button>
                         </div>
                     </div>
 
-                    <div className="mt-3 grid gap-3 lg:grid-cols-12">
-                        <div className="lg:col-span-5">
+                    <div className="mt-3 grid gap-3 lg:grid-cols-3">
+                        <div className="flex flex-col gap-3 lg:col-span-2">
                             <div className="rounded-2xl border border-[rgba(11,46,44,0.08)] bg-white p-4">
                                 <p className="text-sm leading-relaxed text-[var(--ink-soft)]">
                                     {partner.description}
@@ -350,26 +362,18 @@ export default function PartnerDetail() {
                                     />
                                 </dl>
                             </div>
-                        </div>
 
-                        {branches.length > 0 && (
-                            <div className="lg:col-span-4">
-                                <BranchesPreview branches={branches} />
-                            </div>
-                        )}
-
-                        <div
-                            className={
-                                branches.length > 0
-                                    ? 'lg:col-span-3'
-                                    : 'lg:col-span-7'
-                            }
-                        >
                             <CompactMap
                                 address={address}
                                 name={partner.name}
                             />
                         </div>
+
+                        {branches.length > 0 && (
+                            <div className="lg:col-span-1">
+                                <BranchesPreview branches={branches} />
+                            </div>
+                        )}
                     </div>
 
                     {branches.length > 0 && (
@@ -446,7 +450,7 @@ function BranchesPreview({ branches }: { branches: PartnerBranch[] }) {
                     {branches.length}
                 </span>
             </div>
-            <ul className="hide-scroll-x flex max-h-[260px] flex-col gap-2 overflow-y-auto pr-1">
+            <ul className="flex max-h-80 flex-1 flex-col gap-2 overflow-y-auto">
                 {branches.map((b, i) => (
                     <li key={`${b.name}-${i}`}>
                         <a
@@ -498,13 +502,13 @@ function CompactMap({ address, name }: { address: string; name: string }) {
     const openUrl = `https://www.google.com/maps/search/?api=1&query=${query}`;
 
     return (
-        <div className="flex h-full flex-col overflow-hidden rounded-2xl border border-[rgba(11,46,44,0.08)] bg-white">
+        <div className="overflow-hidden rounded-2xl border border-[rgba(11,46,44,0.08)] bg-white">
             <iframe
                 title={`موقع ${name} على الخريطة`}
                 src={embedUrl}
                 loading="lazy"
                 referrerPolicy="no-referrer-when-downgrade"
-                className="aspect-[4/3] w-full lg:aspect-auto lg:flex-1"
+                className="block aspect-[16/9] w-full sm:aspect-[2/1]"
             />
             <a
                 href={openUrl}
@@ -899,7 +903,7 @@ const ICON_PROPS = {
     strokeWidth: 2,
     strokeLinecap: 'round' as const,
     strokeLinejoin: 'round' as const,
-    className: 'h-full w-full',
+    className: 'h-3.5 w-3.5',
 };
 
 function PhoneIcon() {
