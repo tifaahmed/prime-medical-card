@@ -1,22 +1,22 @@
 import { usePage } from '@inertiajs/react';
 import { useState } from 'react';
 import type { FormEvent } from 'react';
-import FloatingActions from '@/components/floating-actions';
-import FloatingLogos from '@/components/floating-logos';
-import SeoHead, { breadcrumbSchema } from '@/components/seo-head';
-import AnnounceBar from '@/components/home/announce-bar';
+import FloatingActions from '@/pages/guest/_components/floating-actions';
+import FloatingLogos from '@/pages/guest/_components/floating-logos';
+import SeoHead, { breadcrumbSchema } from '@/pages/guest/_components/seo-head';
+import AnnounceBar from '@/pages/guest/_components/home/announce-bar';
 import {
     EnvelopeIcon,
     FacebookIcon,
     InstagramIcon,
     TwitterIcon,
     YoutubeIcon,
-} from '@/components/home/icons';
-import MobileBottomNav from '@/components/home/mobile-bottom-nav';
-import useRevealOnScroll from '@/components/home/reveal-on-scroll';
-import SiteFooter from '@/components/home/site-footer';
-import SiteNav from '@/components/home/site-nav';
-import { homeStyles } from '@/components/home/styles';
+} from '@/pages/guest/_components/home/icons';
+import MobileBottomNav from '@/pages/guest/_components/home/mobile-bottom-nav';
+import useRevealOnScroll from '@/pages/guest/_components/home/reveal-on-scroll';
+import SiteFooter from '@/pages/guest/_components/home/site-footer';
+import SiteNav from '@/pages/guest/_components/home/site-nav';
+import { homeStyles } from '@/pages/guest/_components/home/styles';
 
 const PHONE = '+201156385251';
 const PHONE_DISPLAY = '+20 115 638 5251';

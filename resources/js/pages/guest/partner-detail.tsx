@@ -1,15 +1,15 @@
 import { Link, usePage } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
-import FloatingActions from '@/components/floating-actions';
+import FloatingActions from '@/pages/guest/_components/floating-actions';
 import SeoHead, {
     breadcrumbSchema,
     medicalBusinessSchema,
-} from '@/components/seo-head';
-import AnnounceBar from '@/components/home/announce-bar';
-import MobileBottomNav from '@/components/home/mobile-bottom-nav';
-import SiteFooter from '@/components/home/site-footer';
-import SiteNav from '@/components/home/site-nav';
-import { homeStyles } from '@/components/home/styles';
+} from '@/pages/guest/_components/seo-head';
+import AnnounceBar from '@/pages/guest/_components/home/announce-bar';
+import MobileBottomNav from '@/pages/guest/_components/home/mobile-bottom-nav';
+import SiteFooter from '@/pages/guest/_components/home/site-footer';
+import SiteNav from '@/pages/guest/_components/home/site-nav';
+import { homeStyles } from '@/pages/guest/_components/home/styles';
 import {
     findPartner,
     getPartnerLocations,
@@ -17,7 +17,7 @@ import {
     type Partner,
     type PartnerBranch,
     type PartnerCategory,
-} from '@/data/partners';
+} from '@/pages/guest/_data/partners';
 
 const CATEGORY_ICON: Record<PartnerCategory, React.ReactNode> = {
     مستشفيات: (
@@ -192,7 +192,7 @@ export default function PartnerDetail() {
                 <AnnounceBar />
                 <SiteNav authUser={authUser} />
 
-                <section className="container relative z-[2] pt-4 pb-12 sm:pt-6 sm:pb-20">
+                <section className="relative z-[2] container pt-4 pb-12 sm:pt-6 sm:pb-20">
                     <Link
                         href="/partners"
                         className="inline-flex items-center gap-1 text-xs font-semibold text-[var(--teal-700)] hover:text-[var(--teal-900)]"
@@ -237,11 +237,11 @@ export default function PartnerDetail() {
                                     <SparkleIcon />
                                     {partner.discount}
                                 </span>
-                                <span className="text-[11px] font-semibold uppercase tracking-wider text-white/80">
+                                <span className="text-[11px] font-semibold tracking-wider text-white/80 uppercase">
                                     {partner.category}
                                 </span>
                             </div>
-                            <h1 className="mt-1 text-xl font-bold leading-tight text-white sm:text-2xl">
+                            <h1 className="mt-1 text-xl leading-tight font-bold text-white sm:text-2xl">
                                 {partner.name}
                             </h1>
                             <p className="text-xs text-white/80 sm:text-sm">
@@ -302,9 +302,7 @@ export default function PartnerDetail() {
                             <button
                                 type="button"
                                 onClick={handleCopy}
-                                aria-label={
-                                    copied ? 'تم النسخ' : 'نسخ الرابط'
-                                }
+                                aria-label={copied ? 'تم النسخ' : 'نسخ الرابط'}
                                 className="grid h-8 w-8 place-items-center rounded-full bg-white/20 text-white ring-1 ring-white/30 backdrop-blur-md transition hover:bg-white/30"
                             >
                                 <span className="inline-block h-3.5 w-3.5">
@@ -314,9 +312,7 @@ export default function PartnerDetail() {
                             <button
                                 type="button"
                                 onClick={() => setSaved((s) => !s)}
-                                aria-label={
-                                    saved ? 'إزالة من المفضلة' : 'حفظ'
-                                }
+                                aria-label={saved ? 'إزالة من المفضلة' : 'حفظ'}
                                 className="grid h-8 w-8 place-items-center rounded-full bg-white/20 text-white ring-1 ring-white/30 backdrop-blur-md transition hover:bg-white/30"
                             >
                                 <span className="inline-block h-3.5 w-3.5">
@@ -363,10 +359,7 @@ export default function PartnerDetail() {
                                 </dl>
                             </div>
 
-                            <CompactMap
-                                address={address}
-                                name={partner.name}
-                            />
+                            <CompactMap address={address} name={partner.name} />
                         </div>
 
                         {branches.length > 0 && (
@@ -420,16 +413,10 @@ export default function PartnerDetail() {
     );
 }
 
-function CompactDetail({
-    label,
-    value,
-}: {
-    label: string;
-    value: string;
-}) {
+function CompactDetail({ label, value }: { label: string; value: string }) {
     return (
         <div className="flex items-baseline justify-between gap-2">
-            <dt className="shrink-0 text-[11px] font-semibold uppercase tracking-wide text-[var(--teal-900)]">
+            <dt className="shrink-0 text-[11px] font-semibold tracking-wide text-[var(--teal-900)] uppercase">
                 {label}
             </dt>
             <dd className="truncate text-end text-xs text-[var(--ink-soft)]">
@@ -739,7 +726,7 @@ function PartnerQuickModal({
                     type="button"
                     aria-label="إغلاق"
                     onClick={onClose}
-                    className="absolute left-3 top-3 z-10 grid h-9 w-9 place-items-center rounded-full bg-white/90 text-[var(--teal-900)] shadow transition hover:bg-white"
+                    className="absolute top-3 left-3 z-10 grid h-9 w-9 place-items-center rounded-full bg-white/90 text-[var(--teal-900)] shadow transition hover:bg-white"
                 >
                     <CloseIcon />
                 </button>
@@ -786,10 +773,7 @@ function PartnerQuickModal({
                         <ContactRow label="الهاتف" value={partner.phone} />
                         <ContactRow label="واتساب" value={whatsapp} />
                         {partner.email && (
-                            <ContactRow
-                                label="البريد"
-                                value={partner.email}
-                            />
+                            <ContactRow label="البريد" value={partner.email} />
                         )}
                     </dl>
 
@@ -872,7 +856,7 @@ function QuickAction({
             <span className="grid h-7 w-7 place-items-center transition-transform duration-200 group-hover/qa:scale-110">
                 {children}
             </span>
-            <span className="text-[11px] font-bold leading-none">{label}</span>
+            <span className="text-[11px] leading-none font-bold">{label}</span>
         </>
     );
 

@@ -9,9 +9,29 @@
 
 @theme {
     --font-sans:
-        'Instrument Sans', ui-sans-serif, system-ui, sans-serif,
+        'Inter', 'Instrument Sans', ui-sans-serif, system-ui, sans-serif,
         'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
         'Noto Color Emoji';
+    --font-heading:
+        'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif,
+        'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
+        'Noto Color Emoji';
+
+    /* Brand palette ported from the services dashboard */
+    --color-brand-primary: #0f2b5b;
+    --color-brand-primary-dark: #091d3e;
+    --color-brand-primary-light: #1a3f7a;
+    --color-brand-primary-foreground: #ffffff;
+    --color-brand-secondary: #0ea5e9;
+    --color-brand-secondary-dark: #0284c7;
+    --color-brand-secondary-light: #38bdf8;
+    --color-brand-secondary-foreground: #ffffff;
+    --color-brand-accent: #f59e0b;
+    --color-brand-accent-dark: #d97706;
+    --color-brand-accent-light: #fbbf24;
+    --color-brand-accent-foreground: #1a1a1a;
+    --color-brand-warm: #fef7ed;
+    --color-brand-warm-dark: #fdf2e3;
 
     --radius-lg: var(--radius);
     --radius-md: calc(var(--radius) - 2px);
@@ -68,8 +88,8 @@
     --card-foreground: oklch(0.145 0 0);
     --popover: oklch(1 0 0);
     --popover-foreground: oklch(0.145 0 0);
-    --primary: oklch(0.205 0 0);
-    --primary-foreground: oklch(0.985 0 0);
+    --primary: #0f2b5b;
+    --primary-foreground: #ffffff;
     --secondary: oklch(0.97 0 0);
     --secondary-foreground: oklch(0.205 0 0);
     --muted: oklch(0.97 0 0);
@@ -87,15 +107,16 @@
     --chart-4: oklch(0.828 0.189 84.429);
     --chart-5: oklch(0.769 0.188 70.08);
     --radius: 0.625rem;
-    --sidebar: oklch(0.985 0 0);
-    --sidebar-foreground: oklch(0.145 0 0);
-    --sidebar-primary: oklch(0.205 0 0);
-    --sidebar-primary-foreground: oklch(0.985 0 0);
-    --sidebar-accent: oklch(0.97 0 0);
-    --sidebar-accent-foreground: oklch(0.205 0 0);
-    --sidebar-border: oklch(0.922 0 0);
-    --sidebar-ring: oklch(0.87 0 0);
+    --sidebar: var(--color-brand-primary);
+    --sidebar-foreground: #f0f4f8;
+    --sidebar-primary: var(--color-brand-accent);
+    --sidebar-primary-foreground: var(--color-brand-accent-foreground);
+    --sidebar-accent: var(--color-brand-primary-light);
+    --sidebar-accent-foreground: #f0f4f8;
+    --sidebar-border: var(--color-brand-primary-light);
+    --sidebar-ring: var(--color-brand-accent);
 
+    /* Legacy guest-site tokens, kept for existing pages */
     --teal-900: #0b2e2c;
     --teal-800: #14433f;
     --teal-700: #1d5853;
@@ -112,8 +133,8 @@
     --card-foreground: oklch(0.985 0 0);
     --popover: oklch(0.145 0 0);
     --popover-foreground: oklch(0.985 0 0);
-    --primary: oklch(0.985 0 0);
-    --primary-foreground: oklch(0.205 0 0);
+    --primary: #38bdf8;
+    --primary-foreground: #ffffff;
     --secondary: oklch(0.269 0 0);
     --secondary-foreground: oklch(0.985 0 0);
     --muted: oklch(0.269 0 0);
@@ -130,14 +151,68 @@
     --chart-3: oklch(0.769 0.188 70.08);
     --chart-4: oklch(0.627 0.265 303.9);
     --chart-5: oklch(0.645 0.246 16.439);
-    --sidebar: oklch(0.205 0 0);
-    --sidebar-foreground: oklch(0.985 0 0);
-    --sidebar-primary: oklch(0.985 0 0);
-    --sidebar-primary-foreground: oklch(0.985 0 0);
-    --sidebar-accent: oklch(0.269 0 0);
-    --sidebar-accent-foreground: oklch(0.985 0 0);
-    --sidebar-border: oklch(0.269 0 0);
-    --sidebar-ring: oklch(0.439 0 0);
+    --sidebar: var(--color-brand-primary-dark);
+    --sidebar-foreground: #e2e8f0;
+    --sidebar-primary: var(--color-brand-accent);
+    --sidebar-primary-foreground: var(--color-brand-accent-foreground);
+    --sidebar-accent: var(--color-brand-primary);
+    --sidebar-accent-foreground: #f0f4f8;
+    --sidebar-border: var(--color-brand-primary-light);
+    --sidebar-ring: var(--color-brand-accent);
+}
+
+@layer utilities {
+    .form-label {
+        @apply text-[11px] font-semibold tracking-wider text-muted-foreground uppercase;
+    }
+
+    .btn-view {
+        @apply border-brand-secondary/30 bg-brand-secondary/10 text-brand-secondary-dark hover:bg-brand-secondary/20 dark:border-brand-secondary/20 dark:bg-brand-secondary/10 dark:text-brand-secondary-light dark:hover:bg-brand-secondary/20;
+    }
+    .btn-edit {
+        @apply border-brand-accent/30 bg-brand-accent/10 text-brand-accent-dark hover:bg-brand-accent/20 dark:border-brand-accent/20 dark:bg-brand-accent/10 dark:text-brand-accent-light dark:hover:bg-brand-accent/20;
+    }
+    .btn-delete {
+        @apply border-destructive/30 bg-destructive/10 text-destructive hover:bg-destructive/20 dark:border-destructive/20 dark:bg-destructive/10 dark:text-destructive dark:hover:bg-destructive/20;
+    }
+
+    .badge-active {
+        @apply border-brand-secondary/30 bg-brand-secondary/10 text-brand-secondary-dark dark:border-brand-secondary/20 dark:bg-brand-secondary/10 dark:text-brand-secondary-light;
+    }
+    .badge-inactive {
+        @apply border-muted-foreground/20 bg-muted text-muted-foreground dark:border-muted-foreground/15 dark:bg-muted dark:text-muted-foreground;
+    }
+    .badge-pending {
+        @apply border-brand-accent/30 bg-brand-accent/10 text-brand-accent-dark dark:border-brand-accent/20 dark:bg-brand-accent/10 dark:text-brand-accent-light;
+    }
+
+    .text-gradient-primary {
+        @apply bg-gradient-to-r from-brand-primary via-brand-secondary to-brand-primary bg-clip-text text-transparent;
+    }
+    .text-gradient-accent {
+        @apply bg-gradient-to-r from-brand-accent via-brand-accent-light to-brand-secondary bg-clip-text text-transparent;
+    }
+    .bg-warm-section {
+        @apply bg-brand-warm;
+    }
+    .bg-navy-gradient {
+        @apply bg-gradient-to-br from-brand-primary via-brand-primary-dark to-brand-primary;
+    }
+    .bg-section-gradient-warm {
+        @apply bg-gradient-to-br from-brand-warm via-white to-brand-warm-dark;
+    }
+    .bg-section-gradient-cool {
+        @apply bg-gradient-to-br from-brand-secondary/5 via-white to-brand-secondary/3;
+    }
+    .bg-auth-gradient {
+        @apply bg-gradient-to-br from-brand-primary via-brand-primary-dark to-brand-primary-light;
+    }
+    .card-gradient-border {
+        @apply relative rounded-3xl bg-gradient-to-br from-brand-accent via-brand-secondary to-brand-primary p-px shadow-md;
+    }
+    .card-gradient-border > .card-gradient-border-inner {
+        @apply rounded-[calc(1.5rem-1px)] bg-card;
+    }
 }
 
 @layer base {
@@ -148,11 +223,52 @@
     body {
         @apply bg-background text-foreground;
     }
+
+    /* Thin scrollbar matching brand theme */
+    * {
+        scrollbar-width: thin;
+        scrollbar-color: var(--color-brand-primary-light) transparent;
+    }
+
+    .dark * {
+        scrollbar-color: oklch(0.35 0 0) transparent;
+    }
+
+    *::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+    }
+
+    *::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    *::-webkit-scrollbar-thumb {
+        background-color: var(--color-brand-primary-light);
+        border-radius: 9999px;
+    }
+
+    *::-webkit-scrollbar-thumb:hover {
+        background-color: var(--color-brand-primary);
+    }
+
+    .dark *::-webkit-scrollbar-thumb {
+        background-color: oklch(0.35 0 0);
+    }
+
+    .dark *::-webkit-scrollbar-thumb:hover {
+        background-color: oklch(0.45 0 0);
+    }
 }
 
 @keyframes float-bob {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-8px); }
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-8px);
+    }
 }
 
 .animate-float-bob {
@@ -160,7 +276,8 @@
 }
 
 @keyframes pulse-glow {
-    0%, 100% {
+    0%,
+    100% {
         box-shadow:
             0 10px 25px -5px rgba(232, 168, 74, 0.45),
             0 0 0 0 rgba(232, 168, 74, 0.55);
@@ -174,4 +291,42 @@
 
 .animate-pulse-glow {
     animation: pulse-glow 2s ease-out infinite;
+}
+
+@keyframes sidebar-wiggle {
+    0% {
+        transform: translateX(0) rotate(0deg);
+    }
+    15% {
+        transform: translateX(-4px) rotate(-8deg);
+    }
+    30% {
+        transform: translateX(4px) rotate(8deg);
+    }
+    45% {
+        transform: translateX(-3px) rotate(-5deg);
+    }
+    60% {
+        transform: translateX(3px) rotate(5deg);
+    }
+    75% {
+        transform: translateX(-1px) rotate(-2deg);
+    }
+    100% {
+        transform: translateX(0) rotate(0deg);
+    }
+}
+
+.sidebar-trigger-wiggle:hover svg {
+    animation: sidebar-wiggle 0.5s ease-in-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
 }

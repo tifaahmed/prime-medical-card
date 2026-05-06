@@ -39,7 +39,9 @@ export default function SeoHead({
     const currentUrl = (props as SharedProps).currentUrl ?? '/';
 
     const absolute = (path: string) =>
-        /^https?:\/\//.test(path) ? path : `${appUrl}${path.startsWith('/') ? path : `/${path}`}`;
+        /^https?:\/\//.test(path)
+            ? path
+            : `${appUrl}${path.startsWith('/') ? path : `/${path}`}`;
 
     const url = absolute(canonical ?? currentUrl);
     const ogImage = absolute(image ?? DEFAULT_IMAGE);
@@ -151,7 +153,12 @@ export function medicalBusinessSchema(
 
 export function serviceSchema(
     appUrl: string,
-    service: { name: string; description: string; path: string; image?: string },
+    service: {
+        name: string;
+        description: string;
+        path: string;
+        image?: string;
+    },
 ): JsonLd {
     return {
         '@context': 'https://schema.org',

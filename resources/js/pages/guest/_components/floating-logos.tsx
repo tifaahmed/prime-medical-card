@@ -501,7 +501,7 @@ function LogoGallery({
                     e.stopPropagation();
                     prev();
                 }}
-                className="absolute left-4 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-white/10 text-white backdrop-blur-sm transition hover:bg-white/20 sm:left-8"
+                className="absolute top-1/2 left-4 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-white/10 text-white backdrop-blur-sm transition hover:bg-white/20 sm:left-8"
             >
                 <svg
                     viewBox="0 0 24 24"
@@ -523,7 +523,7 @@ function LogoGallery({
                     e.stopPropagation();
                     next();
                 }}
-                className="absolute right-4 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-white/10 text-white backdrop-blur-sm transition hover:bg-white/20 sm:right-8"
+                className="absolute top-1/2 right-4 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-white/10 text-white backdrop-blur-sm transition hover:bg-white/20 sm:right-8"
             >
                 <svg
                     viewBox="0 0 24 24"

@@ -1,13 +1,13 @@
 import { usePage } from '@inertiajs/react';
-import FloatingActions from '@/components/floating-actions';
-import FloatingLogos from '@/components/floating-logos';
-import SeoHead, { breadcrumbSchema } from '@/components/seo-head';
-import AnnounceBar from '@/components/home/announce-bar';
-import MobileBottomNav from '@/components/home/mobile-bottom-nav';
-import useRevealOnScroll from '@/components/home/reveal-on-scroll';
-import SiteFooter from '@/components/home/site-footer';
-import SiteNav from '@/components/home/site-nav';
-import { homeStyles } from '@/components/home/styles';
+import FloatingActions from '@/pages/guest/_components/floating-actions';
+import FloatingLogos from '@/pages/guest/_components/floating-logos';
+import SeoHead, { breadcrumbSchema } from '@/pages/guest/_components/seo-head';
+import AnnounceBar from '@/pages/guest/_components/home/announce-bar';
+import MobileBottomNav from '@/pages/guest/_components/home/mobile-bottom-nav';
+import useRevealOnScroll from '@/pages/guest/_components/home/reveal-on-scroll';
+import SiteFooter from '@/pages/guest/_components/home/site-footer';
+import SiteNav from '@/pages/guest/_components/home/site-nav';
+import { homeStyles } from '@/pages/guest/_components/home/styles';
 import { useSubscribeModal } from '@/components/subscribe-modal';
 
 const STATS = [
@@ -132,10 +132,10 @@ export default function About() {
                 <section className="relative z-[2] py-16 sm:py-24">
                     <div className="container">
                         <div className="mx-auto max-w-3xl text-center">
-                            <span className="inline-flex items-center rounded-full bg-[var(--amber-100)] px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.18em] text-[var(--amber-600)]">
+                            <span className="inline-flex items-center rounded-full bg-[var(--amber-100)] px-4 py-1.5 text-xs font-semibold tracking-[0.18em] text-[var(--amber-600)] uppercase">
                                 من نحن
                             </span>
-                            <h1 className="mt-4 text-4xl font-bold leading-tight text-[var(--teal-900)] sm:text-5xl lg:text-6xl">
+                            <h1 className="mt-4 text-4xl leading-tight font-bold text-[var(--teal-900)] sm:text-5xl lg:text-6xl">
                                 نُعيد تعريف{' '}
                                 <em className="font-serif text-[var(--amber-600)]">
                                     الرعاية الصحية
@@ -171,7 +171,7 @@ export default function About() {
                 <section className="relative z-[2] py-16 sm:py-20">
                     <div className="container grid gap-10 lg:grid-cols-2 lg:items-center">
                         <div>
-                            <span className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--teal-600)]">
+                            <span className="text-xs font-semibold tracking-[0.18em] text-[var(--teal-600)] uppercase">
                                 قصتنا
                             </span>
                             <h2 className="mt-3 text-3xl font-bold text-[var(--teal-900)] sm:text-4xl">
@@ -183,10 +183,10 @@ export default function About() {
                             <div className="mt-6 space-y-4 text-base leading-relaxed text-[var(--ink-soft)]">
                                 <p>
                                     بدأت برايم ميديكال كارد من ملاحظة بسيطة:
-                                    أسعار الرعاية الصحية ترتفع، والكثير من
-                                    الأسر تؤجل الكشف الطبي خوفاً من التكلفة. أردنا
-                                    أن نكون الجسر بين الجهات الطبية المتميزة
-                                    والأسر التي تستحق رعاية أفضل.
+                                    أسعار الرعاية الصحية ترتفع، والكثير من الأسر
+                                    تؤجل الكشف الطبي خوفاً من التكلفة. أردنا أن
+                                    نكون الجسر بين الجهات الطبية المتميزة والأسر
+                                    التي تستحق رعاية أفضل.
                                 </p>
                                 <p>
                                     بدأنا بشراكات محدودة في القاهرة، واليوم نخدم
@@ -261,7 +261,7 @@ export default function About() {
                 <section className="relative z-[2] py-16 sm:py-20">
                     <div className="container">
                         <div className="mx-auto max-w-2xl text-center">
-                            <span className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--teal-600)]">
+                            <span className="text-xs font-semibold tracking-[0.18em] text-[var(--teal-600)] uppercase">
                                 قيمنا
                             </span>
                             <h2 className="mt-3 text-3xl font-bold text-[var(--teal-900)] sm:text-4xl">
@@ -306,7 +306,7 @@ export default function About() {
                 <section className="relative z-[2] bg-[var(--teal-900)] py-16 sm:py-20">
                     <div className="container">
                         <div className="mx-auto max-w-2xl text-center">
-                            <span className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--amber-400)]">
+                            <span className="text-xs font-semibold tracking-[0.18em] text-[var(--amber-400)] uppercase">
                                 الرحلة
                             </span>
                             <h2 className="mt-3 text-3xl font-bold text-[var(--cream)] sm:text-4xl">

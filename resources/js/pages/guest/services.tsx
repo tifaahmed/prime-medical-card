@@ -1,14 +1,14 @@
 import { Link, usePage } from '@inertiajs/react';
-import FloatingActions from '@/components/floating-actions';
-import FloatingLogos from '@/components/floating-logos';
-import SeoHead, { breadcrumbSchema } from '@/components/seo-head';
-import AnnounceBar from '@/components/home/announce-bar';
-import MobileBottomNav from '@/components/home/mobile-bottom-nav';
-import useRevealOnScroll from '@/components/home/reveal-on-scroll';
-import SiteFooter from '@/components/home/site-footer';
-import SiteNav from '@/components/home/site-nav';
-import { homeStyles } from '@/components/home/styles';
-import { SERVICES, type Service } from '@/data/services';
+import FloatingActions from '@/pages/guest/_components/floating-actions';
+import FloatingLogos from '@/pages/guest/_components/floating-logos';
+import SeoHead, { breadcrumbSchema } from '@/pages/guest/_components/seo-head';
+import AnnounceBar from '@/pages/guest/_components/home/announce-bar';
+import MobileBottomNav from '@/pages/guest/_components/home/mobile-bottom-nav';
+import useRevealOnScroll from '@/pages/guest/_components/home/reveal-on-scroll';
+import SiteFooter from '@/pages/guest/_components/home/site-footer';
+import SiteNav from '@/pages/guest/_components/home/site-nav';
+import { homeStyles } from '@/pages/guest/_components/home/styles';
+import { SERVICES, type Service } from '@/pages/guest/_data/services';
 
 export default function Services() {
     const { auth, appUrl } = usePage<{
@@ -73,23 +73,23 @@ export default function Services() {
 
                 <section className="relative z-[2] overflow-hidden bg-[var(--teal-900)] py-14 sm:py-20">
                     <div className="absolute inset-0 -z-0 opacity-30">
-                        <div className="absolute -right-32 top-12 h-72 w-72 rounded-full bg-[var(--amber-500)] blur-3xl" />
-                        <div className="absolute -left-24 bottom-0 h-72 w-72 rounded-full bg-[var(--teal-500)] blur-3xl" />
+                        <div className="absolute top-12 -right-32 h-72 w-72 rounded-full bg-[var(--amber-500)] blur-3xl" />
+                        <div className="absolute bottom-0 -left-24 h-72 w-72 rounded-full bg-[var(--teal-500)] blur-3xl" />
                     </div>
-                    <div className="container relative z-10">
+                    <div className="relative z-10 container">
                         <div className="mx-auto max-w-3xl text-center">
-                            <span className="inline-flex items-center rounded-full bg-[rgba(247,242,234,0.08)] px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.18em] text-[var(--amber-400)]">
+                            <span className="inline-flex items-center rounded-full bg-[rgba(247,242,234,0.08)] px-4 py-1.5 text-xs font-semibold tracking-[0.18em] text-[var(--amber-400)] uppercase">
                                 خدماتنا الطبية
                             </span>
-                            <h1 className="mt-4 text-3xl font-bold leading-tight text-[var(--cream)] sm:text-5xl">
+                            <h1 className="mt-4 text-3xl leading-tight font-bold text-[var(--cream)] sm:text-5xl">
                                 كل ما تحتاجه طبياً{' '}
                                 <em className="font-serif text-[var(--amber-400)]">
                                     في مكان واحد
                                 </em>
                             </h1>
                             <p className="mt-4 text-sm leading-relaxed text-[rgba(247,242,234,0.75)] sm:text-base">
-                                ثمانية تخصصات طبية رئيسية، آلاف نقاط الخدمة، وبطاقة
-                                واحدة لكل أفراد العائلة.
+                                ثمانية تخصصات طبية رئيسية، آلاف نقاط الخدمة،
+                                وبطاقة واحدة لكل أفراد العائلة.
                             </p>
                         </div>
                     </div>

@@ -90,7 +90,7 @@ export default function PartnersMarquee() {
         >
             <div className="container">
                 <div className="mb-10 flex flex-col items-center text-center sm:mb-12">
-                    <span className="rounded-full bg-[rgba(247,242,234,0.08)] px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.18em] text-[var(--amber-400)]">
+                    <span className="rounded-full bg-[rgba(247,242,234,0.08)] px-4 py-1.5 text-xs font-semibold tracking-[0.18em] text-[var(--amber-400)] uppercase">
                         عروض الشركاء
                     </span>
                     <h2 className="mt-4 text-3xl font-bold text-[var(--cream)] sm:text-4xl">
@@ -108,7 +108,10 @@ export default function PartnersMarquee() {
                 className="hide-scrollbar flex cursor-grab gap-4 overflow-x-auto px-6 pb-2 sm:gap-5 sm:px-10 [&.is-dragging]:cursor-grabbing [&.is-dragging>*]:pointer-events-none"
             >
                 {loopOffers.map((offer, i) => (
-                    <PartnerOfferCard key={`${offer.name}-${i}`} offer={offer} />
+                    <PartnerOfferCard
+                        key={`${offer.name}-${i}`}
+                        offer={offer}
+                    />
                 ))}
             </div>
 
@@ -129,9 +132,7 @@ export default function PartnersMarquee() {
 
 function PartnerOfferCard({ offer }: { offer: PartnerOffer }) {
     return (
-        <article
-            className="group relative flex w-[260px] shrink-0 snap-start flex-col gap-4 rounded-3xl bg-[var(--cream)] p-5 shadow-[0_18px_40px_-24px_rgba(0,0,0,0.5)] transition hover:-translate-y-1 hover:shadow-[0_24px_50px_-24px_rgba(0,0,0,0.55)] sm:w-[280px] sm:p-6"
-        >
+        <article className="group relative flex w-[260px] shrink-0 snap-start flex-col gap-4 rounded-3xl bg-[var(--cream)] p-5 shadow-[0_18px_40px_-24px_rgba(0,0,0,0.5)] transition hover:-translate-y-1 hover:shadow-[0_24px_50px_-24px_rgba(0,0,0,0.55)] sm:w-[280px] sm:p-6">
             <div className="flex items-center justify-between gap-3">
                 <div
                     className="flex h-12 w-12 items-center justify-center rounded-2xl text-base font-bold text-white"
@@ -139,7 +140,7 @@ function PartnerOfferCard({ offer }: { offer: PartnerOffer }) {
                 >
                     {offer.initials}
                 </div>
-                <span className="rounded-full bg-[var(--teal-900)] px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-[var(--amber-400)]">
+                <span className="rounded-full bg-[var(--teal-900)] px-3 py-1 text-[11px] font-semibold tracking-wider text-[var(--amber-400)] uppercase">
                     {offer.type}
                 </span>
             </div>
@@ -155,7 +156,7 @@ function PartnerOfferCard({ offer }: { offer: PartnerOffer }) {
 
             <div className="mt-auto flex items-end justify-between border-t border-[rgba(11,46,44,0.1)] pt-4">
                 <div>
-                    <div className="text-[11px] font-semibold uppercase tracking-wider text-[var(--ink-soft)]">
+                    <div className="text-[11px] font-semibold tracking-wider text-[var(--ink-soft)] uppercase">
                         خصم يصل إلى
                     </div>
                     <div className="text-2xl font-extrabold text-[var(--amber-600)]">

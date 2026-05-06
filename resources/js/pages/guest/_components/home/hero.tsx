@@ -84,7 +84,7 @@ export default function Hero() {
     return (
         <section className="hero">
             <OrbitingLogos />
-            <div className="container hero-grid">
+            <div className="hero-grid container">
                 <div className="hero-text">
                     <span className="hero-eyebrow">
                         <span className="pulse"></span>

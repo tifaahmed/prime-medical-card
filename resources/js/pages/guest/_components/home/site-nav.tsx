@@ -59,8 +59,8 @@ export default function SiteNav({ authUser }: { authUser: AuthUser }) {
 
     return (
         <>
-            <nav className={`topnav${hidden ? ' is-hidden' : ''}`}>
-                <div className="container nav-inner">
+            <nav className={`topnav${hidden ? 'is-hidden' : ''}`}>
+                <div className="nav-inner container">
                     <BrandLogo />
 
                     <ul className="nav-menu">
@@ -115,9 +115,7 @@ export default function SiteNav({ authUser }: { authUser: AuthUser }) {
                 </div>
             </nav>
 
-            {cardOpen && (
-                <CardLookupModal onClose={() => setCardOpen(false)} />
-            )}
+            {cardOpen && <CardLookupModal onClose={() => setCardOpen(false)} />}
         </>
     );
 }

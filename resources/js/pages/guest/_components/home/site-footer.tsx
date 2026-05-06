@@ -106,7 +106,9 @@ export default function SiteFooter() {
                             <li>
                                 <a href={`mailto:${EMAIL}`}>
                                     <ContactInline
-                                        icon={<EnvelopeIcon className="h-4 w-4" />}
+                                        icon={
+                                            <EnvelopeIcon className="h-4 w-4" />
+                                        }
                                     >
                                         {EMAIL}
                                     </ContactInline>
@@ -122,9 +124,7 @@ export default function SiteFooter() {
                 </div>
 
                 <div className="footer-bottom">
-                    <div>
-                        © ٢٠٢٦ برايم ميديكال كارد. جميع الحقوق محفوظة.
-                    </div>
+                    <div>© ٢٠٢٦ برايم ميديكال كارد. جميع الحقوق محفوظة.</div>
                     <div>صُنع بـ ♥ في مصر</div>
                 </div>
             </div>

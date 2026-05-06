@@ -4,11 +4,9 @@ import {
     useContext,
     useEffect,
     useRef,
-    useState
-    
-    
+    useState,
 } from 'react';
-import type {FormEvent, ReactNode} from 'react';
+import type { FormEvent, ReactNode } from 'react';
 
 type Ctx = { open: () => void; close: () => void };
 
@@ -79,7 +77,7 @@ function SubscribeModal({ onClose }: { onClose: () => void }) {
                     type="button"
                     onClick={onClose}
                     aria-label="إغلاق"
-                    className="absolute left-4 top-4 flex h-9 w-9 items-center justify-center rounded-full bg-[#f7f2ea] text-[#0b2e2c] transition hover:bg-[#d7e8e5]"
+                    className="absolute top-4 left-4 flex h-9 w-9 items-center justify-center rounded-full bg-[#f7f2ea] text-[#0b2e2c] transition hover:bg-[#d7e8e5]"
                 >
                     <svg
                         viewBox="0 0 24 24"
@@ -121,8 +119,7 @@ function SubscribeModal({ onClose }: { onClose: () => void }) {
                         </h3>
                         <p className="max-w-sm text-sm text-[#3d4948]">
                             شكراً لاهتمامك ببرايم ميديكال كارد. سيتواصل معك أحد
-                            ممثلي خدمة العملاء خلال ٢٤ ساعة عمل لإكمال
-                            الاشتراك.
+                            ممثلي خدمة العملاء خلال ٢٤ ساعة عمل لإكمال الاشتراك.
                         </p>
                         <button
                             type="button"
@@ -135,7 +132,7 @@ function SubscribeModal({ onClose }: { onClose: () => void }) {
                 ) : (
                     <>
                         <div className="text-center">
-                            <span className="inline-flex items-center rounded-full bg-[#fbead2] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#d68228]">
+                            <span className="inline-flex items-center rounded-full bg-[#fbead2] px-3 py-1 text-[11px] font-semibold tracking-[0.18em] text-[#d68228] uppercase">
                                 اشتراك جديد
                             </span>
                             <h2
@@ -240,7 +237,7 @@ function ModalField({
                 placeholder={placeholder}
                 required={required}
                 dir={dir}
-                className="h-12 w-full rounded-full border border-[rgba(11,46,44,0.15)] bg-[#f7f2ea] px-5 text-sm text-[#0a1a19] outline-none transition placeholder:text-[#3d4948]/60 focus:border-[#236b64] focus:bg-white focus:ring-2 focus:ring-[#7fb3ad]"
+                className="h-12 w-full rounded-full border border-[rgba(11,46,44,0.15)] bg-[#f7f2ea] px-5 text-sm text-[#0a1a19] transition outline-none placeholder:text-[#3d4948]/60 focus:border-[#236b64] focus:bg-white focus:ring-2 focus:ring-[#7fb3ad]"
             />
         </div>
     );

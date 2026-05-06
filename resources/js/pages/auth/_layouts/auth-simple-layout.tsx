@@ -28,11 +28,11 @@ export default function AuthSimpleLayout({
             >
                 <div
                     aria-hidden="true"
-                    className="pointer-events-none absolute -right-32 -top-24 h-80 w-80 rounded-full bg-[#e8a84a]/30 blur-3xl"
+                    className="pointer-events-none absolute -top-24 -right-32 h-80 w-80 rounded-full bg-[#e8a84a]/30 blur-3xl"
                 />
                 <div
                     aria-hidden="true"
-                    className="pointer-events-none absolute -left-24 bottom-0 h-72 w-72 rounded-full bg-[#236b64]/25 blur-3xl"
+                    className="pointer-events-none absolute bottom-0 -left-24 h-72 w-72 rounded-full bg-[#236b64]/25 blur-3xl"
                 />
 
                 <div className="relative z-10 w-full max-w-md">

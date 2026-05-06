@@ -1,0 +1,260 @@
+import { Building2, PhoneIcon, StoreIcon } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
+import type { FormEvent } from 'react';
+import InputError from '@/components/input-error';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import ImagePicker from '@/pages/dashboard/_components/image-picker';
+import TranslatableInput from '@/pages/dashboard/_components/translatable-input';
+import BranchItems from '@/pages/dashboard/facilities/_branch-items';
+import type { BranchItem } from '@/pages/dashboard/facilities/_branch-items';
+
+export interface RelatedOption {
+    id: number;
+    name: { en: string; ar: string };
+}
+
+export interface FacilityFormData {
+    name: { en: string; ar: string };
+    facility_type_id: number | string;
+    governorate_id: number | string;
+    phone: string;
+    logo: File | null;
+    logo_url: string | null;
+    logo_remove: boolean;
+    branches: BranchItem[];
+}
+
+interface Props {
+    data: FacilityFormData;
+    setData: <K extends keyof FacilityFormData>(
+        key: K,
+        value: FacilityFormData[K],
+    ) => void;
+    submit: (e: FormEvent) => void;
+    processing: boolean;
+    errors: Record<string, string>;
+    facilityTypes: RelatedOption[];
+    governorates: RelatedOption[];
+    submitLabel: string;
+    cancelHref: string;
+}
+
+export default function FacilityForm({
+    data,
+    setData,
+    submit,
+    processing,
+    errors,
+    facilityTypes,
+    governorates,
+    submitLabel,
+    cancelHref,
+}: Props) {
+    const branchErrorCount = useMemo(
+        () =>
+            Object.keys(errors).filter((k) => k.startsWith('branches')).length,
+        [errors],
+    );
+    const facilityErrorCount = useMemo(
+        () =>
+            Object.keys(errors).filter((k) => !k.startsWith('branches')).length,
+        [errors],
+    );
+
+    const [tab, setTab] = useState<'facility' | 'branches'>('facility');
+
+    useEffect(() => {
+        if (facilityErrorCount > 0) {
+            // eslint-disable-next-line react-hooks/set-state-in-effect
+            setTab('facility');
+        } else if (branchErrorCount > 0) {
+            setTab('branches');
+        }
+    }, [facilityErrorCount, branchErrorCount]);
+
+    return (
+        <form onSubmit={submit} className="w-full space-y-6">
+            <Tabs
+                value={tab}
+                onValueChange={(v) => setTab(v as 'facility' | 'branches')}
+                className="w-full"
+            >
+                <TabsList>
+                    <TabsTrigger value="facility">
+                        <Building2 className="size-4" />
+                        Facility
+                        {facilityErrorCount > 0 && (
+                            <span className="ml-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-destructive px-1.5 text-[10px] font-bold text-white">
+                                {facilityErrorCount}
+                            </span>
+                        )}
+                    </TabsTrigger>
+                    <TabsTrigger value="branches">
+                        <StoreIcon className="size-4" />
+                        Branches
+                        <span className="ml-1 rounded-full bg-muted-foreground/20 px-1.5 py-0.5 text-[10px] font-semibold">
+                            {data.branches.filter((b) => !b._delete).length}
+                        </span>
+                        {branchErrorCount > 0 && (
+                            <span className="ml-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-destructive px-1.5 text-[10px] font-bold text-white">
+                                {branchErrorCount}
+                            </span>
+                        )}
+                    </TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="facility" className="mt-4">
+                    <section className="space-y-6 rounded-3xl border bg-card p-6 shadow-sm">
+                        <header>
+                            <h3 className="font-heading text-lg font-semibold">
+                                Facility details
+                            </h3>
+                            <p className="text-sm text-muted-foreground">
+                                Bilingual name, classification, and contact
+                                info.
+                            </p>
+                        </header>
+
+                        <TranslatableInput
+                            name="name"
+                            label="Name"
+                            values={data.name}
+                            onChange={(locale, value) =>
+                                setData('name', {
+                                    ...data.name,
+                                    [locale]: value,
+                                })
+                            }
+                            errors={errors}
+                            required
+                        />
+
+                        <div className="grid gap-3 md:grid-cols-2">
+                            <div className="grid gap-2">
+                                <Label>
+                                    Facility Type{' '}
+                                    <span className="text-red-600">*</span>
+                                </Label>
+                                <Select
+                                    value={String(data.facility_type_id || '')}
+                                    onValueChange={(v) =>
+                                        setData('facility_type_id', Number(v))
+                                    }
+                                >
+                                    <SelectTrigger className="w-full">
+                                        <SelectValue placeholder="Select a type…" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {facilityTypes.map((t) => (
+                                            <SelectItem
+                                                key={t.id}
+                                                value={String(t.id)}
+                                            >
+                                                {t.name.en} —{' '}
+                                                <span dir="rtl">
+                                                    {t.name.ar}
+                                                </span>
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                                <InputError message={errors.facility_type_id} />
+                            </div>
+
+                            <div className="grid gap-2">
+                                <Label>
+                                    Governorate{' '}
+                                    <span className="text-red-600">*</span>
+                                </Label>
+                                <Select
+                                    value={String(data.governorate_id || '')}
+                                    onValueChange={(v) =>
+                                        setData('governorate_id', Number(v))
+                                    }
+                                >
+                                    <SelectTrigger className="w-full">
+                                        <SelectValue placeholder="Select a governorate…" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {governorates.map((g) => (
+                                            <SelectItem
+                                                key={g.id}
+                                                value={String(g.id)}
+                                            >
+                                                {g.name.en} —{' '}
+                                                <span dir="rtl">
+                                                    {g.name.ar}
+                                                </span>
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                                <InputError message={errors.governorate_id} />
+                            </div>
+                        </div>
+
+                        <div className="grid gap-3 md:grid-cols-2">
+                            <div className="grid gap-2">
+                                <Label>Phone</Label>
+                                <div className="relative">
+                                    <PhoneIcon className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
+                                    <Input
+                                        value={data.phone ?? ''}
+                                        onChange={(e) =>
+                                            setData('phone', e.target.value)
+                                        }
+                                        placeholder="+20 1xx xxx xxxx"
+                                        className="pl-9"
+                                    />
+                                </div>
+                                <InputError message={errors.phone} />
+                            </div>
+
+                            <ImagePicker
+                                label="Logo"
+                                file={data.logo}
+                                existingUrl={data.logo_url}
+                                isRemoved={data.logo_remove}
+                                onFileChange={(f) => setData('logo', f)}
+                                onRemoveExistingChange={(rm) =>
+                                    setData('logo_remove', rm)
+                                }
+                                error={errors.logo}
+                                aspect="square"
+                            />
+                        </div>
+                    </section>
+                </TabsContent>
+
+                <TabsContent value="branches" className="mt-4">
+                    <section className="space-y-4 rounded-3xl border bg-card p-6 shadow-sm">
+                        <BranchItems
+                            branches={data.branches}
+                            onChange={(b) => setData('branches', b)}
+                            errors={errors}
+                        />
+                    </section>
+                </TabsContent>
+            </Tabs>
+
+            <div className="flex gap-2">
+                <Button type="submit" disabled={processing}>
+                    {submitLabel}
+                </Button>
+                <Button asChild variant="outline" type="button">
+                    <a href={cancelHref}>Cancel</a>
+                </Button>
+            </div>
+        </form>
+    );
+}

@@ -82,13 +82,10 @@ export default function SpecialOffers() {
     );
 
     return (
-        <section
-            id="offers"
-            className="relative z-[2] py-16 sm:py-24"
-        >
+        <section id="offers" className="relative z-[2] py-16 sm:py-24">
             <div className="container">
                 <div className="mx-auto max-w-2xl text-center">
-                    <span className="inline-flex items-center gap-2 rounded-full bg-[var(--amber-100)] px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.18em] text-[var(--amber-600)]">
+                    <span className="inline-flex items-center gap-2 rounded-full bg-[var(--amber-100)] px-4 py-1.5 text-xs font-semibold tracking-[0.18em] text-[var(--amber-600)] uppercase">
                         <SparkleIcon />
                         عروض خاصة
                     </span>
@@ -213,7 +210,7 @@ function OfferCard({ offer }: { offer: SpecialOffer }) {
 
             <div className="flex items-center justify-between gap-2">
                 <span
-                    className="rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-white"
+                    className="rounded-full px-3 py-1 text-[11px] font-semibold tracking-wider text-white uppercase"
                     style={{ background: offer.accent }}
                 >
                     {offer.tag}
@@ -237,7 +234,7 @@ function OfferCard({ offer }: { offer: SpecialOffer }) {
 
             <div className="mt-auto flex items-end justify-between border-t border-[rgba(11,46,44,0.08)] pt-4">
                 <div>
-                    <div className="text-[11px] font-semibold uppercase tracking-wider text-[var(--ink-soft)]">
+                    <div className="text-[11px] font-semibold tracking-wider text-[var(--ink-soft)] uppercase">
                         خصم
                     </div>
                     <div className="text-3xl font-extrabold text-[var(--amber-600)]">
@@ -269,11 +266,7 @@ function OfferCard({ offer }: { offer: SpecialOffer }) {
 
 function SparkleIcon() {
     return (
-        <svg
-            viewBox="0 0 24 24"
-            fill="currentColor"
-            className="h-3.5 w-3.5"
-        >
+        <svg viewBox="0 0 24 24" fill="currentColor" className="h-3.5 w-3.5">
             <path d="M12 2l2.4 6.4L21 11l-6.6 2.6L12 20l-2.4-6.4L3 11l6.6-2.6z" />
         </svg>
     );

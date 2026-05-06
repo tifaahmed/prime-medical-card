@@ -1,9 +1,17 @@
 <?php
 
+use App\Http\Controllers\Dashboard\DashboardController;
+use App\Http\Controllers\Dashboard\FacilityBranchController;
+use App\Http\Controllers\Dashboard\FacilityController;
+use App\Http\Controllers\Dashboard\FacilityTypeController;
+use App\Http\Controllers\Dashboard\GovernorateController;
+use App\Http\Controllers\Dashboard\MembershipController;
+use App\Http\Controllers\Dashboard\OfferController;
+use App\Http\Controllers\Guest\GuestController;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\Route;
 
-Route::inertia('/', 'welcome')->name('home');
+Route::get('/', [GuestController::class, 'welcome'])->name('home');
 
 Route::get('/sitemap.xml', function () {
     $appUrl = rtrim(config('app.url', url('/')), '/');
@@ -51,23 +59,28 @@ Route::get('/sitemap.xml', function () {
     return Response::make($xml, 200, ['Content-Type' => 'application/xml']);
 })->name('sitemap');
 
-Route::inertia('/about', 'guest/about')->name('about');
-Route::inertia('/services', 'guest/services')->name('services');
-Route::get('/services/{id}', function (string $id) {
-    return inertia('guest/service-detail', ['id' => $id]);
-})->name('service.show');
-Route::inertia('/partners', 'guest/partners')->name('partners');
-Route::get('/partners/{id}', function (string $id) {
-    return inertia('guest/partner-detail', ['id' => $id]);
-})->name('partner.show');
-Route::inertia('/contact', 'guest/contact')->name('contact');
+Route::get('/about', [GuestController::class, 'about'])->name('about');
+Route::get('/services', [GuestController::class, 'services'])->name('services');
+Route::get('/services/{id}', [GuestController::class, 'serviceDetail'])->name('service.show');
+Route::get('/partners', [GuestController::class, 'partners'])->name('partners');
+Route::get('/partners/{id}', [GuestController::class, 'partnerDetail'])->name('partner.show');
+Route::get('/contact', [GuestController::class, 'contact'])->name('contact');
 
-Route::get('/card/{number}', function (string $number) {
-    return inertia('guest/member-card', ['number' => $number]);
-})->where('number', '[0-9]+')->name('member.card');
+Route::get('/card/{number}', [GuestController::class, 'memberCard'])
+    ->where('number', '[0-9]+')
+    ->name('member.card');
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::inertia('dashboard', 'dashboard')->name('dashboard');
+    Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+    Route::prefix('dashboard')->name('dashboard.')->group(function () {
+        Route::resource('governorates', GovernorateController::class)->except('show');
+        Route::resource('facility-types', FacilityTypeController::class)->except('show');
+        Route::resource('facilities', FacilityController::class);
+        Route::resource('facility-branches', FacilityBranchController::class)->except('show');
+        Route::resource('offers', OfferController::class)->except('show');
+        Route::resource('memberships', MembershipController::class);
+    });
 });
 
 require __DIR__.'/settings.php';

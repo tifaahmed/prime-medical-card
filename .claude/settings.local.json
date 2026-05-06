@@ -34,7 +34,23 @@
       "Bash(ssh -i ~/.ssh/github_recovery -o StrictHostKeyChecking=accept-new -o IdentitiesOnly=yes -T git@github.com)",
       "Bash(echo \"after=$?\")",
       "Bash(php *)",
-      "Bash(awk *)"
+      "Bash(awk *)",
+      "Bash(git *)",
+      "Bash(composer require *)",
+      "Bash(xargs -0 perl -i -pe ' *)",
+      "Bash(tee /tmp/tsc.out)",
+      "Bash(npm run *)",
+      "Bash(vendor/bin/pint --test app/Http/Controllers/Dashboard app/Http/Requests/Dashboard routes/web.php)",
+      "Bash(vendor/bin/pint app/Http/Controllers/Dashboard/FacilityController.php)",
+      "Bash(vendor/bin/pint app/Http/Controllers/Dashboard/FacilityController.php app/Http/Requests/Dashboard/FacilityRequest.php app/Models/FacilityBranch.php app/Models/Facility.php app/Traits/MediaImageTrait.php)",
+      "Bash(npm install *)",
+      "Read(//home/tifaa/projects/membership-app/app/Models/**)",
+      "Read(//home/tifaa/projects/membership-app/database/migrations/**)",
+      "Bash(vendor/bin/pint app/Models/Membership.php app/Models/MembershipFamily.php app/Enums/MembershipFamily/RelationshipEnum.php database/migrations/2026_05_06_130000_create_memberships_table.php database/migrations/2026_05_06_130001_create_membership_families_table.php)",
+      "Bash(vendor/bin/pint app/Http/Controllers/Dashboard/MembershipController.php app/Http/Requests/Dashboard/MembershipRequest.php)",
+      "Bash(vendor/bin/pint app/Http/Controllers/Dashboard/MembershipController.php)",
+      "Bash(grep *)",
+      "Bash(vendor/bin/pint app/Http/Requests/Dashboard/FacilityRequest.php app/Http/Controllers/Dashboard/FacilityController.php)"
     ]
   }
 }

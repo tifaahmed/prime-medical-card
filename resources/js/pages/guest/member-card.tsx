@@ -1,17 +1,17 @@
 import { Link, usePage } from '@inertiajs/react';
-import FloatingActions from '@/components/floating-actions';
-import SeoHead, { breadcrumbSchema } from '@/components/seo-head';
-import AnnounceBar from '@/components/home/announce-bar';
+import FloatingActions from '@/pages/guest/_components/floating-actions';
+import SeoHead, { breadcrumbSchema } from '@/pages/guest/_components/seo-head';
+import AnnounceBar from '@/pages/guest/_components/home/announce-bar';
 import {
     ArrowLeftIcon,
     CheckShieldIcon,
     HeartIcon,
     UsersIcon,
-} from '@/components/home/icons';
-import MobileBottomNav from '@/components/home/mobile-bottom-nav';
-import SiteFooter from '@/components/home/site-footer';
-import SiteNav from '@/components/home/site-nav';
-import { homeStyles } from '@/components/home/styles';
+} from '@/pages/guest/_components/home/icons';
+import MobileBottomNav from '@/pages/guest/_components/home/mobile-bottom-nav';
+import SiteFooter from '@/pages/guest/_components/home/site-footer';
+import SiteNav from '@/pages/guest/_components/home/site-nav';
+import { homeStyles } from '@/pages/guest/_components/home/styles';
 
 type FamilyMember = {
     name: string;
@@ -69,12 +69,7 @@ const FAMILY: FamilyMember[] = [
     },
 ];
 
-const QR_PATTERN = [
-    1, 1, 0, 1,
-    0, 1, 1, 0,
-    1, 0, 1, 1,
-    1, 1, 0, 1,
-];
+const QR_PATTERN = [1, 1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 1, 1, 1, 0, 1];
 
 const PERKS = [
     { icon: <CheckShieldIcon />, title: 'بطاقة سارية', sub: 'حتى ١٢ / ٢٠٢٨' },
@@ -90,7 +85,10 @@ export default function MemberCard() {
     }>().props;
     const authUser = auth?.user ?? null;
 
-    const digits = (number ?? '').replace(/\D/g, '').padEnd(16, '0').slice(0, 16);
+    const digits = (number ?? '')
+        .replace(/\D/g, '')
+        .padEnd(16, '0')
+        .slice(0, 16);
     const displayNumber = digits.replace(/(.{4})/g, '$1 ').trim();
     const maskedNumber = `${digits.slice(0, 4)} •••• •••• ${digits.slice(-4)}`;
 
@@ -128,11 +126,11 @@ export default function MemberCard() {
                     <div className="container">
                         <div className="grid items-center gap-12 lg:grid-cols-2">
                             <div className="text-center lg:text-start">
-                                <span className="inline-flex items-center gap-2 rounded-full bg-[rgba(247,242,234,0.1)] px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.18em] text-[var(--amber-400)]">
+                                <span className="inline-flex items-center gap-2 rounded-full bg-[rgba(247,242,234,0.1)] px-4 py-1.5 text-xs font-semibold tracking-[0.18em] text-[var(--amber-400)] uppercase">
                                     <span className="h-1.5 w-1.5 rounded-full bg-[var(--amber-400)]"></span>
                                     {HOLDER.status}
                                 </span>
-                                <h1 className="mt-4 text-3xl font-bold leading-tight text-[var(--cream)] sm:text-4xl lg:text-5xl">
+                                <h1 className="mt-4 text-3xl leading-tight font-bold text-[var(--cream)] sm:text-4xl lg:text-5xl">
                                     أهلاً، {HOLDER.name.split(' ')[0]}
                                     <br />
                                     <span className="text-[var(--amber-400)]">
@@ -140,8 +138,9 @@ export default function MemberCard() {
                                     </span>
                                 </h1>
                                 <p className="mt-4 text-sm leading-relaxed text-[rgba(247,242,234,0.7)] sm:text-base">
-                                    هذه بطاقة عضويتك المميزة، اعرضها في أي جهة من
-                                    شبكتنا لتحصل على أفضل الخصومات لك ولأفراد عائلتك.
+                                    هذه بطاقة عضويتك المميزة، اعرضها في أي جهة
+                                    من شبكتنا لتحصل على أفضل الخصومات لك ولأفراد
+                                    عائلتك.
                                 </p>
 
                                 <div className="mt-8 grid grid-cols-3 gap-3 sm:gap-4">
@@ -180,7 +179,7 @@ export default function MemberCard() {
                             <div className="rounded-3xl border border-[rgba(11,46,44,0.08)] bg-white p-6 shadow-[0_18px_40px_-30px_rgba(11,46,44,0.5)] sm:p-8">
                                 <div className="flex items-start justify-between gap-4">
                                     <div>
-                                        <span className="rounded-full bg-[var(--amber-100)] px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-[var(--amber-600)]">
+                                        <span className="rounded-full bg-[var(--amber-100)] px-3 py-1 text-[11px] font-semibold tracking-wider text-[var(--amber-600)] uppercase">
                                             بيانات العضو
                                         </span>
                                         <h2 className="mt-3 text-2xl font-bold text-[var(--teal-900)] sm:text-3xl">
@@ -198,11 +197,28 @@ export default function MemberCard() {
                                 </div>
 
                                 <dl className="mt-6 grid grid-cols-1 gap-x-6 gap-y-4 text-sm sm:grid-cols-2">
-                                    <Field label="الرقم القومي" value={HOLDER.nationalId} />
-                                    <Field label="الهاتف" value={HOLDER.phone} dir="ltr" />
-                                    <Field label="البريد" value={HOLDER.email} dir="ltr" />
-                                    <Field label="المحافظة" value={HOLDER.governorate} />
-                                    <Field label="عضو منذ" value={HOLDER.memberSince} />
+                                    <Field
+                                        label="الرقم القومي"
+                                        value={HOLDER.nationalId}
+                                    />
+                                    <Field
+                                        label="الهاتف"
+                                        value={HOLDER.phone}
+                                        dir="ltr"
+                                    />
+                                    <Field
+                                        label="البريد"
+                                        value={HOLDER.email}
+                                        dir="ltr"
+                                    />
+                                    <Field
+                                        label="المحافظة"
+                                        value={HOLDER.governorate}
+                                    />
+                                    <Field
+                                        label="عضو منذ"
+                                        value={HOLDER.memberSince}
+                                    />
                                     <Field
                                         label="الحالة"
                                         value={
@@ -216,7 +232,7 @@ export default function MemberCard() {
                             </div>
 
                             <div className="rounded-3xl border border-[rgba(11,46,44,0.08)] bg-white p-6 shadow-[0_18px_40px_-30px_rgba(11,46,44,0.5)] sm:p-8">
-                                <span className="rounded-full bg-[var(--amber-100)] px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-[var(--amber-600)]">
+                                <span className="rounded-full bg-[var(--amber-100)] px-3 py-1 text-[11px] font-semibold tracking-wider text-[var(--amber-600)] uppercase">
                                     تفاصيل البطاقة
                                 </span>
                                 <h2 className="mt-3 text-2xl font-bold text-[var(--teal-900)] sm:text-3xl">
@@ -234,12 +250,24 @@ export default function MemberCard() {
                                 </p>
 
                                 <dl className="mt-6 grid grid-cols-2 gap-x-6 gap-y-4 text-sm">
-                                    <Field label="نوع البطاقة" value="عائلية مميزة" />
+                                    <Field
+                                        label="نوع البطاقة"
+                                        value="عائلية مميزة"
+                                    />
                                     <Field label="حد الخصم" value="حتى ٧٠٪" />
                                     <Field label="إصدار" value="٠١ / ٢٠٢٤" />
-                                    <Field label="انتهاء الصلاحية" value="١٢ / ٢٠٢٨" />
-                                    <Field label="عدد الأفراد" value="٥ (أنت + ٤)" />
-                                    <Field label="تغطية" value="جميع المحافظات" />
+                                    <Field
+                                        label="انتهاء الصلاحية"
+                                        value="١٢ / ٢٠٢٨"
+                                    />
+                                    <Field
+                                        label="عدد الأفراد"
+                                        value="٥ (أنت + ٤)"
+                                    />
+                                    <Field
+                                        label="تغطية"
+                                        value="جميع المحافظات"
+                                    />
                                 </dl>
 
                                 <div className="mt-6 flex flex-wrap gap-2">
@@ -265,15 +293,15 @@ export default function MemberCard() {
                 <section className="relative z-[2] bg-[rgba(11,46,44,0.04)] py-14 sm:py-20">
                     <div className="container">
                         <div className="mx-auto max-w-2xl text-center">
-                            <span className="inline-flex items-center rounded-full bg-[var(--amber-100)] px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.18em] text-[var(--amber-600)]">
+                            <span className="inline-flex items-center rounded-full bg-[var(--amber-100)] px-4 py-1.5 text-xs font-semibold tracking-[0.18em] text-[var(--amber-600)] uppercase">
                                 أفراد العائلة
                             </span>
                             <h2 className="mt-4 text-3xl font-bold text-[var(--teal-900)] sm:text-4xl">
                                 ٤ أفراد مغطّون بالكامل
                             </h2>
                             <p className="mt-3 text-sm leading-relaxed text-[var(--ink-soft)] sm:text-base">
-                                كل فرد من عائلتك له بطاقة فرعية مرتبطة بحسابك ويستفيد
-                                من نفس الخصومات في كل الشبكة.
+                                كل فرد من عائلتك له بطاقة فرعية مرتبطة بحسابك
+                                ويستفيد من نفس الخصومات في كل الشبكة.
                             </p>
                         </div>
 
@@ -293,16 +321,17 @@ export default function MemberCard() {
                     <div className="container">
                         <div className="grid items-center gap-10 lg:grid-cols-[1fr_1.1fr]">
                             <div>
-                                <span className="inline-flex items-center rounded-full bg-[var(--amber-100)] px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.18em] text-[var(--amber-600)]">
+                                <span className="inline-flex items-center rounded-full bg-[var(--amber-100)] px-4 py-1.5 text-xs font-semibold tracking-[0.18em] text-[var(--amber-600)] uppercase">
                                     شكل البطاقة
                                 </span>
                                 <h2 className="mt-4 text-3xl font-bold text-[var(--teal-900)] sm:text-4xl">
                                     وجهان واحد للخصم
                                 </h2>
                                 <p className="mt-3 text-sm leading-relaxed text-[var(--ink-soft)] sm:text-base">
-                                    البطاقة الرقمية تظهر على هاتفك، والبطاقة الفعلية
-                                    تصلك خلال ٤٨ ساعة. كلاهما يحتويان على رقم العضوية
-                                    والكود السريع للتحقق في أي جهة.
+                                    البطاقة الرقمية تظهر على هاتفك، والبطاقة
+                                    الفعلية تصلك خلال ٤٨ ساعة. كلاهما يحتويان
+                                    على رقم العضوية والكود السريع للتحقق في أي
+                                    جهة.
                                 </p>
                                 <ul className="mt-6 space-y-3 text-sm">
                                     <Bullet text="QR على الوجه الخلفي للتحقق الفوري" />
@@ -341,7 +370,7 @@ function Field({
 }) {
     return (
         <div>
-            <dt className="text-[11px] font-semibold uppercase tracking-wider text-[var(--ink-soft)]">
+            <dt className="text-[11px] font-semibold tracking-wider text-[var(--ink-soft)] uppercase">
                 {label}
             </dt>
             <dd
@@ -409,7 +438,7 @@ function FamilyCard({
     return (
         <article className="group relative overflow-hidden rounded-3xl border border-[rgba(11,46,44,0.08)] bg-white p-5 shadow-[0_18px_40px_-30px_rgba(11,46,44,0.5)] transition hover:-translate-y-1 hover:shadow-[0_24px_50px_-24px_rgba(11,46,44,0.6)]">
             <div
-                className="pointer-events-none absolute -left-8 -top-8 h-24 w-24 rounded-full opacity-15"
+                className="pointer-events-none absolute -top-8 -left-8 h-24 w-24 rounded-full opacity-15"
                 style={{ background: member.accent }}
             ></div>
             <div className="relative flex items-center gap-3">
@@ -446,13 +475,7 @@ function FamilyCard({
     );
 }
 
-function BigMemberCard({
-    number,
-    holder,
-}: {
-    number: string;
-    holder: string;
-}) {
+function BigMemberCard({ number, holder }: { number: string; holder: string }) {
     return (
         <div
             className="relative aspect-[1.586/1] w-full overflow-hidden rounded-[28px] p-7 text-[var(--cream)] shadow-[0_40px_80px_-30px_rgba(11,46,44,0.6)]"
@@ -462,7 +485,7 @@ function BigMemberCard({
             }}
         >
             <div
-                className="pointer-events-none absolute -right-1/4 -top-1/3 h-[140%] w-[80%] rounded-full"
+                className="pointer-events-none absolute -top-1/3 -right-1/4 h-[140%] w-[80%] rounded-full"
                 style={{
                     background:
                         'radial-gradient(circle, rgba(232,168,74,0.22), transparent 60%)',
@@ -481,7 +504,7 @@ function BigMemberCard({
                     <div className="font-display text-xl font-bold tracking-wide">
                         برايم
                     </div>
-                    <div className="mt-1 text-[10px] font-medium uppercase tracking-[0.3em] text-[rgba(247,242,234,0.7)]">
+                    <div className="mt-1 text-[10px] font-medium tracking-[0.3em] text-[rgba(247,242,234,0.7)] uppercase">
                         Medical Card
                     </div>
                 </div>
@@ -497,15 +520,15 @@ function BigMemberCard({
 
             <div className="relative mt-6 flex items-end justify-between">
                 <div>
-                    <div className="text-[9px] font-semibold uppercase tracking-[0.25em] text-[rgba(247,242,234,0.6)]">
+                    <div className="text-[9px] font-semibold tracking-[0.25em] text-[rgba(247,242,234,0.6)] uppercase">
                         Cardholder
                     </div>
-                    <div className="mt-0.5 text-sm font-semibold uppercase tracking-wider sm:text-base">
+                    <div className="mt-0.5 text-sm font-semibold tracking-wider uppercase sm:text-base">
                         {holder}
                     </div>
                 </div>
                 <div>
-                    <div className="text-[9px] font-semibold uppercase tracking-[0.25em] text-[rgba(247,242,234,0.6)]">
+                    <div className="text-[9px] font-semibold tracking-[0.25em] text-[rgba(247,242,234,0.6)] uppercase">
                         Valid Thru
                     </div>
                     <div className="mt-0.5 text-sm font-semibold tracking-wider sm:text-base">
@@ -535,24 +558,21 @@ function SampleCardFront({
             <div className="flex items-start justify-between">
                 <div>
                     <div className="text-base font-bold">برايم</div>
-                    <div className="text-[9px] font-medium uppercase tracking-[0.25em] text-[rgba(247,242,234,0.7)]">
+                    <div className="text-[9px] font-medium tracking-[0.25em] text-[rgba(247,242,234,0.7)] uppercase">
                         Medical Card
                     </div>
                 </div>
                 <div className="h-7 w-10 rounded border border-white/25 bg-gradient-to-br from-white/35 to-white/10"></div>
             </div>
-            <div
-                className="mt-6 font-mono text-sm tracking-[0.15em]"
-                dir="ltr"
-            >
+            <div className="mt-6 font-mono text-sm tracking-[0.15em]" dir="ltr">
                 {number}
             </div>
             <div className="mt-3 flex items-end justify-between text-[10px]">
                 <div>
-                    <div className="font-semibold uppercase tracking-[0.2em] text-[rgba(247,242,234,0.6)]">
+                    <div className="font-semibold tracking-[0.2em] text-[rgba(247,242,234,0.6)] uppercase">
                         Cardholder
                     </div>
-                    <div className="mt-0.5 text-xs font-semibold uppercase tracking-wider">
+                    <div className="mt-0.5 text-xs font-semibold tracking-wider uppercase">
                         {holder}
                     </div>
                 </div>
@@ -572,7 +592,7 @@ function SampleCardBack({ number }: { number: string }) {
                 background: 'linear-gradient(135deg, #f7f1e3 0%, #efe5cd 100%)',
             }}
         >
-            <div className="absolute left-0 right-0 top-5 h-7 bg-[var(--teal-900)]"></div>
+            <div className="absolute top-5 right-0 left-0 h-7 bg-[var(--teal-900)]"></div>
             <div className="mt-14 flex items-center justify-between gap-3">
                 <div className="grid h-14 w-14 shrink-0 grid-cols-4 grid-rows-4 gap-[2px] rounded bg-white p-1">
                     {QR_PATTERN.map((on, i) => (
@@ -580,13 +600,15 @@ function SampleCardBack({ number }: { number: string }) {
                             key={i}
                             className="rounded-[1px]"
                             style={{
-                                background: on ? 'var(--teal-900)' : 'transparent',
+                                background: on
+                                    ? 'var(--teal-900)'
+                                    : 'transparent',
                             }}
                         ></span>
                     ))}
                 </div>
                 <div className="flex-1">
-                    <div className="text-[9px] font-semibold uppercase tracking-[0.2em] text-[var(--ink-soft)]">
+                    <div className="text-[9px] font-semibold tracking-[0.2em] text-[var(--ink-soft)] uppercase">
                         Card Number
                     </div>
                     <div

@@ -58,14 +58,14 @@ export default function FloatingMenu() {
     return (
         <div
             ref={rootRef}
-            className="fixed bottom-24 left-0 sm:bottom-6 sm:left-auto sm:right-4 z-[60]"
+            className="fixed bottom-24 left-0 z-[60] sm:right-4 sm:bottom-6 sm:left-auto"
             dir="rtl"
         >
             <div
                 className={
-                    'pointer-events-none absolute bottom-full left-0 sm:left-auto sm:right-0 mb-2 flex min-w-[9rem] flex-col gap-1.5 transition-all duration-300 ' +
+                    'pointer-events-none absolute bottom-full left-0 mb-2 flex min-w-[9rem] flex-col gap-1.5 transition-all duration-300 sm:right-0 sm:left-auto ' +
                     (open
-                        ? 'translate-y-0 opacity-100 pointer-events-auto'
+                        ? 'pointer-events-auto translate-y-0 opacity-100'
                         : 'translate-y-2 opacity-0')
                 }
             >
@@ -73,7 +73,7 @@ export default function FloatingMenu() {
                     href={`https://wa.me/${WHATSAPP_NUMBER}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex w-full items-center gap-1.5 whitespace-nowrap rounded-md bg-[#25D366] px-2.5 py-1.5 text-start shadow-md transition-all duration-300 hover:scale-105 hover:bg-[#128C7E] hover:shadow-xl"
+                    className="flex w-full items-center gap-1.5 rounded-md bg-[#25D366] px-2.5 py-1.5 text-start whitespace-nowrap shadow-md transition-all duration-300 hover:scale-105 hover:bg-[#128C7E] hover:shadow-xl"
                 >
                     <IconWhatsapp />
                     <span className="text-xs font-medium text-white">
@@ -83,7 +83,7 @@ export default function FloatingMenu() {
 
                 <a
                     href="/"
-                    className="flex w-full items-center gap-1.5 whitespace-nowrap rounded-md bg-[#0b2e2c] px-2.5 py-1.5 text-start shadow-md transition-all duration-300 hover:scale-105 hover:bg-[#12403d] hover:shadow-xl"
+                    className="flex w-full items-center gap-1.5 rounded-md bg-[#0b2e2c] px-2.5 py-1.5 text-start whitespace-nowrap shadow-md transition-all duration-300 hover:scale-105 hover:bg-[#12403d] hover:shadow-xl"
                 >
                     <IconIdCard />
                     <span className="text-xs font-medium text-white">
@@ -93,7 +93,7 @@ export default function FloatingMenu() {
 
                 <a
                     href="#contact"
-                    className="flex w-full items-center gap-1.5 whitespace-nowrap rounded-md bg-[#FF6B6B] px-2.5 py-1.5 text-start shadow-md transition-all duration-300 hover:scale-105 hover:bg-[#FF4F4F] hover:shadow-xl"
+                    className="flex w-full items-center gap-1.5 rounded-md bg-[#FF6B6B] px-2.5 py-1.5 text-start whitespace-nowrap shadow-md transition-all duration-300 hover:scale-105 hover:bg-[#FF4F4F] hover:shadow-xl"
                 >
                     <IconEnvelope />
                     <span className="text-xs font-medium text-white">
@@ -103,7 +103,7 @@ export default function FloatingMenu() {
 
                 <a
                     href={`tel:${PHONE_NUMBER}`}
-                    className="flex w-full items-center gap-1.5 whitespace-nowrap rounded-md bg-[#FFA500] px-2.5 py-1.5 text-start shadow-md transition-all duration-300 hover:scale-105 hover:bg-[#FF9000] hover:shadow-xl"
+                    className="flex w-full items-center gap-1.5 rounded-md bg-[#FFA500] px-2.5 py-1.5 text-start whitespace-nowrap shadow-md transition-all duration-300 hover:scale-105 hover:bg-[#FF9000] hover:shadow-xl"
                 >
                     <IconPhone />
                     <span className="text-xs font-medium text-white">

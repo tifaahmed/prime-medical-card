@@ -96,10 +96,8 @@ export default function OrbitingLogos() {
                 l.element.style.left = `${l.fixedX}px`;
                 l.element.style.top = `${l.fixedY}px`;
             } else {
-                const x =
-                    centerX + Math.cos(l.angle) * l.radius - l.size / 2;
-                const y =
-                    centerY + Math.sin(l.angle) * l.radius - l.size / 2;
+                const x = centerX + Math.cos(l.angle) * l.radius - l.size / 2;
+                const y = centerY + Math.sin(l.angle) * l.radius - l.size / 2;
 
                 l.element.style.left = `${x}px`;
                 l.element.style.top = `${y}px`;

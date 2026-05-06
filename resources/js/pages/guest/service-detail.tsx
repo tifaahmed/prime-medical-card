@@ -1,16 +1,20 @@
 import { Link, usePage } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
-import FloatingActions from '@/components/floating-actions';
+import FloatingActions from '@/pages/guest/_components/floating-actions';
 import SeoHead, {
     breadcrumbSchema,
     serviceSchema,
-} from '@/components/seo-head';
-import AnnounceBar from '@/components/home/announce-bar';
-import MobileBottomNav from '@/components/home/mobile-bottom-nav';
-import SiteFooter from '@/components/home/site-footer';
-import SiteNav from '@/components/home/site-nav';
-import { homeStyles } from '@/components/home/styles';
-import { findService, type Project, type Service } from '@/data/services';
+} from '@/pages/guest/_components/seo-head';
+import AnnounceBar from '@/pages/guest/_components/home/announce-bar';
+import MobileBottomNav from '@/pages/guest/_components/home/mobile-bottom-nav';
+import SiteFooter from '@/pages/guest/_components/home/site-footer';
+import SiteNav from '@/pages/guest/_components/home/site-nav';
+import { homeStyles } from '@/pages/guest/_components/home/styles';
+import {
+    findService,
+    type Project,
+    type Service,
+} from '@/pages/guest/_data/services';
 
 export default function ServiceDetail() {
     const { auth, id, appUrl } = usePage<{
@@ -100,7 +104,7 @@ export default function ServiceDetail() {
                         background: `linear-gradient(135deg, ${service.accent}, ${service.accent}aa)`,
                     }}
                 >
-                    <div className="container relative z-10">
+                    <div className="relative z-10 container">
                         <Link
                             href="/services"
                             className="inline-flex items-center gap-1 text-sm font-semibold text-white/80 hover:text-white"
@@ -124,7 +128,7 @@ export default function ServiceDetail() {
                                 <span className="rounded-full bg-white/15 px-3 py-1 text-xs font-bold text-white/90">
                                     {service.discount}
                                 </span>
-                                <h1 className="mt-3 text-3xl font-bold leading-tight text-white sm:text-5xl">
+                                <h1 className="mt-3 text-3xl leading-tight font-bold text-white sm:text-5xl">
                                     {service.title}
                                 </h1>
                                 <p className="mt-4 text-sm leading-relaxed text-white/85 sm:text-base">
@@ -163,7 +167,7 @@ export default function ServiceDetail() {
                     <div className="container">
                         <div className="flex items-end justify-between gap-3">
                             <div>
-                                <span className="text-xs font-semibold uppercase tracking-widest text-[var(--amber-600)]">
+                                <span className="text-xs font-semibold tracking-widest text-[var(--amber-600)] uppercase">
                                     أحدث المشاريع
                                 </span>
                                 <h2 className="mt-1 text-2xl font-bold text-[var(--teal-900)] sm:text-3xl">
@@ -237,7 +241,7 @@ function ProjectThumb({
                     }}
                     loading="lazy"
                 />
-                <span className="absolute right-3 top-3 rounded-full bg-black/40 px-2 py-0.5 text-[10px] font-bold text-white backdrop-blur-sm">
+                <span className="absolute top-3 right-3 rounded-full bg-black/40 px-2 py-0.5 text-[10px] font-bold text-white backdrop-blur-sm">
                     {project.year}
                 </span>
             </div>
@@ -301,7 +305,7 @@ function ProjectGallery({
                     e.stopPropagation();
                     onClose();
                 }}
-                className="absolute left-4 top-4 flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white backdrop-blur-sm transition hover:bg-white/20"
+                className="absolute top-4 left-4 flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white backdrop-blur-sm transition hover:bg-white/20"
             >
                 <svg
                     viewBox="0 0 24 24"
@@ -324,7 +328,7 @@ function ProjectGallery({
                     e.stopPropagation();
                     onChange((index + 1) % projects.length);
                 }}
-                className="absolute right-4 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-white/10 text-white backdrop-blur-sm transition hover:bg-white/20 sm:right-8"
+                className="absolute top-1/2 right-4 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-white/10 text-white backdrop-blur-sm transition hover:bg-white/20 sm:right-8"
             >
                 <svg
                     viewBox="0 0 24 24"
@@ -346,7 +350,7 @@ function ProjectGallery({
                     e.stopPropagation();
                     onChange((index - 1 + projects.length) % projects.length);
                 }}
-                className="absolute left-4 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-white/10 text-white backdrop-blur-sm transition hover:bg-white/20 sm:left-8"
+                className="absolute top-1/2 left-4 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-white/10 text-white backdrop-blur-sm transition hover:bg-white/20 sm:left-8"
             >
                 <svg
                     viewBox="0 0 24 24"

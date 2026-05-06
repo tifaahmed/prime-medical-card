@@ -1,22 +1,24 @@
 import { usePage } from '@inertiajs/react';
-import FloatingActions from '@/components/floating-actions';
-import FloatingLogos from '@/components/floating-logos';
-import SeoHead, { organizationSchema } from '@/components/seo-head';
-import AnnounceBar from '@/components/home/announce-bar';
-import CtaBanner from '@/components/home/cta-banner';
-import Faq from '@/components/home/faq';
-import Hero from '@/components/home/hero';
-import HowItWorks from '@/components/home/how-it-works';
-import MobileBottomNav from '@/components/home/mobile-bottom-nav';
-import PartnersMarquee from '@/components/home/partners-marquee';
-import Pricing from '@/components/home/pricing';
-import useRevealOnScroll from '@/components/home/reveal-on-scroll';
-import Services from '@/components/home/services';
-import SiteFooter from '@/components/home/site-footer';
-import SiteNav from '@/components/home/site-nav';
-import SpecialOffers from '@/components/home/special-offers';
-import { homeStyles } from '@/components/home/styles';
-import Testimonials from '@/components/home/testimonials';
+import FloatingActions from '@/pages/guest/_components/floating-actions';
+import FloatingLogos from '@/pages/guest/_components/floating-logos';
+import SeoHead, {
+    organizationSchema,
+} from '@/pages/guest/_components/seo-head';
+import AnnounceBar from '@/pages/guest/_components/home/announce-bar';
+import CtaBanner from '@/pages/guest/_components/home/cta-banner';
+import Faq from '@/pages/guest/_components/home/faq';
+import Hero from '@/pages/guest/_components/home/hero';
+import HowItWorks from '@/pages/guest/_components/home/how-it-works';
+import MobileBottomNav from '@/pages/guest/_components/home/mobile-bottom-nav';
+import PartnersMarquee from '@/pages/guest/_components/home/partners-marquee';
+import Pricing from '@/pages/guest/_components/home/pricing';
+import useRevealOnScroll from '@/pages/guest/_components/home/reveal-on-scroll';
+import Services from '@/pages/guest/_components/home/services';
+import SiteFooter from '@/pages/guest/_components/home/site-footer';
+import SiteNav from '@/pages/guest/_components/home/site-nav';
+import SpecialOffers from '@/pages/guest/_components/home/special-offers';
+import { homeStyles } from '@/pages/guest/_components/home/styles';
+import Testimonials from '@/pages/guest/_components/home/testimonials';
 
 export default function Welcome() {
     const { auth, appUrl } = usePage<{
