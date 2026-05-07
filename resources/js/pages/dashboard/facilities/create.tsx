@@ -24,9 +24,15 @@ export default function FacilityCreate({
         branches: [] as BranchItem[],
     });
 
+    const save = (intent: 'stay' | 'return') => {
+        post(`/dashboard/facilities?redirect=${intent}`, {
+            forceFormData: true,
+        });
+    };
+
     const submit = (e: FormEvent) => {
         e.preventDefault();
-        post('/dashboard/facilities', { forceFormData: true });
+        save('stay');
     };
 
     return (
@@ -41,11 +47,12 @@ export default function FacilityCreate({
                     data={data}
                     setData={setData as never}
                     submit={submit}
+                    onSave={save}
                     processing={processing}
                     errors={errors as Record<string, string>}
                     facilityTypes={facilityTypes}
                     governorates={governorates}
-                    submitLabel="Create"
+                    primaryLabel="Create"
                     cancelHref="/dashboard/facilities"
                 />
             </div>

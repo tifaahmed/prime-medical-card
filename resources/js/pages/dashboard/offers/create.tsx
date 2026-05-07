@@ -21,9 +21,13 @@ export default function OfferCreate({
         old_price: '' as string | number,
     });
 
+    const save = (intent: 'stay' | 'return') => {
+        post(`/dashboard/offers?redirect=${intent}`);
+    };
+
     const submit = (e: FormEvent) => {
         e.preventDefault();
-        post('/dashboard/offers');
+        save('stay');
     };
 
     return (
@@ -38,10 +42,11 @@ export default function OfferCreate({
                     data={data}
                     setData={setData as never}
                     submit={submit}
+                    onSave={save}
                     processing={processing}
                     errors={errors as Record<string, string>}
                     offerableTypes={offerableTypes}
-                    submitLabel="Create"
+                    primaryLabel="Create"
                     cancelHref="/dashboard/offers"
                 />
             </div>

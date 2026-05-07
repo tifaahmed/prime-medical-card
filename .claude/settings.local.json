@@ -50,7 +50,15 @@
       "Bash(vendor/bin/pint app/Http/Controllers/Dashboard/MembershipController.php app/Http/Requests/Dashboard/MembershipRequest.php)",
       "Bash(vendor/bin/pint app/Http/Controllers/Dashboard/MembershipController.php)",
       "Bash(grep *)",
-      "Bash(vendor/bin/pint app/Http/Requests/Dashboard/FacilityRequest.php app/Http/Controllers/Dashboard/FacilityController.php)"
+      "Bash(vendor/bin/pint app/Http/Requests/Dashboard/FacilityRequest.php app/Http/Controllers/Dashboard/FacilityController.php)",
+      "Bash(vendor/bin/pint app/Http/Controllers)",
+      "Bash(vendor/bin/pint app/Http/Controllers app/Http/Requests/Dashboard)",
+      "Bash(vendor/bin/pint app/Http/Controllers/Controller.php)",
+      "Read(//etc/php/8.4/cli/**)",
+      "Bash(touch /tmp/pmc-can-write-php-ini-test)",
+      "Bash(rm /tmp/pmc-can-write-php-ini-test)",
+      "Bash(sudo -n true)",
+      "Bash(PHP_INI_SCAN_DIR=:./.php-overrides.d php *)"
     ]
   }
 }

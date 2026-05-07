@@ -46,6 +46,7 @@ export interface BranchItem {
 interface Props {
     branches: BranchItem[];
     onChange: (branches: BranchItem[]) => void;
+    onPersist?: (branches: BranchItem[]) => void;
     errors: Record<string, string>;
 }
 
@@ -78,7 +79,12 @@ const branchHasContent = (b: BranchItem): boolean =>
         b.longitude,
     );
 
-export default function BranchItems({ branches, onChange, errors }: Props) {
+export default function BranchItems({
+    branches,
+    onChange,
+    onPersist,
+    errors,
+}: Props) {
     const [editingIndex, setEditingIndex] = useState<number | null>(null);
     const [draft, setDraft] = useState<BranchItem | null>(null);
 
@@ -106,6 +112,7 @@ export default function BranchItems({ branches, onChange, errors }: Props) {
         onChange(next);
         setEditingIndex(null);
         setDraft(null);
+        onPersist?.(next);
     };
 
     const cancelEdit = () => {

@@ -17,9 +17,13 @@ export default function BranchCreate({
         phone: [] as string[],
     });
 
+    const save = (intent: 'stay' | 'return') => {
+        post(`/dashboard/facility-branches?redirect=${intent}`);
+    };
+
     const submit = (e: FormEvent) => {
         e.preventDefault();
-        post('/dashboard/facility-branches');
+        save('stay');
     };
 
     return (
@@ -34,10 +38,11 @@ export default function BranchCreate({
                     data={data}
                     setData={setData as never}
                     submit={submit}
+                    onSave={save}
                     processing={processing}
                     errors={errors as Record<string, string>}
                     facilities={facilities}
-                    submitLabel="Create"
+                    primaryLabel="Create"
                     cancelHref="/dashboard/facility-branches"
                 />
             </div>

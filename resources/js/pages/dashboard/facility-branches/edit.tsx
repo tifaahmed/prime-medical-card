@@ -28,9 +28,13 @@ export default function BranchEdit({
         phone: branch.phone ?? [],
     });
 
+    const save = (intent: 'stay' | 'return') => {
+        put(`/dashboard/facility-branches/${branch.id}?redirect=${intent}`);
+    };
+
     const submit = (e: FormEvent) => {
         e.preventDefault();
-        put(`/dashboard/facility-branches/${branch.id}`);
+        save('stay');
     };
 
     return (
@@ -45,10 +49,10 @@ export default function BranchEdit({
                     data={data}
                     setData={setData as never}
                     submit={submit}
+                    onSave={save}
                     processing={processing}
                     errors={errors as Record<string, string>}
                     facilities={facilities}
-                    submitLabel="Save"
                     cancelHref="/dashboard/facility-branches"
                 />
             </div>

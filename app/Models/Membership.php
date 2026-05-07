@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\MediaImageTrait;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -19,6 +20,7 @@ class Membership extends Model implements HasMedia
     use HasSlug;
     use HasTranslations;
     use InteractsWithMedia;
+    use MediaImageTrait;
     use SoftDeletes;
 
     /**

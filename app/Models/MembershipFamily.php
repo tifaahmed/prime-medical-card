@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\MembershipFamily\RelationshipEnum;
+use App\Traits\MediaImageTrait;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -14,6 +15,7 @@ class MembershipFamily extends Model implements HasMedia
 {
     use HasFactory;
     use InteractsWithMedia;
+    use MediaImageTrait;
     use SoftDeletes;
 
     /**

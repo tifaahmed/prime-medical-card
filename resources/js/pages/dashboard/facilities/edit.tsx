@@ -62,13 +62,23 @@ export default function FacilityEdit({
         })),
     });
 
-    const submit = (e: FormEvent) => {
-        e.preventDefault();
+    const persist = (
+        intent: 'stay' | 'return',
+        overrides?: { branches?: BranchItem[] },
+    ) => {
+        const payload = { ...data, ...overrides, _method: 'put' };
         router.post(
-            `/dashboard/facilities/${facility.id}`,
-            { ...data, _method: 'put' } as never,
+            `/dashboard/facilities/${facility.id}?redirect=${intent}`,
+            payload as never,
             { forceFormData: true },
         );
+    };
+
+    const save = (intent: 'stay' | 'return') => persist(intent);
+
+    const submit = (e: FormEvent) => {
+        e.preventDefault();
+        save('stay');
     };
 
     return (
@@ -83,11 +93,14 @@ export default function FacilityEdit({
                     data={data}
                     setData={setData as never}
                     submit={submit}
+                    onSave={save}
+                    onPersistBranches={(branches) =>
+                        persist('stay', { branches })
+                    }
                     processing={processing}
                     errors={errors as Record<string, string>}
                     facilityTypes={facilityTypes}
                     governorates={governorates}
-                    submitLabel="Save"
                     cancelHref="/dashboard/facilities"
                 />
             </div>

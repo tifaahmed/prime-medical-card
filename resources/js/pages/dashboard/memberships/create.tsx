@@ -39,9 +39,15 @@ export default function MembershipCreate({
         family: [] as FamilyItem[],
     });
 
+    const save = (intent: 'stay' | 'return') => {
+        post(`/dashboard/memberships?redirect=${intent}`, {
+            forceFormData: true,
+        });
+    };
+
     const submit = (e: FormEvent) => {
         e.preventDefault();
-        post('/dashboard/memberships', { forceFormData: true });
+        save('stay');
     };
 
     return (
@@ -56,10 +62,11 @@ export default function MembershipCreate({
                     data={data}
                     setData={setData as never}
                     submit={submit}
+                    onSave={save}
                     processing={processing}
                     errors={errors as Record<string, string>}
                     relationships={relationships}
-                    submitLabel="Create"
+                    primaryLabel="Create"
                     cancelHref="/dashboard/memberships"
                 />
             </div>

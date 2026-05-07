@@ -63,13 +63,23 @@ export default function MembershipEdit({
         })),
     });
 
-    const submit = (e: FormEvent) => {
-        e.preventDefault();
+    const persist = (
+        intent: 'stay' | 'return',
+        overrides?: { family?: FamilyItem[] },
+    ) => {
+        const payload = { ...data, ...overrides, _method: 'put' };
         router.post(
-            `/dashboard/memberships/${membership.id}`,
-            { ...data, _method: 'put' } as never,
+            `/dashboard/memberships/${membership.id}?redirect=${intent}`,
+            payload as never,
             { forceFormData: true },
         );
+    };
+
+    const save = (intent: 'stay' | 'return') => persist(intent);
+
+    const submit = (e: FormEvent) => {
+        e.preventDefault();
+        save('stay');
     };
 
     return (
@@ -84,10 +94,13 @@ export default function MembershipEdit({
                     data={data}
                     setData={setData as never}
                     submit={submit}
+                    onSave={save}
+                    onPersistFamily={(family) =>
+                        persist('stay', { family })
+                    }
                     processing={processing}
                     errors={errors as Record<string, string>}
                     relationships={relationships}
-                    submitLabel="Save"
                     cancelHref="/dashboard/memberships"
                 />
             </div>

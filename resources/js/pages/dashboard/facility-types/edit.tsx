@@ -1,7 +1,7 @@
 import { Head, useForm } from '@inertiajs/react';
 import type { FormEvent } from 'react';
 import Heading from '@/components/heading';
-import { Button } from '@/components/ui/button';
+import FormActions from '@/pages/dashboard/_components/form-actions';
 import TranslatableInput from '@/pages/dashboard/_components/translatable-input';
 import { dashboard } from '@/routes';
 
@@ -20,9 +20,13 @@ export default function FacilityTypeEdit({
         name: facilityType.name,
     });
 
+    const save = (intent: 'stay' | 'return') => {
+        put(`/dashboard/facility-types/${facilityType.id}?redirect=${intent}`);
+    };
+
     const submit = (e: FormEvent) => {
         e.preventDefault();
-        put(`/dashboard/facility-types/${facilityType.id}`);
+        save('stay');
     };
 
     return (
@@ -33,28 +37,27 @@ export default function FacilityTypeEdit({
                     title="Edit Facility Type"
                     description={`Slug: ${facilityType.slug}`}
                 />
-                <form
-                    onSubmit={submit}
-                    className="w-full space-y-6 rounded-3xl border bg-card p-6 shadow-sm"
-                >
-                    <TranslatableInput
-                        name="name"
-                        label="Name"
-                        values={data.name}
-                        onChange={(locale, value) =>
-                            setData('name', { ...data.name, [locale]: value })
-                        }
-                        errors={errors as Record<string, string>}
-                        required
-                    />
-                    <div className="flex gap-2">
-                        <Button type="submit" disabled={processing}>
-                            Save
-                        </Button>
-                        <Button asChild variant="outline" type="button">
-                            <a href="/dashboard/facility-types">Cancel</a>
-                        </Button>
+                <form onSubmit={submit} className="w-full space-y-6">
+                    <div className="rounded-3xl border bg-card p-6 shadow-sm">
+                        <TranslatableInput
+                            name="name"
+                            label="Name"
+                            values={data.name}
+                            onChange={(locale, value) =>
+                                setData('name', {
+                                    ...data.name,
+                                    [locale]: value,
+                                })
+                            }
+                            errors={errors as Record<string, string>}
+                            required
+                        />
                     </div>
+                    <FormActions
+                        processing={processing}
+                        cancelHref="/dashboard/facility-types"
+                        onSave={save}
+                    />
                 </form>
             </div>
         </>

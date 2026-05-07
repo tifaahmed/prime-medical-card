@@ -1,5 +1,5 @@
 import { Head, Link } from '@inertiajs/react';
-import { PlusIcon } from 'lucide-react';
+import { Building2Icon, PlusIcon } from 'lucide-react';
 import Heading from '@/components/heading';
 import { Button } from '@/components/ui/button';
 import DataTable from '@/pages/dashboard/_components/data-table';
@@ -12,6 +12,7 @@ import { dashboard } from '@/routes';
 interface Facility {
     id: number;
     slug: string;
+    logo_url: string | null;
     name: { en: string; ar: string };
     facility_type: { id: number; name: { en: string; ar: string } } | null;
     governorate: { id: number; name: { en: string; ar: string } } | null;
@@ -25,26 +26,75 @@ export default function FacilitiesIndex({
     filters: { search: string };
 }) {
     const columns: Column<Facility>[] = [
-        { key: 'id', label: '#', render: (r) => r.id },
         {
-            key: 'name_en',
-            label: 'Name (EN)',
-            render: (r) => r.name.en ?? '—',
-        },
-        {
-            key: 'name_ar',
-            label: 'الاسم (AR)',
-            render: (r) => <span dir="rtl">{r.name.ar ?? '—'}</span>,
+            key: 'facility',
+            label: 'Facility',
+            render: (r) => (
+                <div className="flex items-center gap-3">
+                    <div className="flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-lg border bg-muted text-muted-foreground">
+                        {r.logo_url ? (
+                            <img
+                                src={r.logo_url}
+                                alt=""
+                                className="h-full w-full object-cover"
+                            />
+                        ) : (
+                            <Building2Icon className="size-5" />
+                        )}
+                    </div>
+                    <div className="min-w-0">
+                        <p className="truncate font-medium">
+                            {r.name.en ?? '—'}
+                        </p>
+                        <p
+                            className="truncate text-xs text-muted-foreground"
+                            dir="rtl"
+                        >
+                            {r.name.ar ?? '—'}
+                        </p>
+                    </div>
+                </div>
+            ),
         },
         {
             key: 'type',
             label: 'Type',
-            render: (r) => r.facility_type?.name?.en ?? '—',
+            render: (r) =>
+                r.facility_type ? (
+                    <span>
+                        {r.facility_type.name.en ?? '—'}
+                        {r.facility_type.name.ar && (
+                            <span
+                                className="ml-1 text-xs text-muted-foreground"
+                                dir="rtl"
+                            >
+                                / {r.facility_type.name.ar}
+                            </span>
+                        )}
+                    </span>
+                ) : (
+                    '—'
+                ),
         },
         {
             key: 'gov',
             label: 'Governorate',
-            render: (r) => r.governorate?.name?.en ?? '—',
+            render: (r) =>
+                r.governorate ? (
+                    <span>
+                        {r.governorate.name.en ?? '—'}
+                        {r.governorate.name.ar && (
+                            <span
+                                className="ml-1 text-xs text-muted-foreground"
+                                dir="rtl"
+                            >
+                                / {r.governorate.name.ar}
+                            </span>
+                        )}
+                    </span>
+                ) : (
+                    '—'
+                ),
         },
     ];
 

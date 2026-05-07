@@ -4,6 +4,9 @@ namespace App\Http\Controllers\Dashboard;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Dashboard\FacilityRequest;
+use App\Http\Resources\Dashboard\FacilityResource;
+use App\Http\Resources\Dashboard\FacilityTypeResource;
+use App\Http\Resources\Dashboard\GovernorateResource;
 use App\Models\Facility;
 use App\Models\FacilityBranch;
 use App\Models\FacilityType;
@@ -21,33 +24,12 @@ class FacilityController extends Controller
         $search = $request->string('search')->toString();
 
         $facilities = Facility::query()
-            ->with(['facilityType', 'governorate'])
+            ->with(['facilityType', 'governorate', 'media'])
             ->when($search, fn ($q) => $q->where('slug', 'like', "%{$search}%"))
             ->orderBy('id', 'desc')
             ->paginate(10)
             ->withQueryString()
-            ->through(fn ($f) => [
-                'id' => $f->id,
-                'slug' => $f->slug,
-                'name' => [
-                    'en' => $f->getTranslation('name', 'en', false),
-                    'ar' => $f->getTranslation('name', 'ar', false),
-                ],
-                'facility_type' => $f->facilityType ? [
-                    'id' => $f->facilityType->id,
-                    'name' => [
-                        'en' => $f->facilityType->getTranslation('name', 'en', false),
-                        'ar' => $f->facilityType->getTranslation('name', 'ar', false),
-                    ],
-                ] : null,
-                'governorate' => $f->governorate ? [
-                    'id' => $f->governorate->id,
-                    'name' => [
-                        'en' => $f->governorate->getTranslation('name', 'en', false),
-                        'ar' => $f->governorate->getTranslation('name', 'ar', false),
-                    ],
-                ] : null,
-            ]);
+            ->through(fn ($facility) => FacilityResource::make($facility)->resolve($request));
 
         return Inertia::render('dashboard/facilities/index', [
             'facilities' => $facilities,
@@ -55,71 +37,28 @@ class FacilityController extends Controller
         ]);
     }
 
-    public function show(Facility $facility): Response
+    public function show(Request $request, Facility $facility): Response
     {
-        $facility->load(['facilityType', 'governorate', 'branches', 'offers']);
+        $facility->load([
+            'facilityType',
+            'governorate',
+            'branches' => fn ($q) => $q->orderBy('id'),
+            'branches.media',
+            'offers',
+            'offers.offerable',
+            'media',
+        ]);
 
         return Inertia::render('dashboard/facilities/show', [
-            'facility' => [
-                'id' => $facility->id,
-                'slug' => $facility->slug,
-                'name' => [
-                    'en' => $facility->getTranslation('name', 'en', false),
-                    'ar' => $facility->getTranslation('name', 'ar', false),
-                ],
-                'facility_type' => $facility->facilityType ? [
-                    'id' => $facility->facilityType->id,
-                    'name' => [
-                        'en' => $facility->facilityType->getTranslation('name', 'en', false),
-                        'ar' => $facility->facilityType->getTranslation('name', 'ar', false),
-                    ],
-                ] : null,
-                'governorate' => $facility->governorate ? [
-                    'id' => $facility->governorate->id,
-                    'name' => [
-                        'en' => $facility->governorate->getTranslation('name', 'en', false),
-                        'ar' => $facility->governorate->getTranslation('name', 'ar', false),
-                    ],
-                ] : null,
-                'created_at' => $facility->created_at?->toDateTimeString(),
-                'phone' => $facility->phone,
-                'logo_url' => $facility->logo ?: null,
-                'branches' => $facility->branches->map(fn ($b) => [
-                    'id' => $b->id,
-                    'slug' => $b->slug,
-                    'name' => [
-                        'en' => $b->getTranslation('name', 'en', false),
-                        'ar' => $b->getTranslation('name', 'ar', false),
-                    ],
-                    'address' => [
-                        'en' => $b->getTranslation('address', 'en', false),
-                        'ar' => $b->getTranslation('address', 'ar', false),
-                    ],
-                    'phone' => $b->phone ?? [],
-                    'latitude' => $b->latitude,
-                    'longitude' => $b->longitude,
-                    'header_url' => $b->header ?: null,
-                    'gallery' => $b->gallery,
-                ])->all(),
-                'offers' => $facility->offers->map(fn ($o) => [
-                    'id' => $o->id,
-                    'slug' => $o->slug,
-                    'title' => [
-                        'en' => $o->getTranslation('title', 'en', false),
-                        'ar' => $o->getTranslation('title', 'ar', false),
-                    ],
-                    'price' => $o->price,
-                    'old_price' => $o->old_price,
-                ])->all(),
-            ],
+            'facility' => FacilityResource::make($facility)->resolve($request),
         ]);
     }
 
-    public function create(): Response
+    public function create(Request $request): Response
     {
         return Inertia::render('dashboard/facilities/create', [
-            'facilityTypes' => $this->facilityTypeOptions(),
-            'governorates' => $this->governorateOptions(),
+            'facilityTypes' => $this->facilityTypeOptions($request),
+            'governorates' => $this->governorateOptions($request),
         ]);
     }
 
@@ -131,50 +70,34 @@ class FacilityController extends Controller
         $logoRemove = (bool) ($data['logo_remove'] ?? false);
         unset($data['branches'], $data['logo'], $data['logo_remove']);
 
-        DB::transaction(function () use ($request, $data, $branches, $logo, $logoRemove) {
+        $facility = DB::transaction(function () use ($request, $data, $branches, $logo, $logoRemove) {
             $facility = Facility::create($data);
             $this->syncFacilityLogo($facility, $logo, $logoRemove);
             $this->syncBranches($facility, $branches, $request);
+
+            return $facility;
         });
 
-        return to_route('dashboard.facilities.index');
+        return $this->redirectAfterSave(
+            $request,
+            'dashboard.facilities.edit',
+            'dashboard.facilities.index',
+            $facility,
+        );
     }
 
-    public function edit(Facility $facility): Response
+    public function edit(Request $request, Facility $facility): Response
     {
-        $facility->load(['branches' => fn ($q) => $q->orderBy('id'), 'branches.media', 'media']);
+        $facility->load([
+            'branches' => fn ($q) => $q->orderBy('id'),
+            'branches.media',
+            'media',
+        ]);
 
         return Inertia::render('dashboard/facilities/edit', [
-            'facility' => [
-                'id' => $facility->id,
-                'slug' => $facility->slug,
-                'facility_type_id' => $facility->facility_type_id,
-                'governorate_id' => $facility->governorate_id,
-                'name' => [
-                    'en' => $facility->getTranslation('name', 'en', false),
-                    'ar' => $facility->getTranslation('name', 'ar', false),
-                ],
-                'phone' => $facility->phone,
-                'logo_url' => $facility->logo ?: null,
-                'branches' => $facility->branches->map(fn ($b) => [
-                    'id' => $b->id,
-                    'name' => [
-                        'en' => $b->getTranslation('name', 'en', false),
-                        'ar' => $b->getTranslation('name', 'ar', false),
-                    ],
-                    'address' => [
-                        'en' => $b->getTranslation('address', 'en', false),
-                        'ar' => $b->getTranslation('address', 'ar', false),
-                    ],
-                    'phone' => $b->phone ?? [],
-                    'latitude' => $b->latitude,
-                    'longitude' => $b->longitude,
-                    'header_url' => $b->header ?: null,
-                    'gallery' => $b->gallery,
-                ])->all(),
-            ],
-            'facilityTypes' => $this->facilityTypeOptions(),
-            'governorates' => $this->governorateOptions(),
+            'facility' => FacilityResource::make($facility)->resolve($request),
+            'facilityTypes' => $this->facilityTypeOptions($request),
+            'governorates' => $this->governorateOptions($request),
         ]);
     }
 
@@ -192,7 +115,12 @@ class FacilityController extends Controller
             $this->syncBranches($facility, $branches, $request);
         });
 
-        return to_route('dashboard.facilities.index');
+        return $this->redirectAfterSave(
+            $request,
+            'dashboard.facilities.edit',
+            'dashboard.facilities.index',
+            $facility,
+        );
     }
 
     private function syncFacilityLogo(Facility $facility, $logo, bool $remove): void
@@ -308,25 +236,21 @@ class FacilityController extends Controller
         return to_route('dashboard.facilities.index');
     }
 
-    private function facilityTypeOptions(): array
+    private function facilityTypeOptions(Request $request): array
     {
-        return FacilityType::orderBy('id')->get()->map(fn ($t) => [
-            'id' => $t->id,
-            'name' => [
-                'en' => $t->getTranslation('name', 'en', false),
-                'ar' => $t->getTranslation('name', 'ar', false),
-            ],
-        ])->all();
+        return FacilityType::query()
+            ->orderBy('id')
+            ->get()
+            ->map(fn ($type) => FacilityTypeResource::make($type)->resolve($request))
+            ->all();
     }
 
-    private function governorateOptions(): array
+    private function governorateOptions(Request $request): array
     {
-        return Governorate::orderBy('id')->get()->map(fn ($g) => [
-            'id' => $g->id,
-            'name' => [
-                'en' => $g->getTranslation('name', 'en', false),
-                'ar' => $g->getTranslation('name', 'ar', false),
-            ],
-        ])->all();
+        return Governorate::query()
+            ->orderBy('id')
+            ->get()
+            ->map(fn ($gov) => GovernorateResource::make($gov)->resolve($request))
+            ->all();
     }
 }

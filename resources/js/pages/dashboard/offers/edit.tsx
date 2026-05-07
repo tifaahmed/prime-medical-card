@@ -36,9 +36,13 @@ export default function OfferEdit({
         old_price: (offer.old_price ?? '') as string | number,
     });
 
+    const save = (intent: 'stay' | 'return') => {
+        put(`/dashboard/offers/${offer.id}?redirect=${intent}`);
+    };
+
     const submit = (e: FormEvent) => {
         e.preventDefault();
-        put(`/dashboard/offers/${offer.id}`);
+        save('stay');
     };
 
     return (
@@ -53,10 +57,10 @@ export default function OfferEdit({
                     data={data}
                     setData={setData as never}
                     submit={submit}
+                    onSave={save}
                     processing={processing}
                     errors={errors as Record<string, string>}
                     offerableTypes={offerableTypes}
-                    submitLabel="Save"
                     cancelHref="/dashboard/offers"
                 />
             </div>

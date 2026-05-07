@@ -54,6 +54,7 @@ interface Props {
     family: FamilyItem[];
     relationships: RelationshipOption[];
     onChange: (family: FamilyItem[]) => void;
+    onPersist?: (family: FamilyItem[]) => void;
     errors: Record<string, string>;
 }
 
@@ -91,6 +92,7 @@ export default function FamilyItems({
     family,
     relationships,
     onChange,
+    onPersist,
     errors,
 }: Props) {
     const [editingIndex, setEditingIndex] = useState<number | null>(null);
@@ -120,6 +122,7 @@ export default function FamilyItems({
         onChange(next);
         setEditingIndex(null);
         setDraft(null);
+        onPersist?.(next);
     };
 
     const cancelEdit = () => {

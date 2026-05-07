@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Dashboard;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Dashboard\FacilityTypeRequest;
+use App\Http\Resources\Dashboard\FacilityTypeResource;
 use App\Models\FacilityType;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -21,15 +22,7 @@ class FacilityTypeController extends Controller
             ->orderBy('id', 'desc')
             ->paginate(10)
             ->withQueryString()
-            ->through(fn ($t) => [
-                'id' => $t->id,
-                'slug' => $t->slug,
-                'name' => [
-                    'en' => $t->getTranslation('name', 'en', false),
-                    'ar' => $t->getTranslation('name', 'ar', false),
-                ],
-                'created_at' => $t->created_at?->toDateTimeString(),
-            ]);
+            ->through(fn ($type) => FacilityTypeResource::make($type)->resolve($request));
 
         return Inertia::render('dashboard/facility-types/index', [
             'facilityTypes' => $facilityTypes,
@@ -44,22 +37,20 @@ class FacilityTypeController extends Controller
 
     public function store(FacilityTypeRequest $request): RedirectResponse
     {
-        FacilityType::create($request->validated());
+        $facilityType = FacilityType::create($request->validated());
 
-        return to_route('dashboard.facility-types.index');
+        return $this->redirectAfterSave(
+            $request,
+            'dashboard.facility-types.edit',
+            'dashboard.facility-types.index',
+            $facilityType,
+        );
     }
 
-    public function edit(FacilityType $facilityType): Response
+    public function edit(Request $request, FacilityType $facilityType): Response
     {
         return Inertia::render('dashboard/facility-types/edit', [
-            'facilityType' => [
-                'id' => $facilityType->id,
-                'slug' => $facilityType->slug,
-                'name' => [
-                    'en' => $facilityType->getTranslation('name', 'en', false),
-                    'ar' => $facilityType->getTranslation('name', 'ar', false),
-                ],
-            ],
+            'facilityType' => FacilityTypeResource::make($facilityType)->resolve($request),
         ]);
     }
 
@@ -67,7 +58,12 @@ class FacilityTypeController extends Controller
     {
         $facilityType->update($request->validated());
 
-        return to_route('dashboard.facility-types.index');
+        return $this->redirectAfterSave(
+            $request,
+            'dashboard.facility-types.edit',
+            'dashboard.facility-types.index',
+            $facilityType,
+        );
     }
 
     public function destroy(FacilityType $facilityType): RedirectResponse

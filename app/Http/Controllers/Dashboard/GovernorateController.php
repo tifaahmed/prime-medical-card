@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Dashboard;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Dashboard\GovernorateRequest;
+use App\Http\Resources\Dashboard\GovernorateResource;
 use App\Models\Governorate;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -21,15 +22,7 @@ class GovernorateController extends Controller
             ->orderBy('id', 'desc')
             ->paginate(10)
             ->withQueryString()
-            ->through(fn ($g) => [
-                'id' => $g->id,
-                'slug' => $g->slug,
-                'name' => [
-                    'en' => $g->getTranslation('name', 'en', false),
-                    'ar' => $g->getTranslation('name', 'ar', false),
-                ],
-                'created_at' => $g->created_at?->toDateTimeString(),
-            ]);
+            ->through(fn ($gov) => GovernorateResource::make($gov)->resolve($request));
 
         return Inertia::render('dashboard/governorates/index', [
             'governorates' => $governorates,
@@ -44,22 +37,20 @@ class GovernorateController extends Controller
 
     public function store(GovernorateRequest $request): RedirectResponse
     {
-        Governorate::create($request->validated());
+        $governorate = Governorate::create($request->validated());
 
-        return to_route('dashboard.governorates.index');
+        return $this->redirectAfterSave(
+            $request,
+            'dashboard.governorates.edit',
+            'dashboard.governorates.index',
+            $governorate,
+        );
     }
 
-    public function edit(Governorate $governorate): Response
+    public function edit(Request $request, Governorate $governorate): Response
     {
         return Inertia::render('dashboard/governorates/edit', [
-            'governorate' => [
-                'id' => $governorate->id,
-                'slug' => $governorate->slug,
-                'name' => [
-                    'en' => $governorate->getTranslation('name', 'en', false),
-                    'ar' => $governorate->getTranslation('name', 'ar', false),
-                ],
-            ],
+            'governorate' => GovernorateResource::make($governorate)->resolve($request),
         ]);
     }
 
@@ -67,7 +58,12 @@ class GovernorateController extends Controller
     {
         $governorate->update($request->validated());
 
-        return to_route('dashboard.governorates.index');
+        return $this->redirectAfterSave(
+            $request,
+            'dashboard.governorates.edit',
+            'dashboard.governorates.index',
+            $governorate,
+        );
     }
 
     public function destroy(Governorate $governorate): RedirectResponse

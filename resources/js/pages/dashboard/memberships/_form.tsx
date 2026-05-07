@@ -2,10 +2,10 @@ import { CreditCardIcon, UsersIcon } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import type { FormEvent } from 'react';
 import InputError from '@/components/input-error';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import FormActions from '@/pages/dashboard/_components/form-actions';
 import ImagePicker from '@/pages/dashboard/_components/image-picker';
 import TranslatableInput from '@/pages/dashboard/_components/translatable-input';
 import FamilyItems from '@/pages/dashboard/memberships/_family-items';
@@ -34,10 +34,12 @@ interface Props {
         value: MembershipFormData[K],
     ) => void;
     submit: (e: FormEvent) => void;
+    onSave: (intent: 'stay' | 'return') => void;
+    onPersistFamily?: (family: FamilyItem[]) => void;
     processing: boolean;
     errors: Record<string, string>;
     relationships: RelationshipOption[];
-    submitLabel: string;
+    primaryLabel?: string;
     cancelHref: string;
 }
 
@@ -45,10 +47,12 @@ export default function MembershipForm({
     data,
     setData,
     submit,
+    onSave,
+    onPersistFamily,
     processing,
     errors,
     relationships,
-    submitLabel,
+    primaryLabel = 'Save',
     cancelHref,
 }: Props) {
     const familyErrorCount = useMemo(
@@ -259,20 +263,19 @@ export default function MembershipForm({
                             family={data.family}
                             relationships={relationships}
                             onChange={(f) => setData('family', f)}
+                            onPersist={onPersistFamily}
                             errors={errors}
                         />
                     </section>
                 </TabsContent>
             </Tabs>
 
-            <div className="flex gap-2">
-                <Button type="submit" disabled={processing}>
-                    {submitLabel}
-                </Button>
-                <Button asChild variant="outline" type="button">
-                    <a href={cancelHref}>Cancel</a>
-                </Button>
-            </div>
+            <FormActions
+                processing={processing}
+                cancelHref={cancelHref}
+                onSave={onSave}
+                primaryLabel={primaryLabel}
+            />
         </form>
     );
 }

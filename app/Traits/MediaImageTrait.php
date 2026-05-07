@@ -39,6 +39,13 @@ trait MediaImageTrait
         return $media ? $media->getUrl() : '';
     }
 
+    public function getPhotoAttribute(): string
+    {
+        $media = $this->getFirstMedia('photo');
+
+        return $media ? $media->getUrl() : '';
+    }
+
     public function getGalleryAttribute(): array
     {
         return $this->getMedia('gallery')

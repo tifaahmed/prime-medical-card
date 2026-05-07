@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Dashboard;
 use App\Enums\MembershipFamily\RelationshipEnum;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Dashboard\MembershipRequest;
+use App\Http\Resources\Dashboard\MembershipResource;
 use App\Models\Membership;
 use App\Models\MembershipFamily;
 use App\Models\User;
@@ -23,27 +24,14 @@ class MembershipController extends Controller
         $search = $request->string('search')->toString();
 
         $memberships = Membership::query()
-            ->with(['family', 'media'])
+            ->with('media')
+            ->withCount('family')
             ->when($search, fn ($q) => $q->where('membership_number', 'like', "%{$search}%")
                 ->orWhere('slug', 'like', "%{$search}%"))
             ->orderBy('id', 'desc')
             ->paginate(10)
             ->withQueryString()
-            ->through(fn ($m) => [
-                'id' => $m->id,
-                'slug' => $m->slug,
-                'membership_number' => $m->membership_number,
-                'registration_date' => $m->registration_date?->toDateString(),
-                'expiration_date' => $m->expiration_date?->toDateString(),
-                'is_active' => $m->is_active,
-                'is_visible' => $m->is_visible,
-                'family_count' => $m->family->count(),
-                'photo_url' => $this->membershipPhotoUrl($m),
-                'job_title' => [
-                    'en' => $m->getTranslation('job_title', 'en', false),
-                    'ar' => $m->getTranslation('job_title', 'ar', false),
-                ],
-            ]);
+            ->through(fn ($membership) => MembershipResource::make($membership)->resolve($request));
 
         return Inertia::render('dashboard/memberships/index', [
             'memberships' => $memberships,
@@ -51,36 +39,16 @@ class MembershipController extends Controller
         ]);
     }
 
-    public function show(Membership $membership): Response
+    public function show(Request $request, Membership $membership): Response
     {
-        $membership->load(['family' => fn ($q) => $q->orderBy('id'), 'family.media', 'media']);
+        $membership->load([
+            'family' => fn ($q) => $q->orderBy('id'),
+            'family.media',
+            'media',
+        ]);
 
         return Inertia::render('dashboard/memberships/show', [
-            'membership' => [
-                'id' => $membership->id,
-                'slug' => $membership->slug,
-                'membership_number' => $membership->membership_number,
-                'registration_date' => $membership->registration_date?->toDateString(),
-                'expiration_date' => $membership->expiration_date?->toDateString(),
-                'is_active' => $membership->is_active,
-                'is_visible' => $membership->is_visible,
-                'photo_url' => $this->membershipPhotoUrl($membership),
-                'job_title' => [
-                    'en' => $membership->getTranslation('job_title', 'en', false),
-                    'ar' => $membership->getTranslation('job_title', 'ar', false),
-                ],
-                'family' => $membership->family->map(fn ($f) => [
-                    'id' => $f->id,
-                    'name' => $f->name,
-                    'relationship' => $f->relationship?->value,
-                    'relationship_label' => $f->relationship?->labels(),
-                    'date_of_birth' => $f->date_of_birth?->toDateString(),
-                    'phone' => $f->phone,
-                    'email' => $f->email,
-                    'is_active' => $f->is_active,
-                    'photo_url' => $this->familyPhotoUrl($f),
-                ])->all(),
-            ],
+            'membership' => MembershipResource::make($membership)->resolve($request),
         ]);
     }
 
@@ -99,47 +67,35 @@ class MembershipController extends Controller
         $photoRemove = (bool) ($data['photo_remove'] ?? false);
         unset($data['family'], $data['photo'], $data['photo_remove']);
 
-        DB::transaction(function () use ($request, $data, $family, $photo, $photoRemove) {
+        $membership = DB::transaction(function () use ($request, $data, $family, $photo, $photoRemove) {
             $user = $this->createPlaceholderUser($data['membership_number']);
             $data['user_id'] = $user->id;
 
             $membership = Membership::create($data);
             $this->syncMembershipPhoto($membership, $photo, $photoRemove);
             $this->syncFamily($membership, $family, $request);
+
+            return $membership;
         });
 
-        return to_route('dashboard.memberships.index');
+        return $this->redirectAfterSave(
+            $request,
+            'dashboard.memberships.edit',
+            'dashboard.memberships.index',
+            $membership,
+        );
     }
 
-    public function edit(Membership $membership): Response
+    public function edit(Request $request, Membership $membership): Response
     {
-        $membership->load(['family' => fn ($q) => $q->orderBy('id'), 'family.media', 'media']);
+        $membership->load([
+            'family' => fn ($q) => $q->orderBy('id'),
+            'family.media',
+            'media',
+        ]);
 
         return Inertia::render('dashboard/memberships/edit', [
-            'membership' => [
-                'id' => $membership->id,
-                'slug' => $membership->slug,
-                'membership_number' => $membership->membership_number,
-                'registration_date' => $membership->registration_date?->format('Y-m-d'),
-                'expiration_date' => $membership->expiration_date?->format('Y-m-d'),
-                'is_active' => (bool) $membership->is_active,
-                'is_visible' => (bool) $membership->is_visible,
-                'photo_url' => $this->membershipPhotoUrl($membership),
-                'job_title' => [
-                    'en' => $membership->getTranslation('job_title', 'en', false),
-                    'ar' => $membership->getTranslation('job_title', 'ar', false),
-                ],
-                'family' => $membership->family->map(fn ($f) => [
-                    'id' => $f->id,
-                    'name' => $f->name,
-                    'relationship' => $f->relationship?->value,
-                    'date_of_birth' => $f->date_of_birth?->format('Y-m-d'),
-                    'phone' => $f->phone,
-                    'email' => $f->email,
-                    'is_active' => (bool) $f->is_active,
-                    'photo_url' => $this->familyPhotoUrl($f),
-                ])->all(),
-            ],
+            'membership' => MembershipResource::make($membership)->resolve($request),
             'relationships' => RelationshipEnum::getOptions(),
         ]);
     }
@@ -158,7 +114,12 @@ class MembershipController extends Controller
             $this->syncFamily($membership, $family, $request);
         });
 
-        return to_route('dashboard.memberships.index');
+        return $this->redirectAfterSave(
+            $request,
+            'dashboard.memberships.edit',
+            'dashboard.memberships.index',
+            $membership,
+        );
     }
 
     public function destroy(Membership $membership): RedirectResponse
@@ -252,20 +213,6 @@ class MembershipController extends Controller
                 ->usingFileName($photo->getClientOriginalName())
                 ->toMediaCollection('photo');
         }
-    }
-
-    private function familyPhotoUrl(MembershipFamily $member): ?string
-    {
-        $media = $member->getFirstMedia('photo');
-
-        return $media ? $media->getUrl() : null;
-    }
-
-    private function membershipPhotoUrl(Membership $membership): ?string
-    {
-        $media = $membership->getFirstMedia('photo');
-
-        return $media ? $media->getUrl() : null;
     }
 
     private function createPlaceholderUser(string $membershipNumber): User

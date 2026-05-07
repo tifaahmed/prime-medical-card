@@ -2,7 +2,6 @@ import { Building2, PhoneIcon, StoreIcon } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import type { FormEvent } from 'react';
 import InputError from '@/components/input-error';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -13,6 +12,7 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import FormActions from '@/pages/dashboard/_components/form-actions';
 import ImagePicker from '@/pages/dashboard/_components/image-picker';
 import TranslatableInput from '@/pages/dashboard/_components/translatable-input';
 import BranchItems from '@/pages/dashboard/facilities/_branch-items';
@@ -41,11 +41,13 @@ interface Props {
         value: FacilityFormData[K],
     ) => void;
     submit: (e: FormEvent) => void;
+    onSave: (intent: 'stay' | 'return') => void;
+    onPersistBranches?: (branches: BranchItem[]) => void;
     processing: boolean;
     errors: Record<string, string>;
     facilityTypes: RelatedOption[];
     governorates: RelatedOption[];
-    submitLabel: string;
+    primaryLabel?: string;
     cancelHref: string;
 }
 
@@ -53,11 +55,13 @@ export default function FacilityForm({
     data,
     setData,
     submit,
+    onSave,
+    onPersistBranches,
     processing,
     errors,
     facilityTypes,
     governorates,
-    submitLabel,
+    primaryLabel = 'Save',
     cancelHref,
 }: Props) {
     const branchErrorCount = useMemo(
@@ -241,20 +245,19 @@ export default function FacilityForm({
                         <BranchItems
                             branches={data.branches}
                             onChange={(b) => setData('branches', b)}
+                            onPersist={onPersistBranches}
                             errors={errors}
                         />
                     </section>
                 </TabsContent>
             </Tabs>
 
-            <div className="flex gap-2">
-                <Button type="submit" disabled={processing}>
-                    {submitLabel}
-                </Button>
-                <Button asChild variant="outline" type="button">
-                    <a href={cancelHref}>Cancel</a>
-                </Button>
-            </div>
+            <FormActions
+                processing={processing}
+                cancelHref={cancelHref}
+                onSave={onSave}
+                primaryLabel={primaryLabel}
+            />
         </form>
     );
 }
