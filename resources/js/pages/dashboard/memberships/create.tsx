@@ -52,11 +52,11 @@ export default function MembershipCreate({
 
     return (
         <>
-            <Head title="New Membership" />
-            <div className="w-full space-y-6 p-6">
+            <Head title="عضوية جديدة" />
+            <div className="w-full space-y-6 p-6" dir="rtl">
                 <Heading
-                    title="New Membership"
-                    description="Create a membership with optional family members."
+                    title="عضوية جديدة"
+                    description="إنشاء عضوية مع إمكانية إضافة أفراد العائلة."
                 />
                 <MembershipForm
                     data={data}
@@ -66,7 +66,7 @@ export default function MembershipCreate({
                     processing={processing}
                     errors={errors as Record<string, string>}
                     relationships={relationships}
-                    primaryLabel="Create"
+                    primaryLabel="إنشاء"
                     cancelHref="/dashboard/memberships"
                 />
             </div>
@@ -76,8 +76,8 @@ export default function MembershipCreate({
 
 MembershipCreate.layout = {
     breadcrumbs: [
-        { title: 'Dashboard', href: dashboard() },
-        { title: 'Memberships', href: '/dashboard/memberships' },
-        { title: 'New', href: '/dashboard/memberships/create' },
+        { title: 'لوحة التحكم', href: dashboard() },
+        { title: 'العضويات', href: '/dashboard/memberships' },
+        { title: 'جديدة', href: '/dashboard/memberships/create' },
     ],
 };

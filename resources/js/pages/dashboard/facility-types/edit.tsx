@@ -31,17 +31,17 @@ export default function FacilityTypeEdit({
 
     return (
         <>
-            <Head title={`Edit ${facilityType.slug}`} />
-            <div className="w-full space-y-6 p-6">
+            <Head title={`تعديل ${facilityType.name.ar || facilityType.slug}`} />
+            <div className="w-full space-y-6 p-6" dir="rtl">
                 <Heading
-                    title="Edit Facility Type"
-                    description={`Slug: ${facilityType.slug}`}
+                    title="تعديل نوع منشأة"
+                    description={`المعرّف: ${facilityType.slug}`}
                 />
                 <form onSubmit={submit} className="w-full space-y-6">
                     <div className="rounded-3xl border bg-card p-6 shadow-sm">
                         <TranslatableInput
                             name="name"
-                            label="Name"
+                            label="الاسم"
                             values={data.name}
                             onChange={(locale, value) =>
                                 setData('name', {
@@ -66,8 +66,8 @@ export default function FacilityTypeEdit({
 
 FacilityTypeEdit.layout = {
     breadcrumbs: [
-        { title: 'Dashboard', href: dashboard() },
-        { title: 'Facility Types', href: '/dashboard/facility-types' },
-        { title: 'Edit', href: '#' },
+        { title: 'لوحة التحكم', href: dashboard() },
+        { title: 'أنواع المنشآت', href: '/dashboard/facility-types' },
+        { title: 'تعديل', href: '#' },
     ],
 };

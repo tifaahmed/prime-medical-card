@@ -46,7 +46,7 @@ export interface BranchItem {
 interface Props {
     branches: BranchItem[];
     onChange: (branches: BranchItem[]) => void;
-    onPersist?: (branches: BranchItem[]) => void;
+    onPersist?: (branches: BranchItem[]) => Promise<void> | void;
     errors: Record<string, string>;
 }
 
@@ -87,6 +87,7 @@ export default function BranchItems({
 }: Props) {
     const [editingIndex, setEditingIndex] = useState<number | null>(null);
     const [draft, setDraft] = useState<BranchItem | null>(null);
+    const [submitting, setSubmitting] = useState(false);
 
     const visibleCount = branches.filter((b) => !b._delete).length;
 
@@ -102,7 +103,7 @@ export default function BranchItems({
         setDraft(emptyBranch());
     };
 
-    const saveDraft = () => {
+    const saveDraft = async () => {
         if (editingIndex === null || !draft) {
             return;
         }
@@ -110,12 +111,31 @@ export default function BranchItems({
         const next = [...branches];
         next[editingIndex] = draft;
         onChange(next);
-        setEditingIndex(null);
-        setDraft(null);
-        onPersist?.(next);
+
+        if (!onPersist) {
+            setEditingIndex(null);
+            setDraft(null);
+            return;
+        }
+
+        setSubmitting(true);
+        try {
+            await onPersist(next);
+            setEditingIndex(null);
+            setDraft(null);
+        } catch {
+            // Validation failed — keep the dialog open so the user sees the
+            // server-side errors (rendered by BranchEditor via the `errors` prop).
+        } finally {
+            setSubmitting(false);
+        }
     };
 
     const cancelEdit = () => {
+        if (submitting) {
+            return;
+        }
+
         if (editingIndex !== null) {
             const branch = branches[editingIndex];
 
@@ -160,14 +180,14 @@ export default function BranchItems({
     });
 
     return (
-        <div className="space-y-4">
+        <div className="space-y-4" dir="rtl">
             <div className="flex flex-wrap items-center justify-between gap-2">
                 <div className="flex items-center gap-2">
                     <span className="flex size-8 items-center justify-center rounded-lg bg-teal-500/10 text-teal-600">
                         <StoreIcon className="size-4" />
                     </span>
                     <h3 className="font-heading text-lg font-semibold">
-                        Branches
+                        الفروع
                     </h3>
                     <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
                         {visibleCount}
@@ -175,14 +195,14 @@ export default function BranchItems({
                 </div>
                 <Button type="button" onClick={openAdd} className="gap-1.5">
                     <PlusIcon className="size-4" />
-                    Add Branch
+                    إضافة فرع
                 </Button>
             </div>
 
             {branches.length === 0 ? (
                 <div className="rounded-2xl border border-dashed bg-muted/20 px-4 py-12 text-center text-sm text-muted-foreground">
-                    No branches yet. Click <strong>Add Branch</strong> to create
-                    the first one.
+                    لا توجد فروع بعد. اضغط <strong>إضافة فرع</strong> لإضافة
+                    أول فرع.
                 </div>
             ) : (
                 <ul className="grid gap-3 md:grid-cols-2">
@@ -216,11 +236,11 @@ export default function BranchItems({
                     <DialogHeader>
                         <DialogTitle>
                             {editingIndex !== null && branches[editingIndex]?.id
-                                ? `Edit branch #${branches[editingIndex].id}`
-                                : 'New branch'}
+                                ? `تعديل الفرع #${branches[editingIndex].id}`
+                                : 'فرع جديد'}
                         </DialogTitle>
                         <DialogDescription>
-                            Bilingual details, contact, GPS and images.
+                            البيانات وجهات الاتصال والموقع والصور.
                         </DialogDescription>
                     </DialogHeader>
 
@@ -242,11 +262,16 @@ export default function BranchItems({
                             type="button"
                             variant="outline"
                             onClick={cancelEdit}
+                            disabled={submitting}
                         >
-                            Cancel
+                            إلغاء
                         </Button>
-                        <Button type="button" onClick={saveDraft}>
-                            Save
+                        <Button
+                            type="button"
+                            onClick={saveDraft}
+                            disabled={submitting}
+                        >
+                            {submitting ? 'جاري الحفظ…' : 'حفظ'}
                         </Button>
                     </DialogFooter>
                 </DialogContent>
@@ -287,10 +312,9 @@ function BranchSummary({
     onRemove: () => void;
     onRestore: () => void;
 }) {
-    const titleEn =
-        branch.name.en || (branch.id ? `Branch #${branch.id}` : 'New branch');
-    const titleAr = branch.name.ar;
-    const addressLine = branch.address.en || branch.address.ar;
+    const titleAr =
+        branch.name.ar || (branch.id ? `الفرع #${branch.id}` : 'فرع جديد');
+    const addressLine = branch.address.ar || branch.address.en;
     const totalImages = branch.gallery.length + branch.gallery_files.length;
     const hasHeader = Boolean(branch.header || branch.header_url);
     const headerSrc = useHeaderPreview(branch.header, branch.header_url);
@@ -319,16 +343,8 @@ function BranchSummary({
                     <span className="flex size-5 items-center justify-center rounded-full bg-brand-primary/10 text-[10px] font-semibold text-brand-primary">
                         {index + 1}
                     </span>
-                    <p className="truncate font-medium">
-                        {titleEn}
-                        {titleAr && (
-                            <span
-                                className="ml-1 text-sm text-muted-foreground"
-                                dir="rtl"
-                            >
-                                / {titleAr}
-                            </span>
-                        )}
+                    <p className="truncate font-medium" dir="rtl">
+                        {titleAr}
                     </p>
                 </div>
                 {addressLine && (
@@ -359,8 +375,8 @@ function BranchSummary({
                 <div className="flex flex-wrap gap-2 pt-1">
                     {branch._delete ? (
                         <>
-                            <span className="inline-flex items-center rounded-full bg-destructive/10 px-2 py-0.5 text-[10px] font-semibold tracking-wider text-destructive uppercase">
-                                Will be deleted
+                            <span className="inline-flex items-center rounded-full bg-destructive/10 px-2 py-0.5 text-[10px] font-semibold tracking-wider text-destructive">
+                                سيتم الحذف
                             </span>
                             <Button
                                 type="button"
@@ -370,7 +386,7 @@ function BranchSummary({
                                 className="gap-1.5"
                             >
                                 <UndoIcon className="size-3.5" />
-                                Restore
+                                تراجع
                             </Button>
                         </>
                     ) : (
@@ -383,7 +399,7 @@ function BranchSummary({
                                 className="btn-edit gap-1.5"
                             >
                                 <PencilIcon className="size-3.5" />
-                                Edit
+                                تعديل
                             </Button>
                             <Button
                                 type="button"
@@ -393,7 +409,7 @@ function BranchSummary({
                                 className="btn-delete gap-1.5"
                             >
                                 <Trash2Icon className="size-3.5" />
-                                Remove
+                                حذف
                             </Button>
                         </>
                     )}
@@ -415,10 +431,10 @@ function BranchEditor({
     errors: Record<string, string>;
 }) {
     return (
-        <div className="space-y-5 py-2">
+        <div className="space-y-5 py-2" dir="rtl">
             <TranslatableInput
                 name={`branches.${index}.name`}
-                label="Branch name"
+                label="اسم الفرع"
                 values={branch.name}
                 onChange={(locale, value) =>
                     onChange({
@@ -430,7 +446,7 @@ function BranchEditor({
 
             <TranslatableInput
                 name={`branches.${index}.address`}
-                label="Address"
+                label="العنوان"
                 values={branch.address}
                 onChange={(locale, value) =>
                     onChange({
@@ -459,7 +475,7 @@ function BranchEditor({
             />
 
             <ImagePicker
-                label="Header image"
+                label="صورة الغلاف"
                 file={branch.header}
                 existingUrl={branch.header_url}
                 isRemoved={branch.header_remove}
@@ -502,22 +518,22 @@ function PhoneList({
 
     return (
         <div className="grid gap-2">
-            <Label>Phone numbers</Label>
+            <Label>أرقام الهواتف</Label>
             <div className="space-y-2">
                 {phones.length === 0 && (
                     <p className="text-sm text-muted-foreground">
-                        No phone numbers yet.
+                        لا توجد أرقام بعد.
                     </p>
                 )}
                 {phones.map((p, i) => (
                     <div key={i} className="flex gap-2">
                         <div className="relative flex-1">
-                            <PhoneIcon className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
+                            <PhoneIcon className="pointer-events-none absolute top-1/2 right-3 size-4 -translate-y-1/2 text-muted-foreground" />
                             <Input
                                 value={p ?? ''}
                                 onChange={(e) => updatePhone(i, e.target.value)}
                                 placeholder="+20 1xx xxx xxxx"
-                                className="pl-9"
+                                className="pr-9"
                             />
                         </div>
                         <Button
@@ -527,7 +543,7 @@ function PhoneList({
                             className="btn-delete gap-1.5"
                         >
                             <Trash2Icon className="size-3.5" />
-                            Remove
+                            حذف
                         </Button>
                     </div>
                 ))}
@@ -539,7 +555,7 @@ function PhoneList({
                 onClick={addPhone}
             >
                 <PlusIcon className="size-3.5" />
-                Add phone
+                إضافة رقم
             </Button>
             <InputError message={errors[errorKey]} />
         </div>
@@ -563,12 +579,12 @@ function GpsInputs({
         <div className="grid gap-2">
             <Label className="flex items-center gap-1.5">
                 <MapPinIcon className="size-3.5 text-muted-foreground" />
-                GPS location
+                الموقع الجغرافي
             </Label>
             <div className="grid gap-3 md:grid-cols-2">
                 <div className="grid gap-1.5">
                     <span className="text-xs text-muted-foreground">
-                        Latitude
+                        خط العرض
                     </span>
                     <Input
                         type="number"
@@ -583,7 +599,7 @@ function GpsInputs({
                 </div>
                 <div className="grid gap-1.5">
                     <span className="text-xs text-muted-foreground">
-                        Longitude
+                        خط الطول
                     </span>
                     <Input
                         type="number"

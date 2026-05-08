@@ -44,12 +44,10 @@ function MetaCard({
     icon: Icon,
     label,
     value,
-    valueAr,
 }: {
     icon: typeof CreditCardIcon;
     label: string;
     value: string | null | undefined;
-    valueAr?: string | null;
 }) {
     return (
         <div className="flex items-start gap-3 rounded-2xl border bg-card p-4 shadow-sm">
@@ -57,15 +55,12 @@ function MetaCard({
                 <Icon className="size-4" />
             </div>
             <div className="space-y-0.5">
-                <p className="text-[11px] font-semibold tracking-wider text-muted-foreground uppercase">
+                <p className="text-[11px] font-semibold tracking-wider text-muted-foreground">
                     {label}
                 </p>
-                <p className="font-medium">{value ?? '—'}</p>
-                {valueAr && (
-                    <p className="text-sm text-muted-foreground" dir="rtl">
-                        {valueAr}
-                    </p>
-                )}
+                <p className="font-medium" dir="rtl">
+                    {value ?? '—'}
+                </p>
             </div>
         </div>
     );
@@ -79,7 +74,7 @@ export default function MembershipShow({
     return (
         <>
             <Head title={membership.membership_number} />
-            <div className="w-full space-y-6 p-6">
+            <div className="w-full space-y-6 p-6" dir="rtl">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                     <div className="flex items-center gap-4">
                         {membership.photo_url ? (
@@ -96,8 +91,8 @@ export default function MembershipShow({
                         <Heading
                             title={membership.membership_number}
                             description={
-                                membership.job_title.en ||
                                 membership.job_title.ar ||
+                                membership.job_title.en ||
                                 undefined
                             }
                         />
@@ -112,23 +107,23 @@ export default function MembershipShow({
                             )}
                         >
                             <CheckCircle2Icon className="size-3" />
-                            {membership.is_active ? 'Active' : 'Inactive'}
+                            {membership.is_active ? 'مفعّلة' : 'غير مفعّلة'}
                         </span>
                         {!membership.is_visible && (
                             <span className="inline-flex items-center gap-1 rounded-full border border-muted-foreground/20 bg-muted px-2 py-0.5 text-[11px] font-medium text-muted-foreground">
                                 <EyeOffIcon className="size-3" />
-                                Hidden
+                                مخفية
                             </span>
                         )}
                         <Button asChild variant="outline">
-                            <Link href="/dashboard/memberships">Back</Link>
+                            <Link href="/dashboard/memberships">عودة</Link>
                         </Button>
                         <Button asChild className="gap-1.5">
                             <Link
                                 href={`/dashboard/memberships/${membership.id}/edit`}
                             >
                                 <PencilIcon className="size-4" />
-                                Edit
+                                تعديل
                             </Link>
                         </Button>
                     </div>
@@ -137,18 +132,20 @@ export default function MembershipShow({
                 <div className="grid gap-4 md:grid-cols-3">
                     <MetaCard
                         icon={CreditCardIcon}
-                        label="Job title"
-                        value={membership.job_title.en}
-                        valueAr={membership.job_title.ar}
+                        label="المسمى الوظيفي"
+                        value={
+                            membership.job_title.ar ||
+                            membership.job_title.en
+                        }
                     />
                     <MetaCard
                         icon={CalendarIcon}
-                        label="Registered"
+                        label="تاريخ التسجيل"
                         value={membership.registration_date}
                     />
                     <MetaCard
                         icon={CalendarIcon}
-                        label="Expires"
+                        label="تاريخ الانتهاء"
                         value={membership.expiration_date}
                     />
                 </div>
@@ -160,7 +157,7 @@ export default function MembershipShow({
                                 <UsersIcon className="size-4" />
                             </span>
                             <h3 className="font-heading text-lg font-semibold">
-                                Family
+                                العائلة
                             </h3>
                             <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
                                 {membership.family.length}
@@ -176,14 +173,14 @@ export default function MembershipShow({
                                 href={`/dashboard/memberships/${membership.id}/edit`}
                             >
                                 <PencilIcon className="size-3.5" />
-                                Manage Family
+                                إدارة العائلة
                             </Link>
                         </Button>
                     </header>
 
                     {membership.family.length === 0 ? (
                         <div className="px-5 py-12 text-center text-sm text-muted-foreground">
-                            No family members yet.
+                            لا يوجد أفراد عائلة بعد.
                         </div>
                     ) : (
                         <ul className="divide-y">
@@ -204,31 +201,42 @@ export default function MembershipShow({
                                         )}
                                     </div>
                                     <div className="min-w-0 flex-1 space-y-1">
-                                        <p className="font-medium">{m.name}</p>
+                                        <p className="font-medium" dir="rtl">
+                                            {m.name}
+                                        </p>
                                         {m.relationship_label && (
-                                            <p className="text-xs text-muted-foreground">
-                                                {m.relationship_label.en}
-                                                <span className="mx-1">·</span>
-                                                <span dir="rtl">
-                                                    {m.relationship_label.ar}
-                                                </span>
+                                            <p
+                                                className="text-xs text-muted-foreground"
+                                                dir="rtl"
+                                            >
+                                                {m.relationship_label.ar ||
+                                                    m.relationship_label.en}
                                             </p>
                                         )}
                                         <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
                                             {m.phone && (
-                                                <span className="flex items-center gap-1">
+                                                <span
+                                                    className="flex items-center gap-1"
+                                                    dir="ltr"
+                                                >
                                                     <PhoneIcon className="size-3" />
                                                     {m.phone}
                                                 </span>
                                             )}
                                             {m.email && (
-                                                <span className="flex items-center gap-1">
+                                                <span
+                                                    className="flex items-center gap-1"
+                                                    dir="ltr"
+                                                >
                                                     <MailIcon className="size-3" />
                                                     {m.email}
                                                 </span>
                                             )}
                                             {m.date_of_birth && (
-                                                <span className="flex items-center gap-1">
+                                                <span
+                                                    className="flex items-center gap-1"
+                                                    dir="ltr"
+                                                >
                                                     <CalendarIcon className="size-3" />
                                                     {m.date_of_birth}
                                                 </span>
@@ -237,7 +245,7 @@ export default function MembershipShow({
                                     </div>
                                     {!m.is_active && (
                                         <span className="inline-flex items-center rounded-full bg-muted px-2 py-0.5 text-[11px] font-medium text-muted-foreground">
-                                            Inactive
+                                            غير مفعّل
                                         </span>
                                     )}
                                 </li>
@@ -252,8 +260,8 @@ export default function MembershipShow({
 
 MembershipShow.layout = {
     breadcrumbs: [
-        { title: 'Dashboard', href: dashboard() },
-        { title: 'Memberships', href: '/dashboard/memberships' },
-        { title: 'View', href: '#' },
+        { title: 'لوحة التحكم', href: dashboard() },
+        { title: 'العضويات', href: '/dashboard/memberships' },
+        { title: 'عرض', href: '#' },
     ],
 };

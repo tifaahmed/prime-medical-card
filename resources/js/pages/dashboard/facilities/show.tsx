@@ -60,12 +60,10 @@ function MetaCard({
     icon: Icon,
     label,
     value,
-    valueAr,
 }: {
     icon: typeof Building2;
     label: string;
     value: string | null | undefined;
-    valueAr?: string | null;
 }) {
     return (
         <div className="flex items-start gap-3 rounded-2xl border bg-card p-4 shadow-sm">
@@ -73,15 +71,12 @@ function MetaCard({
                 <Icon className="size-4" />
             </div>
             <div className="space-y-0.5">
-                <p className="text-[11px] font-semibold tracking-wider text-muted-foreground uppercase">
+                <p className="text-[11px] font-semibold tracking-wider text-muted-foreground">
                     {label}
                 </p>
-                <p className="font-medium">{value ?? '—'}</p>
-                {valueAr && (
-                    <p className="text-sm text-muted-foreground" dir="rtl">
-                        {valueAr}
-                    </p>
-                )}
+                <p className="font-medium" dir="rtl">
+                    {value ?? '—'}
+                </p>
             </div>
         </div>
     );
@@ -90,8 +85,8 @@ function MetaCard({
 export default function FacilityShow({ facility }: { facility: Facility }) {
     return (
         <>
-            <Head title={facility.name.en ?? facility.slug} />
-            <div className="w-full space-y-6 p-6">
+            <Head title={facility.name.ar || facility.slug} />
+            <div className="w-full space-y-6 p-6" dir="rtl">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                     <div className="flex items-center gap-4">
                         {facility.logo_url ? (
@@ -106,20 +101,20 @@ export default function FacilityShow({ facility }: { facility: Facility }) {
                             </div>
                         )}
                         <Heading
-                            title={facility.name.en || facility.slug}
-                            description={facility.name.ar || undefined}
+                            title={facility.name.ar || facility.slug}
+                            description={facility.slug}
                         />
                     </div>
                     <div className="flex gap-2">
                         <Button asChild variant="outline">
-                            <Link href="/dashboard/facilities">Back</Link>
+                            <Link href="/dashboard/facilities">عودة</Link>
                         </Button>
                         <Button asChild className="gap-1.5">
                             <Link
                                 href={`/dashboard/facilities/${facility.id}/edit`}
                             >
                                 <PencilIcon className="size-4" />
-                                Edit
+                                تعديل
                             </Link>
                         </Button>
                     </div>
@@ -128,24 +123,22 @@ export default function FacilityShow({ facility }: { facility: Facility }) {
                 <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
                     <MetaCard
                         icon={LayersIcon}
-                        label="Type"
-                        value={facility.facility_type?.name.en}
-                        valueAr={facility.facility_type?.name.ar}
+                        label="النوع"
+                        value={facility.facility_type?.name.ar}
                     />
                     <MetaCard
                         icon={MapPinIcon}
-                        label="Governorate"
-                        value={facility.governorate?.name.en}
-                        valueAr={facility.governorate?.name.ar}
+                        label="المحافظة"
+                        value={facility.governorate?.name.ar}
                     />
                     <MetaCard
                         icon={PhoneIcon}
-                        label="Phone"
+                        label="رقم الهاتف"
                         value={facility.phone}
                     />
                     <MetaCard
                         icon={TagIcon}
-                        label="Slug"
+                        label="المعرّف"
                         value={facility.slug}
                     />
                 </div>
@@ -157,7 +150,7 @@ export default function FacilityShow({ facility }: { facility: Facility }) {
                                 <StoreIcon className="size-4" />
                             </span>
                             <h3 className="font-heading text-lg font-semibold">
-                                Branches
+                                الفروع
                             </h3>
                             <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
                                 {facility.branches.length}
@@ -173,14 +166,14 @@ export default function FacilityShow({ facility }: { facility: Facility }) {
                                 href={`/dashboard/facilities/${facility.id}/edit`}
                             >
                                 <PlusIcon className="size-3.5" />
-                                Manage Branches
+                                إدارة الفروع
                             </Link>
                         </Button>
                     </header>
 
                     {facility.branches.length === 0 ? (
                         <div className="px-5 py-12 text-center text-sm text-muted-foreground">
-                            No branches yet for this facility.
+                            لا توجد فروع لهذه المنشأة بعد.
                         </div>
                     ) : (
                         <ul className="divide-y">
@@ -197,38 +190,31 @@ export default function FacilityShow({ facility }: { facility: Facility }) {
                                     )}
                                     <div className="flex flex-wrap items-start justify-between gap-3">
                                         <div className="space-y-1">
-                                            <p className="font-medium">
-                                                {b.name.en || (
+                                            <p
+                                                className="font-medium"
+                                                dir="rtl"
+                                            >
+                                                {b.name.ar || (
                                                     <span className="text-muted-foreground">
-                                                        Unnamed branch
-                                                    </span>
-                                                )}
-                                                {b.name.ar && (
-                                                    <span
-                                                        className="ml-2 text-sm text-muted-foreground"
-                                                        dir="rtl"
-                                                    >
-                                                        / {b.name.ar}
+                                                        فرع بدون اسم
                                                     </span>
                                                 )}
                                             </p>
-                                            {(b.address.en || b.address.ar) && (
-                                                <p className="text-sm text-muted-foreground">
-                                                    {b.address.en}
-                                                    {b.address.ar && (
-                                                        <span
-                                                            className="ml-2"
-                                                            dir="rtl"
-                                                        >
-                                                            / {b.address.ar}
-                                                        </span>
-                                                    )}
+                                            {(b.address.ar || b.address.en) && (
+                                                <p
+                                                    className="text-sm text-muted-foreground"
+                                                    dir="rtl"
+                                                >
+                                                    {b.address.ar ||
+                                                        b.address.en}
                                                 </p>
                                             )}
                                             {b.phone.length > 0 && (
                                                 <p className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
                                                     <PhoneIcon className="size-3.5" />
-                                                    {b.phone.join(' · ')}
+                                                    <span dir="ltr">
+                                                        {b.phone.join(' · ')}
+                                                    </span>
                                                 </p>
                                             )}
                                             {b.latitude !== null &&
@@ -240,6 +226,7 @@ export default function FacilityShow({ facility }: { facility: Facility }) {
                                                             target="_blank"
                                                             rel="noreferrer"
                                                             className="text-brand-secondary hover:underline"
+                                                            dir="ltr"
                                                         >
                                                             {b.latitude},{' '}
                                                             {b.longitude}
@@ -257,7 +244,7 @@ export default function FacilityShow({ facility }: { facility: Facility }) {
                                                 href={`/dashboard/facility-branches/${b.id}/edit`}
                                             >
                                                 <PencilIcon className="size-3.5" />
-                                                Edit
+                                                تعديل
                                             </Link>
                                         </Button>
                                     </div>
@@ -293,7 +280,7 @@ export default function FacilityShow({ facility }: { facility: Facility }) {
                                 <TagIcon className="size-4" />
                             </span>
                             <h3 className="font-heading text-lg font-semibold">
-                                Offers
+                                العروض
                             </h3>
                             <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
                                 {facility.offers.length}
@@ -307,14 +294,14 @@ export default function FacilityShow({ facility }: { facility: Facility }) {
                         >
                             <Link href="/dashboard/offers/create">
                                 <PlusIcon className="size-3.5" />
-                                Add Offer
+                                إضافة عرض
                             </Link>
                         </Button>
                     </header>
 
                     {facility.offers.length === 0 ? (
                         <div className="px-5 py-12 text-center text-sm text-muted-foreground">
-                            No offers yet for this facility.
+                            لا توجد عروض لهذه المنشأة بعد.
                         </div>
                     ) : (
                         <ul className="divide-y">
@@ -324,28 +311,20 @@ export default function FacilityShow({ facility }: { facility: Facility }) {
                                     className="flex flex-wrap items-center justify-between gap-3 px-5 py-4"
                                 >
                                     <div className="space-y-0.5">
-                                        <p className="font-medium">
-                                            {o.title.en || (
+                                        <p className="font-medium" dir="rtl">
+                                            {o.title.ar || (
                                                 <span className="text-muted-foreground">
-                                                    Untitled
-                                                </span>
-                                            )}
-                                            {o.title.ar && (
-                                                <span
-                                                    className="ml-2 text-sm text-muted-foreground"
-                                                    dir="rtl"
-                                                >
-                                                    / {o.title.ar}
+                                                    بدون عنوان
                                                 </span>
                                             )}
                                         </p>
                                         {o.price && (
-                                            <p className="text-sm">
+                                            <p className="text-sm" dir="ltr">
                                                 <span className="font-semibold">
                                                     {o.price}
                                                 </span>
                                                 {o.old_price && (
-                                                    <span className="ml-2 text-xs text-muted-foreground line-through">
+                                                    <span className="mr-2 text-xs text-muted-foreground line-through">
                                                         {o.old_price}
                                                     </span>
                                                 )}
@@ -362,7 +341,7 @@ export default function FacilityShow({ facility }: { facility: Facility }) {
                                             href={`/dashboard/offers/${o.id}/edit`}
                                         >
                                             <PencilIcon className="size-3.5" />
-                                            Edit
+                                            تعديل
                                         </Link>
                                     </Button>
                                 </li>
@@ -377,8 +356,8 @@ export default function FacilityShow({ facility }: { facility: Facility }) {
 
 FacilityShow.layout = {
     breadcrumbs: [
-        { title: 'Dashboard', href: dashboard() },
-        { title: 'Facilities', href: '/dashboard/facilities' },
-        { title: 'View', href: '#' },
+        { title: 'لوحة التحكم', href: dashboard() },
+        { title: 'المنشآت', href: '/dashboard/facilities' },
+        { title: 'عرض', href: '#' },
     ],
 };

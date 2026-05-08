@@ -4,6 +4,7 @@ import FloatingLogos from '@/pages/guest/_components/floating-logos';
 import SeoHead, {
     organizationSchema,
 } from '@/pages/guest/_components/seo-head';
+import type { PageSeoProp } from '@/pages/guest/_components/seo-head';
 import AnnounceBar from '@/pages/guest/_components/home/announce-bar';
 import CtaBanner from '@/pages/guest/_components/home/cta-banner';
 import Faq from '@/pages/guest/_components/home/faq';
@@ -20,7 +21,22 @@ import SpecialOffers from '@/pages/guest/_components/home/special-offers';
 import { homeStyles } from '@/pages/guest/_components/home/styles';
 import Testimonials from '@/pages/guest/_components/home/testimonials';
 
-export default function Welcome() {
+const FALLBACK_TITLE =
+    'برايم ميديكال كارد — بطاقة الخصومات الطبية الأولى';
+const FALLBACK_DESCRIPTION =
+    'احصل على خصومات تصل إلى 70% في أكثر من 3000 عيادة وصيدلية ومعمل تحاليل. بطاقة واحدة لكل العائلة في كل محافظات مصر.';
+const FALLBACK_KEYWORDS = [
+    'برايم ميديكال كارد',
+    'بطاقة طبية',
+    'خصومات طبية',
+    'تأمين طبي',
+    'صيدليات',
+    'تحاليل',
+    'أشعة',
+    'مستشفيات',
+];
+
+export default function Welcome({ seo }: { seo?: PageSeoProp | null }) {
     const { auth, appUrl } = usePage<{
         auth: { user: { name: string } | null };
         appUrl: string;
@@ -32,18 +48,13 @@ export default function Welcome() {
     return (
         <>
             <SeoHead
-                title="برايم ميديكال كارد — بطاقة الخصومات الطبية الأولى"
-                description="احصل على خصومات تصل إلى 70% في أكثر من 3000 عيادة وصيدلية ومعمل تحاليل. بطاقة واحدة لكل العائلة في كل محافظات مصر."
-                keywords={[
-                    'برايم ميديكال كارد',
-                    'بطاقة طبية',
-                    'خصومات طبية',
-                    'تأمين طبي',
-                    'صيدليات',
-                    'تحاليل',
-                    'أشعة',
-                    'مستشفيات',
-                ]}
+                title={seo?.title || FALLBACK_TITLE}
+                description={seo?.description || FALLBACK_DESCRIPTION}
+                keywords={
+                    seo?.keywords?.length ? seo.keywords : FALLBACK_KEYWORDS
+                }
+                image={seo?.og_image_url ?? undefined}
+                noindex={seo?.noindex ?? false}
                 jsonLd={[
                     organizationSchema(appUrl ?? ''),
                     {

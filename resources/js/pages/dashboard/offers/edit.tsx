@@ -47,11 +47,11 @@ export default function OfferEdit({
 
     return (
         <>
-            <Head title={`Edit ${offer.slug}`} />
-            <div className="w-full space-y-6 p-6">
+            <Head title={`تعديل ${offer.title.ar || offer.slug}`} />
+            <div className="w-full space-y-6 p-6" dir="rtl">
                 <Heading
-                    title="Edit Offer"
-                    description={`Slug: ${offer.slug}`}
+                    title="تعديل عرض"
+                    description={`المعرّف: ${offer.slug}`}
                 />
                 <OfferForm
                     data={data}
@@ -70,8 +70,8 @@ export default function OfferEdit({
 
 OfferEdit.layout = {
     breadcrumbs: [
-        { title: 'Dashboard', href: dashboard() },
-        { title: 'Offers', href: '/dashboard/offers' },
-        { title: 'Edit', href: '#' },
+        { title: 'لوحة التحكم', href: dashboard() },
+        { title: 'العروض', href: '/dashboard/offers' },
+        { title: 'تعديل', href: '#' },
     ],
 };

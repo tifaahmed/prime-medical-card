@@ -21,17 +21,17 @@ export default function GovernorateCreate() {
 
     return (
         <>
-            <Head title="New Governorate" />
-            <div className="w-full space-y-6 p-6">
+            <Head title="محافظة جديدة" />
+            <div className="w-full space-y-6 p-6" dir="rtl">
                 <Heading
-                    title="New Governorate"
-                    description="Provide the name in both English and Arabic."
+                    title="محافظة جديدة"
+                    description="أدخل اسم المحافظة."
                 />
                 <form onSubmit={submit} className="w-full space-y-6">
                     <div className="rounded-3xl border bg-card p-6 shadow-sm">
                         <TranslatableInput
                             name="name"
-                            label="Name"
+                            label="الاسم"
                             values={data.name}
                             onChange={(locale, value) =>
                                 setData('name', {
@@ -47,7 +47,7 @@ export default function GovernorateCreate() {
                         processing={processing}
                         cancelHref="/dashboard/governorates"
                         onSave={save}
-                        primaryLabel="Create"
+                        primaryLabel="إنشاء"
                     />
                 </form>
             </div>
@@ -57,8 +57,8 @@ export default function GovernorateCreate() {
 
 GovernorateCreate.layout = {
     breadcrumbs: [
-        { title: 'Dashboard', href: dashboard() },
-        { title: 'Governorates', href: '/dashboard/governorates' },
-        { title: 'New', href: '/dashboard/governorates/create' },
+        { title: 'لوحة التحكم', href: dashboard() },
+        { title: 'المحافظات', href: '/dashboard/governorates' },
+        { title: 'جديدة', href: '/dashboard/governorates/create' },
     ],
 };

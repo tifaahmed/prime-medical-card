@@ -38,7 +38,7 @@ export default function FacilityEdit({
     facilityTypes: RelatedOption[];
     governorates: RelatedOption[];
 }) {
-    const { data, setData, processing, errors } = useForm({
+    const { data, setData, processing, errors, setError, clearErrors } = useForm({
         name: facility.name,
         facility_type_id: facility.facility_type_id as number | string,
         governorate_id: facility.governorate_id as number | string,
@@ -65,16 +65,31 @@ export default function FacilityEdit({
     const persist = (
         intent: 'stay' | 'return',
         overrides?: { branches?: BranchItem[] },
-    ) => {
+    ): Promise<void> => {
         const payload = { ...data, ...overrides, _method: 'put' };
-        router.post(
-            `/dashboard/facilities/${facility.id}?redirect=${intent}`,
-            payload as never,
-            { forceFormData: true },
-        );
+
+        return new Promise<void>((resolve, reject) => {
+            router.post(
+                `/dashboard/facilities/${facility.id}?redirect=${intent}`,
+                payload as never,
+                {
+                    forceFormData: true,
+                    onSuccess: () => {
+                        clearErrors();
+                        resolve();
+                    },
+                    onError: (serverErrors) => {
+                        setError(serverErrors as never);
+                        reject(serverErrors);
+                    },
+                },
+            );
+        });
     };
 
-    const save = (intent: 'stay' | 'return') => persist(intent);
+    const save = (intent: 'stay' | 'return') => {
+        void persist(intent);
+    };
 
     const submit = (e: FormEvent) => {
         e.preventDefault();
@@ -83,11 +98,11 @@ export default function FacilityEdit({
 
     return (
         <>
-            <Head title={`Edit ${facility.slug}`} />
-            <div className="w-full space-y-6 p-6">
+            <Head title={`تعديل ${facility.name.ar || facility.slug}`} />
+            <div className="w-full space-y-6 p-6" dir="rtl">
                 <Heading
-                    title="Edit Facility"
-                    description={`Slug: ${facility.slug}`}
+                    title="تعديل منشأة"
+                    description={`المعرّف: ${facility.slug}`}
                 />
                 <FacilityForm
                     data={data}
@@ -110,8 +125,8 @@ export default function FacilityEdit({
 
 FacilityEdit.layout = {
     breadcrumbs: [
-        { title: 'Dashboard', href: dashboard() },
-        { title: 'Facilities', href: '/dashboard/facilities' },
-        { title: 'Edit', href: '#' },
+        { title: 'لوحة التحكم', href: dashboard() },
+        { title: 'المنشآت', href: '/dashboard/facilities' },
+        { title: 'تعديل', href: '#' },
     ],
 };

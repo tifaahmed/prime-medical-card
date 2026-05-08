@@ -19,20 +19,21 @@ export default function CardLookupModal({ onClose }: { onClose: () => void }) {
         return () => window.removeEventListener('keydown', onKey);
     }, [onClose]);
 
-    const formatted = formatCardNumber(value);
+    const isAllDigits = /^\d*$/.test(value.replace(/\s/g, ''));
+    const formatted = isAllDigits ? formatCardNumber(value) : value;
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        const digits = value.replace(/\D/g, '');
+        const cleaned = value.trim().replace(/\s+/g, '');
 
-        if (digits.length < 8) {
+        if (cleaned.length < 4) {
             setError('من فضلك أدخل رقم كارت صحيح');
             return;
         }
 
         setError(null);
         onClose();
-        router.visit(`/card/${digits}`);
+        router.visit(`/card/${encodeURIComponent(cleaned)}`);
     };
 
     return (
@@ -84,9 +85,8 @@ export default function CardLookupModal({ onClose }: { onClose: () => void }) {
                             id="card-number"
                             ref={inputRef}
                             type="text"
-                            inputMode="numeric"
                             autoComplete="off"
-                            placeholder="0000 0000 0000"
+                            placeholder="MC-2026-0001"
                             value={formatted}
                             onChange={(e) => {
                                 setError(null);

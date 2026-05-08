@@ -31,17 +31,17 @@ export default function GovernorateEdit({
 
     return (
         <>
-            <Head title={`Edit ${governorate.slug}`} />
-            <div className="w-full space-y-6 p-6">
+            <Head title={`تعديل ${governorate.name.ar || governorate.slug}`} />
+            <div className="w-full space-y-6 p-6" dir="rtl">
                 <Heading
-                    title="Edit Governorate"
-                    description={`Slug: ${governorate.slug}`}
+                    title="تعديل محافظة"
+                    description={`المعرّف: ${governorate.slug}`}
                 />
                 <form onSubmit={submit} className="w-full space-y-6">
                     <div className="rounded-3xl border bg-card p-6 shadow-sm">
                         <TranslatableInput
                             name="name"
-                            label="Name"
+                            label="الاسم"
                             values={data.name}
                             onChange={(locale, value) =>
                                 setData('name', {
@@ -66,8 +66,8 @@ export default function GovernorateEdit({
 
 GovernorateEdit.layout = {
     breadcrumbs: [
-        { title: 'Dashboard', href: dashboard() },
-        { title: 'Governorates', href: '/dashboard/governorates' },
-        { title: 'Edit', href: '#' },
+        { title: 'لوحة التحكم', href: dashboard() },
+        { title: 'المحافظات', href: '/dashboard/governorates' },
+        { title: 'تعديل', href: '#' },
     ],
 };

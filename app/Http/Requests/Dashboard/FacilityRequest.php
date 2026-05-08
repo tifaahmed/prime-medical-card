@@ -14,7 +14,7 @@ class FacilityRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name.en' => ['required', 'string', 'max:255'],
+            'name.en' => ['nullable', 'string', 'max:255'],
             'name.ar' => ['required', 'string', 'max:255'],
             'facility_type_id' => ['required', 'integer', 'exists:facility_types,id'],
             'governorate_id' => ['required', 'integer', 'exists:governorates,id'],

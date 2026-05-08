@@ -32,11 +32,11 @@ export default function OfferCreate({
 
     return (
         <>
-            <Head title="New Offer" />
-            <div className="w-full space-y-6 p-6">
+            <Head title="عرض جديد" />
+            <div className="w-full space-y-6 p-6" dir="rtl">
                 <Heading
-                    title="New Offer"
-                    description="Bilingual offer attached to a facility or branch"
+                    title="عرض جديد"
+                    description="عرض مرتبط بمنشأة أو فرع."
                 />
                 <OfferForm
                     data={data}
@@ -46,7 +46,7 @@ export default function OfferCreate({
                     processing={processing}
                     errors={errors as Record<string, string>}
                     offerableTypes={offerableTypes}
-                    primaryLabel="Create"
+                    primaryLabel="إنشاء"
                     cancelHref="/dashboard/offers"
                 />
             </div>
@@ -56,8 +56,8 @@ export default function OfferCreate({
 
 OfferCreate.layout = {
     breadcrumbs: [
-        { title: 'Dashboard', href: dashboard() },
-        { title: 'Offers', href: '/dashboard/offers' },
-        { title: 'New', href: '/dashboard/offers/create' },
+        { title: 'لوحة التحكم', href: dashboard() },
+        { title: 'العروض', href: '/dashboard/offers' },
+        { title: 'جديد', href: '/dashboard/offers/create' },
     ],
 };

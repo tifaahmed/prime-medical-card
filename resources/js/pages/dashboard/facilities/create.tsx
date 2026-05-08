@@ -37,11 +37,11 @@ export default function FacilityCreate({
 
     return (
         <>
-            <Head title="New Facility" />
-            <div className="w-full space-y-6 p-6">
+            <Head title="منشأة جديدة" />
+            <div className="w-full space-y-6 p-6" dir="rtl">
                 <Heading
-                    title="New Facility"
-                    description="Add a facility along with its branches, logo, contact info and locations."
+                    title="منشأة جديدة"
+                    description="أضف منشأة مع فروعها وشعارها وبيانات التواصل والموقع."
                 />
                 <FacilityForm
                     data={data}
@@ -52,7 +52,7 @@ export default function FacilityCreate({
                     errors={errors as Record<string, string>}
                     facilityTypes={facilityTypes}
                     governorates={governorates}
-                    primaryLabel="Create"
+                    primaryLabel="إنشاء"
                     cancelHref="/dashboard/facilities"
                 />
             </div>
@@ -62,8 +62,8 @@ export default function FacilityCreate({
 
 FacilityCreate.layout = {
     breadcrumbs: [
-        { title: 'Dashboard', href: dashboard() },
-        { title: 'Facilities', href: '/dashboard/facilities' },
-        { title: 'New', href: '/dashboard/facilities/create' },
+        { title: 'لوحة التحكم', href: dashboard() },
+        { title: 'المنشآت', href: '/dashboard/facilities' },
+        { title: 'جديدة', href: '/dashboard/facilities/create' },
     ],
 };

@@ -25,37 +25,34 @@ export default function FacilityTypesIndex({
     const columns: Column<FacilityType>[] = [
         { key: 'id', label: '#', render: (r) => r.id },
         {
-            key: 'name_en',
-            label: 'Name (EN)',
-            render: (r) => r.name.en ?? '—',
-        },
-        {
             key: 'name_ar',
-            label: 'الاسم (AR)',
+            label: 'الاسم',
             render: (r) => <span dir="rtl">{r.name.ar ?? '—'}</span>,
         },
         {
             key: 'slug',
-            label: 'Slug',
+            label: 'المعرّف',
             render: (r) => (
-                <code className="text-xs text-muted-foreground">{r.slug}</code>
+                <code dir="ltr" className="text-xs text-muted-foreground">
+                    {r.slug}
+                </code>
             ),
         },
     ];
 
     return (
         <>
-            <Head title="Facility Types" />
-            <div className="w-full space-y-6 p-6">
+            <Head title="أنواع المنشآت" />
+            <div className="w-full space-y-6 p-6" dir="rtl">
                 <div className="flex items-center justify-between">
                     <Heading
-                        title="Facility Types"
-                        description="Manage facility types in English and Arabic."
+                        title="أنواع المنشآت"
+                        description="إدارة أنواع المنشآت."
                     />
                     <Button asChild className="gap-1.5">
                         <Link href="/dashboard/facility-types/create">
                             <PlusIcon className="size-4" />
-                            Add Facility Type
+                            إضافة نوع
                         </Link>
                     </Button>
                 </div>
@@ -66,6 +63,7 @@ export default function FacilityTypesIndex({
                     destroyUrl={(r) => `/dashboard/facility-types/${r.id}`}
                     searchUrl="/dashboard/facility-types"
                     initialSearch={filters.search}
+                    searchPlaceholder="ابحث بالمعرّف…"
                 />
             </div>
         </>
@@ -74,7 +72,7 @@ export default function FacilityTypesIndex({
 
 FacilityTypesIndex.layout = {
     breadcrumbs: [
-        { title: 'Dashboard', href: dashboard() },
-        { title: 'Facility Types', href: '/dashboard/facility-types' },
+        { title: 'لوحة التحكم', href: dashboard() },
+        { title: 'أنواع المنشآت', href: '/dashboard/facility-types' },
     ],
 };

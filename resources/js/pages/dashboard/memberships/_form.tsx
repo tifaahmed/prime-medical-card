@@ -35,7 +35,7 @@ interface Props {
     ) => void;
     submit: (e: FormEvent) => void;
     onSave: (intent: 'stay' | 'return') => void;
-    onPersistFamily?: (family: FamilyItem[]) => void;
+    onPersistFamily?: (family: FamilyItem[]) => Promise<void> | void;
     processing: boolean;
     errors: Record<string, string>;
     relationships: RelationshipOption[];
@@ -52,7 +52,7 @@ export default function MembershipForm({
     processing,
     errors,
     relationships,
-    primaryLabel = 'Save',
+    primaryLabel = 'حفظ',
     cancelHref,
 }: Props) {
     const familyErrorCount = useMemo(
@@ -64,7 +64,13 @@ export default function MembershipForm({
         [errors],
     );
 
-    const [tab, setTab] = useState<'membership' | 'family'>('membership');
+    const [tab, setTab] = useState<'membership' | 'family'>(() => {
+        if (typeof window === 'undefined') {
+            return 'membership';
+        }
+
+        return window.location.hash === '#family' ? 'family' : 'membership';
+    });
 
     useEffect(() => {
         if (membershipErrorCount > 0) {
@@ -75,8 +81,26 @@ export default function MembershipForm({
         }
     }, [membershipErrorCount, familyErrorCount]);
 
+    useEffect(() => {
+        const desiredHash = tab === 'family' ? '#family' : '';
+
+        if (window.location.hash !== desiredHash) {
+            const { pathname, search } = window.location;
+            window.history.replaceState(null, '', `${pathname}${search}${desiredHash}`);
+        }
+    }, [tab]);
+
+    useEffect(() => {
+        const onHashChange = () => {
+            setTab(window.location.hash === '#family' ? 'family' : 'membership');
+        };
+
+        window.addEventListener('hashchange', onHashChange);
+        return () => window.removeEventListener('hashchange', onHashChange);
+    }, []);
+
     return (
-        <form onSubmit={submit} className="w-full space-y-6">
+        <form onSubmit={submit} className="w-full space-y-6" dir="rtl">
             <Tabs
                 value={tab}
                 onValueChange={(v) => setTab(v as 'membership' | 'family')}
@@ -85,21 +109,21 @@ export default function MembershipForm({
                 <TabsList>
                     <TabsTrigger value="membership">
                         <CreditCardIcon className="size-4" />
-                        Membership
+                        العضوية
                         {membershipErrorCount > 0 && (
-                            <span className="ml-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-destructive px-1.5 text-[10px] font-bold text-white">
+                            <span className="mr-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-destructive px-1.5 text-[10px] font-bold text-white">
                                 {membershipErrorCount}
                             </span>
                         )}
                     </TabsTrigger>
                     <TabsTrigger value="family">
                         <UsersIcon className="size-4" />
-                        Family
-                        <span className="ml-1 rounded-full bg-muted-foreground/20 px-1.5 py-0.5 text-[10px] font-semibold">
+                        العائلة
+                        <span className="mr-1 rounded-full bg-muted-foreground/20 px-1.5 py-0.5 text-[10px] font-semibold">
                             {data.family.filter((m) => !m._delete).length}
                         </span>
                         {familyErrorCount > 0 && (
-                            <span className="ml-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-destructive px-1.5 text-[10px] font-bold text-white">
+                            <span className="mr-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-destructive px-1.5 text-[10px] font-bold text-white">
                                 {familyErrorCount}
                             </span>
                         )}
@@ -110,17 +134,16 @@ export default function MembershipForm({
                     <section className="space-y-6 rounded-3xl border bg-card p-6 shadow-sm">
                         <header>
                             <h3 className="font-heading text-lg font-semibold">
-                                Membership details
+                                بيانات العضوية
                             </h3>
                             <p className="text-sm text-muted-foreground">
-                                Membership number, validity, status, and
-                                bilingual job title.
+                                رقم العضوية، الصلاحية، الحالة، والمسمى الوظيفي.
                             </p>
                         </header>
 
                         <div className="flex flex-col gap-6 md:flex-row md:items-start">
                             <ImagePicker
-                                label="Membership photo"
+                                label="صورة العضوية"
                                 file={data.photo}
                                 existingUrl={data.photo_url}
                                 isRemoved={data.photo_remove}
@@ -136,10 +159,11 @@ export default function MembershipForm({
                             <div className="flex-1 space-y-4">
                                 <div className="grid gap-2">
                                     <Label>
-                                        Membership number{' '}
+                                        رقم العضوية{' '}
                                         <span className="text-red-600">*</span>
                                     </Label>
                                     <Input
+                                        dir="ltr"
                                         value={data.membership_number}
                                         onChange={(e) =>
                                             setData(
@@ -157,7 +181,7 @@ export default function MembershipForm({
                                 <div className="grid gap-3 sm:grid-cols-2">
                                     <div className="grid gap-2">
                                         <Label>
-                                            Registration date{' '}
+                                            تاريخ التسجيل{' '}
                                             <span className="text-red-600">
                                                 *
                                             </span>
@@ -178,7 +202,7 @@ export default function MembershipForm({
                                     </div>
                                     <div className="grid gap-2">
                                         <Label>
-                                            Expiration date{' '}
+                                            تاريخ الانتهاء{' '}
                                             <span className="text-red-600">
                                                 *
                                             </span>
@@ -203,7 +227,7 @@ export default function MembershipForm({
 
                         <TranslatableInput
                             name="job_title"
-                            label="Job title"
+                            label="المسمى الوظيفي"
                             values={data.job_title}
                             onChange={(locale, value) =>
                                 setData('job_title', {
@@ -226,11 +250,10 @@ export default function MembershipForm({
                                 />
                                 <span className="space-y-0.5">
                                     <span className="block text-sm font-medium">
-                                        Active
+                                        مفعّلة
                                     </span>
                                     <span className="block text-xs text-muted-foreground">
-                                        Whether this membership can be used
-                                        right now.
+                                        هل يمكن استخدام هذه العضوية حالياً.
                                     </span>
                                 </span>
                             </label>
@@ -245,11 +268,10 @@ export default function MembershipForm({
                                 />
                                 <span className="space-y-0.5">
                                     <span className="block text-sm font-medium">
-                                        Visible
+                                        ظاهرة
                                     </span>
                                     <span className="block text-xs text-muted-foreground">
-                                        Whether this membership is shown on the
-                                        public website.
+                                        هل تظهر هذه العضوية على الموقع العام.
                                     </span>
                                 </span>
                             </label>

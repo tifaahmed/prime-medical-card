@@ -14,93 +14,85 @@ import SiteNav from '@/pages/guest/_components/home/site-nav';
 import { homeStyles } from '@/pages/guest/_components/home/styles';
 
 type FamilyMember = {
+    id: number;
     name: string;
-    relation: string;
-    age: number;
-    avatar: string;
-    accent: string;
-    cardSuffix: string;
+    relationship_ar: string | null;
+    date_of_birth: string | null;
+    phone: string | null;
+    email: string | null;
+    is_active: boolean;
+    photo_url: string | null;
 };
 
-const HOLDER = {
-    name: 'مصطفى حسن إبراهيم',
-    nameLatin: 'MOSTAFA HASSAN',
-    nationalId: '٢٩٠٠٥١٢٠١٢٣٤٥٦',
-    phone: '٠١٠٠ ٢٢٣ ٤٥٦٧',
-    email: 'mostafa.hassan@example.com',
-    governorate: 'القاهرة',
-    plan: 'الباقة العائلية المميزة',
-    memberSince: 'يناير ٢٠٢٤',
-    status: 'مفعّلة',
+type Membership = {
+    id: number;
+    membership_number: string;
+    registration_date: string | null;
+    expiration_date: string | null;
+    is_active: boolean;
+    is_visible: boolean;
+    job_title_ar: string | null;
+    photo_url: string | null;
+    holder_name: string | null;
+    family: FamilyMember[];
 };
 
-const FAMILY: FamilyMember[] = [
-    {
-        name: 'نور حسن',
-        relation: 'الزوجة',
-        age: 34,
-        avatar: 'نح',
-        accent: '#d68228',
-        cardSuffix: '4263',
-    },
-    {
-        name: 'يوسف حسن',
-        relation: 'الابن',
-        age: 9,
-        avatar: 'يح',
-        accent: '#236b64',
-        cardSuffix: '8821',
-    },
-    {
-        name: 'مريم حسن',
-        relation: 'الابنة',
-        age: 6,
-        avatar: 'مح',
-        accent: '#7fb3ad',
-        cardSuffix: '5519',
-    },
-    {
-        name: 'حسن إبراهيم',
-        relation: 'الأب',
-        age: 64,
-        avatar: 'حإ',
-        accent: '#1a544f',
-        cardSuffix: '9072',
-    },
-];
+type PageProps = {
+    auth: { user: { name: string } | null };
+    appUrl: string;
+    number: string;
+    membership: Membership | null;
+};
 
-const QR_PATTERN = [1, 1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 1, 1, 1, 0, 1];
-
-const PERKS = [
-    { icon: <CheckShieldIcon />, title: 'بطاقة سارية', sub: 'حتى ١٢ / ٢٠٢٨' },
-    { icon: <UsersIcon />, title: '٤ أفراد عائلة', sub: 'مغطّون بالكامل' },
-    { icon: <HeartIcon />, title: 'خصم حتى ٧٠٪', sub: 'في كل الشبكة' },
-];
+const ACCENTS = ['#d68228', '#236b64', '#7fb3ad', '#1a544f', '#a35a2c'];
 
 export default function MemberCard() {
-    const { auth, appUrl, number } = usePage<{
-        auth: { user: { name: string } | null };
-        appUrl: string;
-        number: string;
-    }>().props;
+    const { auth, appUrl, number, membership } = usePage<PageProps>().props;
     const authUser = auth?.user ?? null;
 
-    const digits = (number ?? '')
-        .replace(/\D/g, '')
-        .padEnd(16, '0')
-        .slice(0, 16);
-    const displayNumber = digits.replace(/(.{4})/g, '$1 ').trim();
-    const maskedNumber = `${digits.slice(0, 4)} •••• •••• ${digits.slice(-4)}`;
+    if (!membership || !membership.is_visible) {
+        return <NotFound number={number} appUrl={appUrl} authUser={authUser} />;
+    }
+
+    const displayNumber = formatCardDisplay(membership.membership_number);
+    const maskedNumber = maskCardNumber(membership.membership_number);
+    const familyCount = membership.family.length;
+    const expiryShort = membership.expiration_date
+        ? formatExpiryShort(membership.expiration_date)
+        : '—';
+    const memberSince = membership.registration_date
+        ? formatRegistrationDate(membership.registration_date)
+        : '—';
+
+    const PERKS = [
+        {
+            icon: <CheckShieldIcon />,
+            title: membership.is_active ? 'بطاقة سارية' : 'غير مفعّلة',
+            sub: `حتى ${expiryShort}`,
+        },
+        {
+            icon: <UsersIcon />,
+            title: `${familyCount} ${familyCount === 1 ? 'فرد' : 'أفراد'} عائلة`,
+            sub: 'مرتبطون بالحساب',
+        },
+        { icon: <HeartIcon />, title: 'خصم حتى ٧٠٪', sub: 'في كل الشبكة' },
+    ];
+
+    const holderShort = membership.holder_name?.split(' ')[0] ?? 'عميلنا الكريم';
 
     return (
         <>
             <SeoHead
-                title="بطاقة العضوية — برايم ميديكال كارد"
+                title={`بطاقة ${membership.membership_number} — برايم ميديكال كارد`}
                 description="بيانات بطاقة العضوية، تفاصيل العضو وأفراد العائلة."
+                noindex
                 jsonLd={[
                     breadcrumbSchema(appUrl ?? '', [
                         { name: 'الرئيسية', path: '/' },
-                        { name: 'بطاقة العضوية', path: `/card/${digits}` },
+                        {
+                            name: 'بطاقة العضوية',
+                            path: `/card/${membership.membership_number}`,
+                        },
                     ]),
                 ]}
             >
@@ -114,7 +106,6 @@ export default function MemberCard() {
                     href="https://fonts.googleapis.com/css2?family=Reem+Kufi:wght@400;500;600;700&family=Tajawal:wght@300;400;500;700;800&family=Amiri:ital,wght@0,400;0,700;1,400&display=swap"
                     rel="stylesheet"
                 />
-                <meta name="robots" content="noindex" />
             </SeoHead>
             <style dangerouslySetInnerHTML={{ __html: homeStyles }} />
 
@@ -128,10 +119,12 @@ export default function MemberCard() {
                             <div className="text-center lg:text-start">
                                 <span className="inline-flex items-center gap-2 rounded-full bg-[rgba(247,242,234,0.1)] px-4 py-1.5 text-xs font-semibold tracking-[0.18em] text-[var(--amber-400)] uppercase">
                                     <span className="h-1.5 w-1.5 rounded-full bg-[var(--amber-400)]"></span>
-                                    {HOLDER.status}
+                                    {membership.is_active
+                                        ? 'مفعّلة'
+                                        : 'غير مفعّلة'}
                                 </span>
                                 <h1 className="mt-4 text-3xl leading-tight font-bold text-[var(--cream)] sm:text-4xl lg:text-5xl">
-                                    أهلاً، {HOLDER.name.split(' ')[0]}
+                                    أهلاً، {holderShort}
                                     <br />
                                     <span className="text-[var(--amber-400)]">
                                         بطاقتك جاهزة للاستخدام
@@ -166,7 +159,12 @@ export default function MemberCard() {
                             <div className="relative mx-auto w-full max-w-[420px]">
                                 <BigMemberCard
                                     number={displayNumber}
-                                    holder={HOLDER.nameLatin}
+                                    holder={
+                                        membership.holder_name ||
+                                        'PRIME MEMBER'
+                                    }
+                                    photoUrl={membership.photo_url}
+                                    expiryShort={expiryShort}
                                 />
                             </div>
                         </div>
@@ -183,48 +181,66 @@ export default function MemberCard() {
                                             بيانات العضو
                                         </span>
                                         <h2 className="mt-3 text-2xl font-bold text-[var(--teal-900)] sm:text-3xl">
-                                            {HOLDER.name}
+                                            {membership.holder_name || '—'}
                                         </h2>
-                                        <p className="mt-1 text-sm text-[var(--ink-soft)]">
-                                            {HOLDER.plan}
-                                        </p>
+                                        {membership.job_title_ar && (
+                                            <p className="mt-1 text-sm text-[var(--ink-soft)]">
+                                                {membership.job_title_ar}
+                                            </p>
+                                        )}
                                     </div>
-                                    <MemberAvatar
-                                        initials="مح"
-                                        accent="#0b2e2c"
-                                        size={72}
-                                    />
+                                    {membership.photo_url ? (
+                                        <img
+                                            src={membership.photo_url}
+                                            alt=""
+                                            className="size-[72px] shrink-0 rounded-2xl object-cover shadow"
+                                        />
+                                    ) : (
+                                        <MemberAvatar
+                                            initials={initials(
+                                                membership.holder_name,
+                                            )}
+                                            accent="#0b2e2c"
+                                            size={72}
+                                        />
+                                    )}
                                 </div>
 
                                 <dl className="mt-6 grid grid-cols-1 gap-x-6 gap-y-4 text-sm sm:grid-cols-2">
                                     <Field
-                                        label="الرقم القومي"
-                                        value={HOLDER.nationalId}
-                                    />
-                                    <Field
-                                        label="الهاتف"
-                                        value={HOLDER.phone}
+                                        label="رقم العضوية"
+                                        value={membership.membership_number}
                                         dir="ltr"
-                                    />
-                                    <Field
-                                        label="البريد"
-                                        value={HOLDER.email}
-                                        dir="ltr"
-                                    />
-                                    <Field
-                                        label="المحافظة"
-                                        value={HOLDER.governorate}
                                     />
                                     <Field
                                         label="عضو منذ"
-                                        value={HOLDER.memberSince}
+                                        value={memberSince}
                                     />
+                                    {membership.expiration_date && (
+                                        <Field
+                                            label="تنتهي في"
+                                            value={
+                                                membership.expiration_date
+                                            }
+                                            dir="ltr"
+                                        />
+                                    )}
                                     <Field
                                         label="الحالة"
                                         value={
-                                            <span className="inline-flex items-center gap-1.5 rounded-full bg-[#e7f5ee] px-2.5 py-1 text-xs font-bold text-[#0e8a4f]">
-                                                <span className="h-1.5 w-1.5 rounded-full bg-[#0e8a4f]"></span>
-                                                {HOLDER.status}
+                                            <span
+                                                className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-bold ${
+                                                    membership.is_active
+                                                        ? 'bg-[#e7f5ee] text-[#0e8a4f]'
+                                                        : 'bg-[#fdecec] text-[#c0392b]'
+                                                }`}
+                                            >
+                                                <span
+                                                    className={`h-1.5 w-1.5 rounded-full ${membership.is_active ? 'bg-[#0e8a4f]' : 'bg-[#c0392b]'}`}
+                                                ></span>
+                                                {membership.is_active
+                                                    ? 'مفعّلة'
+                                                    : 'غير مفعّلة'}
                                             </span>
                                         }
                                     />
@@ -246,29 +262,9 @@ export default function MemberCard() {
                                     {displayNumber}
                                 </div>
                                 <p className="mt-2 text-xs text-[var(--ink-soft)]">
-                                    يظهر مختصراً عند العرض: {maskedNumber}
+                                    يظهر مختصراً عند العرض:{' '}
+                                    <span dir="ltr">{maskedNumber}</span>
                                 </p>
-
-                                <dl className="mt-6 grid grid-cols-2 gap-x-6 gap-y-4 text-sm">
-                                    <Field
-                                        label="نوع البطاقة"
-                                        value="عائلية مميزة"
-                                    />
-                                    <Field label="حد الخصم" value="حتى ٧٠٪" />
-                                    <Field label="إصدار" value="٠١ / ٢٠٢٤" />
-                                    <Field
-                                        label="انتهاء الصلاحية"
-                                        value="١٢ / ٢٠٢٨"
-                                    />
-                                    <Field
-                                        label="عدد الأفراد"
-                                        value="٥ (أنت + ٤)"
-                                    />
-                                    <Field
-                                        label="تغطية"
-                                        value="جميع المحافظات"
-                                    />
-                                </dl>
 
                                 <div className="mt-6 flex flex-wrap gap-2">
                                     <Link
@@ -290,62 +286,133 @@ export default function MemberCard() {
                     </div>
                 </section>
 
-                <section className="relative z-[2] bg-[rgba(11,46,44,0.04)] py-14 sm:py-20">
-                    <div className="container">
-                        <div className="mx-auto max-w-2xl text-center">
-                            <span className="inline-flex items-center rounded-full bg-[var(--amber-100)] px-4 py-1.5 text-xs font-semibold tracking-[0.18em] text-[var(--amber-600)] uppercase">
-                                أفراد العائلة
-                            </span>
-                            <h2 className="mt-4 text-3xl font-bold text-[var(--teal-900)] sm:text-4xl">
-                                ٤ أفراد مغطّون بالكامل
-                            </h2>
-                            <p className="mt-3 text-sm leading-relaxed text-[var(--ink-soft)] sm:text-base">
-                                كل فرد من عائلتك له بطاقة فرعية مرتبطة بحسابك
-                                ويستفيد من نفس الخصومات في كل الشبكة.
-                            </p>
-                        </div>
-
-                        <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-                            {FAMILY.map((m) => (
-                                <FamilyCard
-                                    key={m.name}
-                                    member={m}
-                                    parentSuffix={digits.slice(-4)}
-                                />
-                            ))}
-                        </div>
-                    </div>
-                </section>
-
-                <section className="relative z-[2] py-14 sm:py-20">
-                    <div className="container">
-                        <div className="grid items-center gap-10 lg:grid-cols-[1fr_1.1fr]">
-                            <div>
+                {familyCount > 0 && (
+                    <section className="relative z-[2] bg-[rgba(11,46,44,0.04)] py-14 sm:py-20">
+                        <div className="container">
+                            <div className="mx-auto max-w-2xl text-center">
                                 <span className="inline-flex items-center rounded-full bg-[var(--amber-100)] px-4 py-1.5 text-xs font-semibold tracking-[0.18em] text-[var(--amber-600)] uppercase">
-                                    شكل البطاقة
+                                    أفراد العائلة
                                 </span>
                                 <h2 className="mt-4 text-3xl font-bold text-[var(--teal-900)] sm:text-4xl">
-                                    وجهان واحد للخصم
+                                    {familyCount}{' '}
+                                    {familyCount === 1
+                                        ? 'فرد مرتبط بالحساب'
+                                        : 'أفراد مرتبطون بالحساب'}
                                 </h2>
                                 <p className="mt-3 text-sm leading-relaxed text-[var(--ink-soft)] sm:text-base">
-                                    البطاقة الرقمية تظهر على هاتفك، والبطاقة
-                                    الفعلية تصلك خلال ٤٨ ساعة. كلاهما يحتويان
-                                    على رقم العضوية والكود السريع للتحقق في أي
-                                    جهة.
+                                    كل فرد من عائلتك يستفيد من نفس الخصومات في
+                                    كل الشبكة.
                                 </p>
-                                <ul className="mt-6 space-y-3 text-sm">
-                                    <Bullet text="QR على الوجه الخلفي للتحقق الفوري" />
-                                    <Bullet text="رقم البطاقة + اسم العضو على الوجه الأمامي" />
-                                    <Bullet text="حماية بـ chip ذكي ضد التزوير" />
-                                </ul>
                             </div>
 
-                            <div className="relative grid gap-5 sm:grid-cols-2">
-                                <SampleCardFront
-                                    number={displayNumber}
-                                    holder={HOLDER.nameLatin}
-                                />
-                                <SampleCardBack number={maskedNumber} />
+                            <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+                                {membership.family.map((m, i) => (
+                                    <FamilyCard
+                                        key={m.id}
+                                        member={m}
+                                        accent={
+                                            ACCENTS[i % ACCENTS.length] ??
+                                            '#0b2e2c'
+                                        }
+                                    />
+                                ))}
+                            </div>
+                        </div>
+                    </section>
+                )}
+
+                <SiteFooter />
+                <MobileBottomNav />
+                <FloatingActions />
+            </div>
+        </>
+    );
+}
+
+function NotFound({
+    number,
+    appUrl,
+    authUser,
+}: {
+    number: string;
+    appUrl: string;
+    authUser: { name: string } | null;
+}) {
+    return (
+        <>
+            <SeoHead
+                title="بطاقة غير موجودة — برايم ميديكال كارد"
+                description="رقم البطاقة الذي أدخلته غير مسجل لدينا."
+                noindex
+                jsonLd={[
+                    breadcrumbSchema(appUrl ?? '', [
+                        { name: 'الرئيسية', path: '/' },
+                        { name: 'بطاقة العضوية', path: `/card/${number}` },
+                    ]),
+                ]}
+            >
+                <link rel="preconnect" href="https://fonts.googleapis.com" />
+                <link
+                    rel="preconnect"
+                    href="https://fonts.gstatic.com"
+                    crossOrigin=""
+                />
+                <link
+                    href="https://fonts.googleapis.com/css2?family=Reem+Kufi:wght@400;500;600;700&family=Tajawal:wght@300;400;500;700;800&family=Amiri:ital,wght@0,400;0,700;1,400&display=swap"
+                    rel="stylesheet"
+                />
+            </SeoHead>
+            <style dangerouslySetInnerHTML={{ __html: homeStyles }} />
+
+            <div className="pm-home" dir="rtl" lang="ar">
+                <AnnounceBar />
+                <SiteNav authUser={authUser} />
+
+                <section className="relative z-[2] py-20 sm:py-28">
+                    <div className="container">
+                        <div className="mx-auto max-w-xl rounded-3xl border border-[rgba(11,46,44,0.08)] bg-white p-8 text-center shadow-[0_18px_40px_-30px_rgba(11,46,44,0.5)]">
+                            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-[#fdecec] text-[#c0392b]">
+                                <svg
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth={2}
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    className="h-8 w-8"
+                                >
+                                    <circle cx="12" cy="12" r="10" />
+                                    <line x1="15" y1="9" x2="9" y2="15" />
+                                    <line x1="9" y1="9" x2="15" y2="15" />
+                                </svg>
+                            </div>
+                            <h1 className="mt-6 text-2xl font-bold text-[var(--teal-900)] sm:text-3xl">
+                                لم نعثر على هذا الكارت
+                            </h1>
+                            <p className="mt-3 text-sm text-[var(--ink-soft)]">
+                                الرقم{' '}
+                                <span
+                                    dir="ltr"
+                                    className="rounded bg-[rgba(11,46,44,0.06)] px-2 py-0.5 font-mono text-[var(--teal-900)]"
+                                >
+                                    {number}
+                                </span>{' '}
+                                غير مسجل في قاعدة بياناتنا، أو قد يكون مخفياً.
+                            </p>
+                            <div className="mt-6 flex flex-wrap justify-center gap-2">
+                                <Link
+                                    href="/"
+                                    className="inline-flex items-center gap-2 rounded-full bg-[var(--teal-900)] px-5 py-2.5 text-sm font-semibold text-[var(--cream)] transition hover:bg-[var(--teal-800)]"
+                                >
+                                    الرئيسية
+                                    <ArrowLeftIcon />
+                                </Link>
+                                <Link
+                                    href="/contact"
+                                    className="inline-flex items-center gap-2 rounded-full border border-[rgba(11,46,44,0.15)] px-5 py-2.5 text-sm font-semibold text-[var(--teal-900)] transition hover:border-[var(--teal-700)]"
+                                >
+                                    تواصل مع الدعم
+                                </Link>
                             </div>
                         </div>
                     </div>
@@ -384,27 +451,6 @@ function Field({
     );
 }
 
-function Bullet({ text }: { text: string }) {
-    return (
-        <li className="flex items-start gap-2 text-[var(--ink-soft)]">
-            <span className="mt-1 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[var(--amber-100)] text-[var(--amber-600)]">
-                <svg
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth={3}
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="h-3 w-3"
-                >
-                    <polyline points="20 6 9 17 4 12" />
-                </svg>
-            </span>
-            {text}
-        </li>
-    );
-}
-
 function MemberAvatar({
     initials,
     accent,
@@ -430,52 +476,80 @@ function MemberAvatar({
 
 function FamilyCard({
     member,
-    parentSuffix,
+    accent,
 }: {
     member: FamilyMember;
-    parentSuffix: string;
+    accent: string;
 }) {
+    const age = member.date_of_birth ? ageFromDob(member.date_of_birth) : null;
+
     return (
         <article className="group relative overflow-hidden rounded-3xl border border-[rgba(11,46,44,0.08)] bg-white p-5 shadow-[0_18px_40px_-30px_rgba(11,46,44,0.5)] transition hover:-translate-y-1 hover:shadow-[0_24px_50px_-24px_rgba(11,46,44,0.6)]">
             <div
                 className="pointer-events-none absolute -top-8 -left-8 h-24 w-24 rounded-full opacity-15"
-                style={{ background: member.accent }}
+                style={{ background: accent }}
             ></div>
             <div className="relative flex items-center gap-3">
-                <MemberAvatar
-                    initials={member.avatar}
-                    accent={member.accent}
-                    size={56}
-                />
+                {member.photo_url ? (
+                    <img
+                        src={member.photo_url}
+                        alt=""
+                        className="size-14 shrink-0 rounded-2xl object-cover"
+                    />
+                ) : (
+                    <MemberAvatar
+                        initials={initials(member.name)}
+                        accent={accent}
+                        size={56}
+                    />
+                )}
                 <div>
                     <h3 className="text-base font-bold text-[var(--teal-900)]">
                         {member.name}
                     </h3>
                     <p className="text-xs text-[var(--ink-soft)]">
-                        {member.relation} • {member.age} سنة
+                        {member.relationship_ar ?? '—'}
+                        {age !== null && ` • ${age} سنة`}
                     </p>
                 </div>
             </div>
-            <div
-                className="mt-5 rounded-2xl bg-[rgba(11,46,44,0.04)] px-3 py-2 font-mono text-xs text-[var(--teal-900)]"
-                dir="ltr"
-            >
-                {parentSuffix} •••• •••• {member.cardSuffix}
-            </div>
+            {(member.phone || member.email) && (
+                <div className="mt-4 space-y-1 text-xs text-[var(--ink-soft)]">
+                    {member.phone && <div dir="ltr">{member.phone}</div>}
+                    {member.email && <div dir="ltr">{member.email}</div>}
+                </div>
+            )}
             <div className="mt-3 flex items-center justify-between text-xs">
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-[#e7f5ee] px-2.5 py-1 font-bold text-[#0e8a4f]">
-                    <span className="h-1.5 w-1.5 rounded-full bg-[#0e8a4f]"></span>
-                    مفعّلة
-                </span>
-                <span className="font-semibold text-[var(--teal-700)]">
-                    خصم حتى ٧٠٪
+                <span
+                    className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 font-bold ${
+                        member.is_active
+                            ? 'bg-[#e7f5ee] text-[#0e8a4f]'
+                            : 'bg-[#fdecec] text-[#c0392b]'
+                    }`}
+                >
+                    <span
+                        className={`h-1.5 w-1.5 rounded-full ${member.is_active ? 'bg-[#0e8a4f]' : 'bg-[#c0392b]'}`}
+                    ></span>
+                    {member.is_active ? 'مفعّل' : 'غير مفعّل'}
                 </span>
             </div>
         </article>
     );
 }
 
-function BigMemberCard({ number, holder }: { number: string; holder: string }) {
+function BigMemberCard({
+    number,
+    holder,
+    photoUrl,
+    expiryShort,
+}: {
+    number: string;
+    holder: string;
+    photoUrl: string | null;
+    expiryShort: string;
+}) {
+    void photoUrl;
+
     return (
         <div
             className="relative aspect-[1.586/1] w-full overflow-hidden rounded-[28px] p-7 text-[var(--cream)] shadow-[0_40px_80px_-30px_rgba(11,46,44,0.6)]"
@@ -532,7 +606,7 @@ function BigMemberCard({ number, holder }: { number: string; holder: string }) {
                         Valid Thru
                     </div>
                     <div className="mt-0.5 text-sm font-semibold tracking-wider sm:text-base">
-                        12 / 28
+                        {expiryShort}
                     </div>
                 </div>
             </div>
@@ -540,92 +614,74 @@ function BigMemberCard({ number, holder }: { number: string; holder: string }) {
     );
 }
 
-function SampleCardFront({
-    number,
-    holder,
-}: {
-    number: string;
-    holder: string;
-}) {
-    return (
-        <div
-            className="relative aspect-[1.586/1] overflow-hidden rounded-3xl p-5 text-[var(--cream)] shadow-[0_24px_50px_-24px_rgba(11,46,44,0.55)]"
-            style={{
-                background:
-                    'linear-gradient(135deg, var(--teal-800) 0%, var(--teal-900) 100%)',
-            }}
-        >
-            <div className="flex items-start justify-between">
-                <div>
-                    <div className="text-base font-bold">برايم</div>
-                    <div className="text-[9px] font-medium tracking-[0.25em] text-[rgba(247,242,234,0.7)] uppercase">
-                        Medical Card
-                    </div>
-                </div>
-                <div className="h-7 w-10 rounded border border-white/25 bg-gradient-to-br from-white/35 to-white/10"></div>
-            </div>
-            <div className="mt-6 font-mono text-sm tracking-[0.15em]" dir="ltr">
-                {number}
-            </div>
-            <div className="mt-3 flex items-end justify-between text-[10px]">
-                <div>
-                    <div className="font-semibold tracking-[0.2em] text-[rgba(247,242,234,0.6)] uppercase">
-                        Cardholder
-                    </div>
-                    <div className="mt-0.5 text-xs font-semibold tracking-wider uppercase">
-                        {holder}
-                    </div>
-                </div>
-                <div className="rounded-full bg-[var(--amber-400)] px-2 py-0.5 text-[9px] font-bold text-[var(--teal-900)]">
-                    FRONT
-                </div>
-            </div>
-        </div>
-    );
+function formatCardDisplay(raw: string): string {
+    return raw.replace(/(.{4})/g, '$1 ').trim();
 }
 
-function SampleCardBack({ number }: { number: string }) {
-    return (
-        <div
-            className="relative aspect-[1.586/1] overflow-hidden rounded-3xl p-5 text-[var(--teal-900)] shadow-[0_24px_50px_-24px_rgba(11,46,44,0.55)]"
-            style={{
-                background: 'linear-gradient(135deg, #f7f1e3 0%, #efe5cd 100%)',
-            }}
-        >
-            <div className="absolute top-5 right-0 left-0 h-7 bg-[var(--teal-900)]"></div>
-            <div className="mt-14 flex items-center justify-between gap-3">
-                <div className="grid h-14 w-14 shrink-0 grid-cols-4 grid-rows-4 gap-[2px] rounded bg-white p-1">
-                    {QR_PATTERN.map((on, i) => (
-                        <span
-                            key={i}
-                            className="rounded-[1px]"
-                            style={{
-                                background: on
-                                    ? 'var(--teal-900)'
-                                    : 'transparent',
-                            }}
-                        ></span>
-                    ))}
-                </div>
-                <div className="flex-1">
-                    <div className="text-[9px] font-semibold tracking-[0.2em] text-[var(--ink-soft)] uppercase">
-                        Card Number
-                    </div>
-                    <div
-                        className="mt-1 font-mono text-xs tracking-[0.15em]"
-                        dir="ltr"
-                    >
-                        {number}
-                    </div>
-                </div>
-                <div className="rounded-full bg-[var(--teal-900)] px-2 py-0.5 text-[9px] font-bold text-[var(--amber-400)]">
-                    BACK
-                </div>
-            </div>
-            <p className="mt-4 text-[10px] leading-relaxed text-[var(--ink-soft)]">
-                هذه البطاقة مخصصة للحامل المذكور وغير قابلة للتحويل. للاستفسارات
-                اتصل ١٦٧٧٧.
-            </p>
-        </div>
-    );
+function maskCardNumber(raw: string): string {
+    const stripped = raw.replace(/\s/g, '');
+    if (stripped.length <= 8) {
+        return stripped;
+    }
+    const first = stripped.slice(0, 4);
+    const last = stripped.slice(-4);
+    return `${first} •••• •••• ${last}`;
+}
+
+function formatExpiryShort(date: string): string {
+    const d = new Date(date);
+    if (isNaN(d.getTime())) {
+        return date;
+    }
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const year = String(d.getFullYear()).slice(-2);
+    return `${month} / ${year}`;
+}
+
+function formatRegistrationDate(date: string): string {
+    const d = new Date(date);
+    if (isNaN(d.getTime())) {
+        return date;
+    }
+    const months = [
+        'يناير',
+        'فبراير',
+        'مارس',
+        'إبريل',
+        'مايو',
+        'يونيو',
+        'يوليو',
+        'أغسطس',
+        'سبتمبر',
+        'أكتوبر',
+        'نوفمبر',
+        'ديسمبر',
+    ];
+    return `${months[d.getMonth()]} ${d.getFullYear()}`;
+}
+
+function ageFromDob(dob: string): number | null {
+    const d = new Date(dob);
+    if (isNaN(d.getTime())) {
+        return null;
+    }
+    const now = new Date();
+    let age = now.getFullYear() - d.getFullYear();
+    const m = now.getMonth() - d.getMonth();
+    if (m < 0 || (m === 0 && now.getDate() < d.getDate())) {
+        age--;
+    }
+    return age;
+}
+
+function initials(name: string | null): string {
+    if (!name) {
+        return '؟';
+    }
+    return name
+        .split(/\s+/)
+        .filter(Boolean)
+        .slice(0, 2)
+        .map((p) => p.charAt(0))
+        .join('');
 }

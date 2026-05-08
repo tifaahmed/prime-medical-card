@@ -1,10 +1,11 @@
 import { Head, Link } from '@inertiajs/react';
 import {
-    ArrowRight,
+    ArrowLeft,
     Building2,
     CreditCard,
     Layers,
     MapPin,
+    Search,
     Store,
     Tag,
 } from 'lucide-react';
@@ -16,8 +17,8 @@ import { dashboard } from '@/routes';
 const resources = [
     {
         key: 'governorates',
-        label: 'Governorates',
-        description: 'Manage governorates (EN / AR)',
+        label: 'المحافظات',
+        description: 'إدارة المحافظات',
         href: '/dashboard/governorates',
         icon: MapPin,
         bg: 'bg-emerald-50 dark:bg-emerald-950/30',
@@ -26,8 +27,8 @@ const resources = [
     },
     {
         key: 'facility-types',
-        label: 'Facility Types',
-        description: 'Manage facility types (EN / AR)',
+        label: 'أنواع المنشآت',
+        description: 'إدارة أنواع المنشآت',
         href: '/dashboard/facility-types',
         icon: Layers,
         bg: 'bg-violet-50 dark:bg-violet-950/30',
@@ -36,8 +37,8 @@ const resources = [
     },
     {
         key: 'facilities',
-        label: 'Facilities',
-        description: 'Manage facilities (EN / AR)',
+        label: 'المنشآت',
+        description: 'إدارة المنشآت الطبية',
         href: '/dashboard/facilities',
         icon: Building2,
         bg: 'bg-cyan-50 dark:bg-cyan-950/30',
@@ -46,8 +47,8 @@ const resources = [
     },
     {
         key: 'branches',
-        label: 'Facility Branches',
-        description: 'Manage branches (EN / AR)',
+        label: 'الفروع',
+        description: 'إدارة فروع المنشآت',
         href: '/dashboard/facility-branches',
         icon: Store,
         bg: 'bg-teal-50 dark:bg-teal-950/30',
@@ -56,8 +57,8 @@ const resources = [
     },
     {
         key: 'offers',
-        label: 'Offers',
-        description: 'Manage offers (EN / AR)',
+        label: 'العروض',
+        description: 'إدارة العروض والخصومات',
         href: '/dashboard/offers',
         icon: Tag,
         bg: 'bg-amber-50 dark:bg-amber-950/30',
@@ -66,24 +67,34 @@ const resources = [
     },
     {
         key: 'memberships',
-        label: 'Memberships',
-        description: 'Members & their family',
+        label: 'العضويات',
+        description: 'الأعضاء وعائلاتهم',
         href: '/dashboard/memberships',
         icon: CreditCard,
         bg: 'bg-rose-50 dark:bg-rose-950/30',
         iconBg: 'bg-rose-500/10',
         iconColor: 'text-rose-600 dark:text-rose-400',
     },
+    {
+        key: 'page-seos',
+        label: 'SEO الصفحات',
+        description: 'تحسين ظهور الصفحات في البحث',
+        href: '/dashboard/page-seos',
+        icon: Search,
+        bg: 'bg-indigo-50 dark:bg-indigo-950/30',
+        iconBg: 'bg-indigo-500/10',
+        iconColor: 'text-indigo-600 dark:text-indigo-400',
+    },
 ] as const;
 
 export default function Dashboard() {
     return (
         <>
-            <Head title="Dashboard" />
-            <div className="w-full space-y-6 p-6">
+            <Head title="لوحة التحكم" />
+            <div className="w-full space-y-6 p-6" dir="rtl">
                 <Heading
-                    title="Dashboard"
-                    description="Manage every model in English and Arabic."
+                    title="لوحة التحكم"
+                    description="إدارة بيانات الموقع باللغة العربية."
                 />
 
                 <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
@@ -120,28 +131,12 @@ export default function Dashboard() {
                                                 {r.description}
                                             </p>
                                         </div>
-                                        <ArrowRight className="size-4 shrink-0 text-muted-foreground" />
+                                        <ArrowLeft className="size-4 shrink-0 text-muted-foreground" />
                                     </CardContent>
                                 </Card>
                             </Link>
                         );
                     })}
-                </div>
-
-                <div className="rounded-3xl border bg-gradient-to-br from-brand-primary via-brand-primary-dark to-brand-primary p-6 text-brand-primary-foreground shadow-sm">
-                    <div className="max-w-2xl space-y-2">
-                        <p className="text-sm font-semibold tracking-wider text-white/70 uppercase">
-                            Bilingual content
-                        </p>
-                        <h3 className="font-heading text-2xl font-bold">
-                            Every record carries both English and Arabic
-                        </h3>
-                        <p className="text-sm text-white/80">
-                            Names, addresses, titles, and descriptions are
-                            stored as JSON translations, so the public site
-                            always picks the right language.
-                        </p>
-                    </div>
                 </div>
             </div>
         </>
@@ -151,7 +146,7 @@ export default function Dashboard() {
 Dashboard.layout = {
     breadcrumbs: [
         {
-            title: 'Dashboard',
+            title: 'لوحة التحكم',
             href: dashboard(),
         },
     ],

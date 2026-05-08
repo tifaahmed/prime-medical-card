@@ -25,37 +25,34 @@ export default function GovernoratesIndex({
     const columns: Column<Governorate>[] = [
         { key: 'id', label: '#', render: (r) => r.id },
         {
-            key: 'name_en',
-            label: 'Name (EN)',
-            render: (r) => r.name.en ?? '—',
-        },
-        {
             key: 'name_ar',
-            label: 'الاسم (AR)',
+            label: 'الاسم',
             render: (r) => <span dir="rtl">{r.name.ar ?? '—'}</span>,
         },
         {
             key: 'slug',
-            label: 'Slug',
+            label: 'المعرّف',
             render: (r) => (
-                <code className="text-xs text-muted-foreground">{r.slug}</code>
+                <code dir="ltr" className="text-xs text-muted-foreground">
+                    {r.slug}
+                </code>
             ),
         },
     ];
 
     return (
         <>
-            <Head title="Governorates" />
-            <div className="w-full space-y-6 p-6">
+            <Head title="المحافظات" />
+            <div className="w-full space-y-6 p-6" dir="rtl">
                 <div className="flex items-center justify-between">
                     <Heading
-                        title="Governorates"
-                        description="Manage governorates in English and Arabic."
+                        title="المحافظات"
+                        description="إدارة المحافظات."
                     />
                     <Button asChild className="gap-1.5">
                         <Link href="/dashboard/governorates/create">
                             <PlusIcon className="size-4" />
-                            Add Governorate
+                            إضافة محافظة
                         </Link>
                     </Button>
                 </div>
@@ -66,6 +63,7 @@ export default function GovernoratesIndex({
                     destroyUrl={(r) => `/dashboard/governorates/${r.id}`}
                     searchUrl="/dashboard/governorates"
                     initialSearch={filters.search}
+                    searchPlaceholder="ابحث بالمعرّف…"
                 />
             </div>
         </>
@@ -74,7 +72,7 @@ export default function GovernoratesIndex({
 
 GovernoratesIndex.layout = {
     breadcrumbs: [
-        { title: 'Dashboard', href: dashboard() },
-        { title: 'Governorates', href: '/dashboard/governorates' },
+        { title: 'لوحة التحكم', href: dashboard() },
+        { title: 'المحافظات', href: '/dashboard/governorates' },
     ],
 };

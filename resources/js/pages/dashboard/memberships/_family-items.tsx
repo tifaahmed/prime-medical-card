@@ -54,7 +54,7 @@ interface Props {
     family: FamilyItem[];
     relationships: RelationshipOption[];
     onChange: (family: FamilyItem[]) => void;
-    onPersist?: (family: FamilyItem[]) => void;
+    onPersist?: (family: FamilyItem[]) => Promise<void> | void;
     errors: Record<string, string>;
 }
 
@@ -97,6 +97,7 @@ export default function FamilyItems({
 }: Props) {
     const [editingIndex, setEditingIndex] = useState<number | null>(null);
     const [draft, setDraft] = useState<FamilyItem | null>(null);
+    const [submitting, setSubmitting] = useState(false);
 
     const visibleCount = family.filter((m) => !m._delete).length;
 
@@ -112,7 +113,7 @@ export default function FamilyItems({
         setDraft(emptyFamilyMember());
     };
 
-    const saveDraft = () => {
+    const saveDraft = async () => {
         if (editingIndex === null || !draft) {
             return;
         }
@@ -120,12 +121,31 @@ export default function FamilyItems({
         const next = [...family];
         next[editingIndex] = draft;
         onChange(next);
-        setEditingIndex(null);
-        setDraft(null);
-        onPersist?.(next);
+
+        if (!onPersist) {
+            setEditingIndex(null);
+            setDraft(null);
+            return;
+        }
+
+        setSubmitting(true);
+        try {
+            await onPersist(next);
+            setEditingIndex(null);
+            setDraft(null);
+        } catch {
+            // Validation failed — keep the dialog open so the user sees the
+            // server-side errors (rendered by FamilyEditor via the `errors` prop).
+        } finally {
+            setSubmitting(false);
+        }
     };
 
     const cancelEdit = () => {
+        if (submitting) {
+            return;
+        }
+
         if (editingIndex !== null) {
             const member = family[editingIndex];
 
@@ -167,14 +187,14 @@ export default function FamilyItems({
     });
 
     return (
-        <div className="space-y-4">
+        <div className="space-y-4" dir="rtl">
             <div className="flex flex-wrap items-center justify-between gap-2">
                 <div className="flex items-center gap-2">
                     <span className="flex size-8 items-center justify-center rounded-lg bg-violet-500/10 text-violet-600">
                         <UsersIcon className="size-4" />
                     </span>
                     <h3 className="font-heading text-lg font-semibold">
-                        Family
+                        العائلة
                     </h3>
                     <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
                         {visibleCount}
@@ -182,14 +202,14 @@ export default function FamilyItems({
                 </div>
                 <Button type="button" onClick={openAdd} className="gap-1.5">
                     <PlusIcon className="size-4" />
-                    Add Family Member
+                    إضافة فرد
                 </Button>
             </div>
 
             {family.length === 0 ? (
                 <div className="rounded-2xl border border-dashed bg-muted/20 px-4 py-12 text-center text-sm text-muted-foreground">
-                    No family members yet. Click{' '}
-                    <strong>Add Family Member</strong> to add the first one.
+                    لا توجد بيانات عائلة بعد. اضغط <strong>إضافة فرد</strong>
+                    {' '}لإضافة أول فرد.
                 </div>
             ) : (
                 <ul className="grid gap-3 md:grid-cols-2">
@@ -224,11 +244,11 @@ export default function FamilyItems({
                     <DialogHeader>
                         <DialogTitle>
                             {editingIndex !== null && family[editingIndex]?.id
-                                ? `Edit family member #${family[editingIndex].id}`
-                                : 'New family member'}
+                                ? `تعديل فرد العائلة #${family[editingIndex].id}`
+                                : 'فرد عائلة جديد'}
                         </DialogTitle>
                         <DialogDescription>
-                            Personal details and contact info.
+                            البيانات الشخصية ومعلومات التواصل.
                         </DialogDescription>
                     </DialogHeader>
 
@@ -251,11 +271,16 @@ export default function FamilyItems({
                             type="button"
                             variant="outline"
                             onClick={cancelEdit}
+                            disabled={submitting}
                         >
-                            Cancel
+                            إلغاء
                         </Button>
-                        <Button type="button" onClick={saveDraft}>
-                            Save
+                        <Button
+                            type="button"
+                            onClick={saveDraft}
+                            disabled={submitting}
+                        >
+                            {submitting ? 'جاري الحفظ…' : 'حفظ'}
                         </Button>
                     </DialogFooter>
                 </DialogContent>
@@ -327,19 +352,17 @@ function FamilySummary({
                     <span className="flex size-5 items-center justify-center rounded-full bg-brand-primary/10 text-[10px] font-semibold text-brand-primary">
                         {index + 1}
                     </span>
-                    <p className="truncate font-medium">
+                    <p className="truncate font-medium" dir="rtl">
                         {member.name || (
                             <span className="text-muted-foreground">
-                                Unnamed
+                                بدون اسم
                             </span>
                         )}
                     </p>
                 </div>
                 {relLabel && (
-                    <p className="text-xs text-muted-foreground">
-                        {relLabel.en}
-                        <span className="mx-1">·</span>
-                        <span dir="rtl">{relLabel.ar}</span>
+                    <p className="text-xs text-muted-foreground" dir="rtl">
+                        {relLabel.ar || relLabel.en}
                     </p>
                 )}
                 <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-muted-foreground">
@@ -365,8 +388,8 @@ function FamilySummary({
                 <div className="flex flex-wrap gap-2 pt-1">
                     {member._delete ? (
                         <>
-                            <span className="inline-flex items-center rounded-full bg-destructive/10 px-2 py-0.5 text-[10px] font-semibold tracking-wider text-destructive uppercase">
-                                Will be deleted
+                            <span className="inline-flex items-center rounded-full bg-destructive/10 px-2 py-0.5 text-[10px] font-semibold tracking-wider text-destructive">
+                                سيتم الحذف
                             </span>
                             <Button
                                 type="button"
@@ -376,7 +399,7 @@ function FamilySummary({
                                 className="gap-1.5"
                             >
                                 <UndoIcon className="size-3.5" />
-                                Restore
+                                تراجع
                             </Button>
                         </>
                     ) : (
@@ -389,7 +412,7 @@ function FamilySummary({
                                 className="btn-edit gap-1.5"
                             >
                                 <PencilIcon className="size-3.5" />
-                                Edit
+                                تعديل
                             </Button>
                             <Button
                                 type="button"
@@ -399,7 +422,7 @@ function FamilySummary({
                                 className="btn-delete gap-1.5"
                             >
                                 <Trash2Icon className="size-3.5" />
-                                Remove
+                                حذف
                             </Button>
                         </>
                     )}
@@ -425,13 +448,14 @@ function FamilyEditor({
     const k = (field: string) => `family.${index}.${field}`;
 
     return (
-        <div className="space-y-5 py-2">
+        <div className="space-y-5 py-2" dir="rtl">
             <div className="grid gap-3 md:grid-cols-2">
                 <div className="grid gap-2">
                     <Label>
-                        Name <span className="text-red-600">*</span>
+                        الاسم <span className="text-red-600">*</span>
                     </Label>
                     <Input
+                        dir="rtl"
                         value={member.name}
                         onChange={(e) => onChange({ name: e.target.value })}
                     />
@@ -439,20 +463,21 @@ function FamilyEditor({
                 </div>
                 <div className="grid gap-2">
                     <Label>
-                        Relationship <span className="text-red-600">*</span>
+                        صلة القرابة <span className="text-red-600">*</span>
                     </Label>
                     <Select
                         value={member.relationship || ''}
                         onValueChange={(v) => onChange({ relationship: v })}
                     >
                         <SelectTrigger className="w-full">
-                            <SelectValue placeholder="Select…" />
+                            <SelectValue placeholder="اختر…" />
                         </SelectTrigger>
                         <SelectContent>
                             {relationships.map((r) => (
                                 <SelectItem key={r.value} value={r.value}>
-                                    {r.label.en} —{' '}
-                                    <span dir="rtl">{r.label.ar}</span>
+                                    <span dir="rtl">
+                                        {r.label.ar || r.label.en}
+                                    </span>
                                 </SelectItem>
                             ))}
                         </SelectContent>
@@ -463,7 +488,7 @@ function FamilyEditor({
 
             <div className="grid gap-3 md:grid-cols-3">
                 <div className="grid gap-2">
-                    <Label>Date of birth</Label>
+                    <Label>تاريخ الميلاد</Label>
                     <Input
                         type="date"
                         value={member.date_of_birth ?? ''}
@@ -474,31 +499,32 @@ function FamilyEditor({
                     <InputError message={errors[k('date_of_birth')]} />
                 </div>
                 <div className="grid gap-2">
-                    <Label>Phone</Label>
+                    <Label>رقم الهاتف</Label>
                     <div className="relative">
-                        <PhoneIcon className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
+                        <PhoneIcon className="pointer-events-none absolute top-1/2 right-3 size-4 -translate-y-1/2 text-muted-foreground" />
                         <Input
                             value={member.phone ?? ''}
                             onChange={(e) =>
                                 onChange({ phone: e.target.value })
                             }
                             placeholder="+20 1xx xxx xxxx"
-                            className="pl-9"
+                            className="pr-9"
                         />
                     </div>
                     <InputError message={errors[k('phone')]} />
                 </div>
                 <div className="grid gap-2">
-                    <Label>Email</Label>
+                    <Label>البريد الإلكتروني</Label>
                     <div className="relative">
-                        <MailIcon className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
+                        <MailIcon className="pointer-events-none absolute top-1/2 right-3 size-4 -translate-y-1/2 text-muted-foreground" />
                         <Input
+                            dir="ltr"
                             type="email"
                             value={member.email ?? ''}
                             onChange={(e) =>
                                 onChange({ email: e.target.value })
                             }
-                            className="pl-9"
+                            className="pr-9"
                         />
                     </div>
                     <InputError message={errors[k('email')]} />
@@ -514,12 +540,12 @@ function FamilyEditor({
                     className="size-4 rounded border-input"
                 />
                 <Label htmlFor={`active-${index}`} className="cursor-pointer">
-                    Active
+                    مفعّل
                 </Label>
             </div>
 
             <ImagePicker
-                label="Photo"
+                label="الصورة"
                 file={member.photo}
                 existingUrl={member.photo_url}
                 isRemoved={member.photo_remove}

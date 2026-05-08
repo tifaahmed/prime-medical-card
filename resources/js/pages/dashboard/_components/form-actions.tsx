@@ -8,26 +8,17 @@ interface Props {
     primaryLabel?: string;
 }
 
-/**
- * Standard dashboard form action bar:
- * - "Save & stay" (primary, also bound to Enter via type="submit")
- * - "Save & return" (jumps back to the resource index)
- * - "Cancel" link
- *
- * The parent form's onSubmit handler should call onSave('stay') so that
- * pressing Enter behaves like the primary button.
- */
 export default function FormActions({
     processing,
     cancelHref,
     onSave,
-    primaryLabel = 'Save',
+    primaryLabel = 'حفظ',
 }: Props) {
     return (
         <div className="flex flex-wrap items-center gap-2">
             <Button type="submit" disabled={processing} className="gap-1.5">
                 <CheckIcon className="size-4" />
-                {primaryLabel} &amp; stay
+                {primaryLabel} والبقاء
             </Button>
             <Button
                 type="button"
@@ -37,10 +28,10 @@ export default function FormActions({
                 className="gap-1.5"
             >
                 <ListIcon className="size-4" />
-                {primaryLabel} &amp; return
+                {primaryLabel} والعودة
             </Button>
             <Button asChild variant="outline" type="button">
-                <a href={cancelHref}>Cancel</a>
+                <a href={cancelHref}>إلغاء</a>
             </Button>
         </div>
     );

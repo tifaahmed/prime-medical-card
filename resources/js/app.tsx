@@ -15,7 +15,7 @@ createInertiaApp({
     layout: (name) => {
         switch (true) {
             case name.startsWith('guest/'):
-                return null;
+                return GuestLayout;
             case name.startsWith('auth/'):
                 return AuthLayout;
             case name.startsWith('settings/'):
@@ -32,7 +32,6 @@ createInertiaApp({
             <TooltipProvider delayDuration={0}>
                 <SubscribeModalProvider>
                     {app}
-                    <FloatingMenu />
                     <Toaster />
                 </SubscribeModalProvider>
             </TooltipProvider>
@@ -42,6 +41,15 @@ createInertiaApp({
         color: '#4B5563',
     },
 });
+
+function GuestLayout({ children }: { children: React.ReactNode }) {
+    return (
+        <>
+            {children}
+            <FloatingMenu />
+        </>
+    );
+}
 
 // This will set light / dark mode on load...
 initializeTheme();

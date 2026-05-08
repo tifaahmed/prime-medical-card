@@ -49,6 +49,16 @@ interface Props {
     cancelHref: string;
 }
 
+const TYPE_LABELS_AR: Record<string, string> = {
+    Facility: 'منشأة',
+    FacilityBranch: 'فرع',
+};
+
+function arTypeLabel(group: OfferableGroup): string {
+    const klass = group.type.split('\\').pop() ?? group.type;
+    return TYPE_LABELS_AR[klass] ?? group.label;
+}
+
 export default function OfferForm({
     data,
     setData,
@@ -57,7 +67,7 @@ export default function OfferForm({
     processing,
     errors,
     offerableTypes,
-    primaryLabel = 'Save',
+    primaryLabel = 'حفظ',
     cancelHref,
 }: Props) {
     const currentGroup = offerableTypes.find(
@@ -65,12 +75,12 @@ export default function OfferForm({
     );
 
     return (
-        <form onSubmit={submit} className="w-full space-y-6">
+        <form onSubmit={submit} className="w-full space-y-6" dir="rtl">
             <div className="space-y-6 rounded-3xl border bg-card p-6 shadow-sm">
                 <div className="grid gap-3 md:grid-cols-2">
                     <div className="grid gap-2">
                         <Label>
-                            Belongs to <span className="text-red-600">*</span>
+                            تابع لـ <span className="text-red-600">*</span>
                         </Label>
                         <Select
                             value={data.offerable_type || ''}
@@ -80,12 +90,12 @@ export default function OfferForm({
                             }}
                         >
                             <SelectTrigger className="w-full">
-                                <SelectValue placeholder="Select a parent type…" />
+                                <SelectValue placeholder="اختر النوع…" />
                             </SelectTrigger>
                             <SelectContent>
                                 {offerableTypes.map((g) => (
                                     <SelectItem key={g.type} value={g.type}>
-                                        {g.label}
+                                        {arTypeLabel(g)}
                                     </SelectItem>
                                 ))}
                             </SelectContent>
@@ -94,7 +104,7 @@ export default function OfferForm({
                     </div>
                     <div className="grid gap-2">
                         <Label>
-                            Parent record{' '}
+                            السجل المرتبط{' '}
                             <span className="text-red-600">*</span>
                         </Label>
                         <Select
@@ -105,13 +115,14 @@ export default function OfferForm({
                             disabled={!currentGroup}
                         >
                             <SelectTrigger className="w-full">
-                                <SelectValue placeholder="Select…" />
+                                <SelectValue placeholder="اختر…" />
                             </SelectTrigger>
                             <SelectContent>
                                 {(currentGroup?.options ?? []).map((o) => (
                                     <SelectItem key={o.id} value={String(o.id)}>
-                                        {o.name.en} —{' '}
-                                        <span dir="rtl">{o.name.ar}</span>
+                                        <span dir="rtl">
+                                            {o.name.ar || o.name.en}
+                                        </span>
                                     </SelectItem>
                                 ))}
                             </SelectContent>
@@ -122,7 +133,7 @@ export default function OfferForm({
 
                 <TranslatableInput
                     name="title"
-                    label="Title"
+                    label="العنوان"
                     values={data.title}
                     onChange={(locale, value) =>
                         setData('title', { ...data.title, [locale]: value })
@@ -133,7 +144,7 @@ export default function OfferForm({
 
                 <TranslatableInput
                     name="short_description"
-                    label="Short description"
+                    label="الوصف المختصر"
                     values={data.short_description}
                     onChange={(locale, value) =>
                         setData('short_description', {
@@ -147,7 +158,7 @@ export default function OfferForm({
 
                 <TranslatableInput
                     name="full_description"
-                    label="Full description"
+                    label="الوصف الكامل"
                     values={data.full_description}
                     onChange={(locale, value) =>
                         setData('full_description', {
@@ -161,7 +172,7 @@ export default function OfferForm({
 
                 <div className="grid gap-3 md:grid-cols-3">
                     <div className="grid gap-2">
-                        <Label>Phone</Label>
+                        <Label>رقم الهاتف</Label>
                         <Input
                             value={data.phone ?? ''}
                             onChange={(e) => setData('phone', e.target.value)}
@@ -169,8 +180,9 @@ export default function OfferForm({
                         <InputError message={errors.phone} />
                     </div>
                     <div className="grid gap-2">
-                        <Label>Price</Label>
+                        <Label>السعر</Label>
                         <Input
+                            dir="ltr"
                             type="number"
                             step="0.01"
                             value={data.price ?? ''}
@@ -179,8 +191,9 @@ export default function OfferForm({
                         <InputError message={errors.price} />
                     </div>
                     <div className="grid gap-2">
-                        <Label>Old price</Label>
+                        <Label>السعر القديم</Label>
                         <Input
+                            dir="ltr"
                             type="number"
                             step="0.01"
                             value={data.old_price ?? ''}

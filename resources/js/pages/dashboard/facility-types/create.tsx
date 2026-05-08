@@ -21,17 +21,17 @@ export default function FacilityTypeCreate() {
 
     return (
         <>
-            <Head title="New Facility Type" />
-            <div className="w-full space-y-6 p-6">
+            <Head title="نوع منشأة جديد" />
+            <div className="w-full space-y-6 p-6" dir="rtl">
                 <Heading
-                    title="New Facility Type"
-                    description="Provide the name in both English and Arabic."
+                    title="نوع منشأة جديد"
+                    description="أدخل اسم النوع."
                 />
                 <form onSubmit={submit} className="w-full space-y-6">
                     <div className="rounded-3xl border bg-card p-6 shadow-sm">
                         <TranslatableInput
                             name="name"
-                            label="Name"
+                            label="الاسم"
                             values={data.name}
                             onChange={(locale, value) =>
                                 setData('name', {
@@ -47,7 +47,7 @@ export default function FacilityTypeCreate() {
                         processing={processing}
                         cancelHref="/dashboard/facility-types"
                         onSave={save}
-                        primaryLabel="Create"
+                        primaryLabel="إنشاء"
                     />
                 </form>
             </div>
@@ -57,8 +57,8 @@ export default function FacilityTypeCreate() {
 
 FacilityTypeCreate.layout = {
     breadcrumbs: [
-        { title: 'Dashboard', href: dashboard() },
-        { title: 'Facility Types', href: '/dashboard/facility-types' },
-        { title: 'New', href: '/dashboard/facility-types/create' },
+        { title: 'لوحة التحكم', href: dashboard() },
+        { title: 'أنواع المنشآت', href: '/dashboard/facility-types' },
+        { title: 'جديد', href: '/dashboard/facility-types/create' },
     ],
 };

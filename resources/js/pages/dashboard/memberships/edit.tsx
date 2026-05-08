@@ -39,7 +39,7 @@ export default function MembershipEdit({
     membership: Membership;
     relationships: RelationshipOption[];
 }) {
-    const { data, setData, processing, errors } = useForm({
+    const { data, setData, processing, errors, setError, clearErrors } = useForm({
         membership_number: membership.membership_number,
         registration_date: membership.registration_date,
         expiration_date: membership.expiration_date,
@@ -66,16 +66,31 @@ export default function MembershipEdit({
     const persist = (
         intent: 'stay' | 'return',
         overrides?: { family?: FamilyItem[] },
-    ) => {
+    ): Promise<void> => {
         const payload = { ...data, ...overrides, _method: 'put' };
-        router.post(
-            `/dashboard/memberships/${membership.id}?redirect=${intent}`,
-            payload as never,
-            { forceFormData: true },
-        );
+
+        return new Promise<void>((resolve, reject) => {
+            router.post(
+                `/dashboard/memberships/${membership.id}?redirect=${intent}`,
+                payload as never,
+                {
+                    forceFormData: true,
+                    onSuccess: () => {
+                        clearErrors();
+                        resolve();
+                    },
+                    onError: (serverErrors) => {
+                        setError(serverErrors as never);
+                        reject(serverErrors);
+                    },
+                },
+            );
+        });
     };
 
-    const save = (intent: 'stay' | 'return') => persist(intent);
+    const save = (intent: 'stay' | 'return') => {
+        void persist(intent);
+    };
 
     const submit = (e: FormEvent) => {
         e.preventDefault();
@@ -84,11 +99,11 @@ export default function MembershipEdit({
 
     return (
         <>
-            <Head title={`Edit ${membership.membership_number}`} />
-            <div className="w-full space-y-6 p-6">
+            <Head title={`تعديل ${membership.membership_number}`} />
+            <div className="w-full space-y-6 p-6" dir="rtl">
                 <Heading
-                    title="Edit Membership"
-                    description={`Number: ${membership.membership_number}`}
+                    title="تعديل عضوية"
+                    description={`رقم العضوية: ${membership.membership_number}`}
                 />
                 <MembershipForm
                     data={data}
@@ -110,8 +125,8 @@ export default function MembershipEdit({
 
 MembershipEdit.layout = {
     breadcrumbs: [
-        { title: 'Dashboard', href: dashboard() },
-        { title: 'Memberships', href: '/dashboard/memberships' },
-        { title: 'Edit', href: '#' },
+        { title: 'لوحة التحكم', href: dashboard() },
+        { title: 'العضويات', href: '/dashboard/memberships' },
+        { title: 'تعديل', href: '#' },
     ],
 };

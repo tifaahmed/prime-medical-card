@@ -29,39 +29,38 @@ export default function BranchesIndex({
         { key: 'id', label: '#', render: (r) => r.id },
         {
             key: 'facility',
-            label: 'Facility',
-            render: (r) => r.facility?.name?.en ?? '—',
-        },
-        {
-            key: 'name_en',
-            label: 'Branch (EN)',
-            render: (r) => r.name.en ?? '—',
+            label: 'المنشأة',
+            render: (r) => (
+                <span dir="rtl">{r.facility?.name?.ar ?? '—'}</span>
+            ),
         },
         {
             key: 'name_ar',
-            label: 'الفرع (AR)',
+            label: 'الفرع',
             render: (r) => <span dir="rtl">{r.name.ar ?? '—'}</span>,
         },
         {
             key: 'phone',
-            label: 'Phone',
-            render: (r) => (r.phone ?? []).join(', ') || '—',
+            label: 'الهاتف',
+            render: (r) => (
+                <span dir="ltr">{(r.phone ?? []).join(', ') || '—'}</span>
+            ),
         },
     ];
 
     return (
         <>
-            <Head title="Facility Branches" />
-            <div className="w-full space-y-6 p-6">
+            <Head title="فروع المنشآت" />
+            <div className="w-full space-y-6 p-6" dir="rtl">
                 <div className="flex items-center justify-between">
                     <Heading
-                        title="Facility Branches"
-                        description="Manage facility branches in English and Arabic."
+                        title="فروع المنشآت"
+                        description="إدارة فروع المنشآت."
                     />
                     <Button asChild className="gap-1.5">
                         <Link href="/dashboard/facility-branches/create">
                             <PlusIcon className="size-4" />
-                            Add Branch
+                            إضافة فرع
                         </Link>
                     </Button>
                 </div>
@@ -72,6 +71,7 @@ export default function BranchesIndex({
                     destroyUrl={(r) => `/dashboard/facility-branches/${r.id}`}
                     searchUrl="/dashboard/facility-branches"
                     initialSearch={filters.search}
+                    searchPlaceholder="ابحث بالاسم…"
                 />
             </div>
         </>
@@ -80,7 +80,7 @@ export default function BranchesIndex({
 
 BranchesIndex.layout = {
     breadcrumbs: [
-        { title: 'Dashboard', href: dashboard() },
-        { title: 'Facility Branches', href: '/dashboard/facility-branches' },
+        { title: 'لوحة التحكم', href: dashboard() },
+        { title: 'فروع المنشآت', href: '/dashboard/facility-branches' },
     ],
 };

@@ -4,6 +4,7 @@ import type { FormEvent } from 'react';
 import FloatingActions from '@/pages/guest/_components/floating-actions';
 import FloatingLogos from '@/pages/guest/_components/floating-logos';
 import SeoHead, { breadcrumbSchema } from '@/pages/guest/_components/seo-head';
+import type { PageSeoProp } from '@/pages/guest/_components/seo-head';
 import AnnounceBar from '@/pages/guest/_components/home/announce-bar';
 import {
     EnvelopeIcon,
@@ -26,7 +27,11 @@ const ADDRESS = 'القاهرة، جمهورية مصر العربية';
 const MAP_LAT = '30.0444';
 const MAP_LNG = '31.2357';
 
-export default function Contact() {
+const FALLBACK_TITLE = 'تواصل معنا — برايم ميديكال كارد';
+const FALLBACK_DESCRIPTION =
+    'تواصل مع فريق برايم ميديكال كارد عبر الهاتف أو الواتساب أو البريد الإلكتروني. نحن هنا للإجابة على أسئلتك ومساعدتك في الاشتراك.';
+
+export default function Contact({ seo }: { seo?: PageSeoProp | null }) {
     const { auth, appUrl } = usePage<{
         auth: { user: { name: string } | null };
         appUrl: string;
@@ -44,8 +49,11 @@ export default function Contact() {
     return (
         <>
             <SeoHead
-                title="تواصل معنا — برايم ميديكال كارد"
-                description="تواصل مع فريق برايم ميديكال كارد عبر الهاتف أو الواتساب أو البريد الإلكتروني. نحن هنا للإجابة على أسئلتك ومساعدتك في الاشتراك."
+                title={seo?.title || FALLBACK_TITLE}
+                description={seo?.description || FALLBACK_DESCRIPTION}
+                keywords={seo?.keywords?.length ? seo.keywords : undefined}
+                image={seo?.og_image_url ?? undefined}
+                noindex={seo?.noindex ?? false}
                 jsonLd={[
                     {
                         '@context': 'https://schema.org',

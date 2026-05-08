@@ -106,13 +106,13 @@ export default function ImagePicker({
                 {empty && (
                     <div className="flex flex-col items-center gap-2 text-muted-foreground">
                         <ImageIcon className="size-8" />
-                        <span className="text-sm">No image yet</span>
+                        <span className="text-sm">لا توجد صورة بعد</span>
                     </div>
                 )}
                 {isRemoved && (
                     <div className="absolute inset-0 flex items-center justify-center bg-destructive/40">
-                        <span className="rounded-full bg-destructive px-3 py-1 text-xs font-semibold tracking-wider text-white uppercase">
-                            Will be removed
+                        <span className="rounded-full bg-destructive px-3 py-1 text-xs font-semibold tracking-wider text-white">
+                            سيتم الحذف
                         </span>
                     </div>
                 )}
@@ -139,7 +139,7 @@ export default function ImagePicker({
                     className="gap-1.5"
                 >
                     <UploadIcon className="size-3.5" />
-                    {file ? 'Change file' : showExisting ? 'Replace' : 'Upload'}
+                    {file ? 'تغيير الملف' : showExisting ? 'استبدال' : 'رفع صورة'}
                 </Button>
                 {(file || showExisting) && !isRemoved && (
                     <Button
@@ -149,7 +149,7 @@ export default function ImagePicker({
                         onClick={handleClear}
                     >
                         <Trash2Icon className="size-3.5" />
-                        Remove
+                        حذف
                     </Button>
                 )}
                 {isRemoved && (
@@ -158,7 +158,7 @@ export default function ImagePicker({
                         variant="outline"
                         onClick={handleRestore}
                     >
-                        Undo remove
+                        تراجع عن الحذف
                     </Button>
                 )}
             </div>

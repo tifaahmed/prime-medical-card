@@ -2,6 +2,7 @@ import { usePage } from '@inertiajs/react';
 import FloatingActions from '@/pages/guest/_components/floating-actions';
 import FloatingLogos from '@/pages/guest/_components/floating-logos';
 import SeoHead, { breadcrumbSchema } from '@/pages/guest/_components/seo-head';
+import type { PageSeoProp } from '@/pages/guest/_components/seo-head';
 import AnnounceBar from '@/pages/guest/_components/home/announce-bar';
 import MobileBottomNav from '@/pages/guest/_components/home/mobile-bottom-nav';
 import useRevealOnScroll from '@/pages/guest/_components/home/reveal-on-scroll';
@@ -82,7 +83,11 @@ const TIMELINE = [
     },
 ];
 
-export default function About() {
+const FALLBACK_TITLE = 'عن الشركة — برايم ميديكال كارد';
+const FALLBACK_DESCRIPTION =
+    'تعرّف على قصة برايم ميديكال كارد، رؤيتنا، قيمنا، ورحلتنا في تقديم رعاية صحية ميسّرة لأكثر من ربع مليون عضو في مصر.';
+
+export default function About({ seo }: { seo?: PageSeoProp | null }) {
     const { auth, appUrl } = usePage<{
         auth: { user: { name: string } | null };
         appUrl: string;
@@ -95,8 +100,11 @@ export default function About() {
     return (
         <>
             <SeoHead
-                title="عن الشركة — برايم ميديكال كارد"
-                description="تعرّف على قصة برايم ميديكال كارد، رؤيتنا، قيمنا، ورحلتنا في تقديم رعاية صحية ميسّرة لأكثر من ربع مليون عضو في مصر."
+                title={seo?.title || FALLBACK_TITLE}
+                description={seo?.description || FALLBACK_DESCRIPTION}
+                keywords={seo?.keywords?.length ? seo.keywords : undefined}
+                image={seo?.og_image_url ?? undefined}
+                noindex={seo?.noindex ?? false}
                 jsonLd={[
                     {
                         '@context': 'https://schema.org',

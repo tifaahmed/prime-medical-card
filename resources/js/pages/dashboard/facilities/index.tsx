@@ -28,7 +28,7 @@ export default function FacilitiesIndex({
     const columns: Column<Facility>[] = [
         {
             key: 'facility',
-            label: 'Facility',
+            label: 'المنشأة',
             render: (r) => (
                 <div className="flex items-center gap-3">
                     <div className="flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-lg border bg-muted text-muted-foreground">
@@ -43,13 +43,7 @@ export default function FacilitiesIndex({
                         )}
                     </div>
                     <div className="min-w-0">
-                        <p className="truncate font-medium">
-                            {r.name.en ?? '—'}
-                        </p>
-                        <p
-                            className="truncate text-xs text-muted-foreground"
-                            dir="rtl"
-                        >
+                        <p className="truncate font-medium" dir="rtl">
                             {r.name.ar ?? '—'}
                         </p>
                     </div>
@@ -58,40 +52,20 @@ export default function FacilitiesIndex({
         },
         {
             key: 'type',
-            label: 'Type',
+            label: 'النوع',
             render: (r) =>
                 r.facility_type ? (
-                    <span>
-                        {r.facility_type.name.en ?? '—'}
-                        {r.facility_type.name.ar && (
-                            <span
-                                className="ml-1 text-xs text-muted-foreground"
-                                dir="rtl"
-                            >
-                                / {r.facility_type.name.ar}
-                            </span>
-                        )}
-                    </span>
+                    <span dir="rtl">{r.facility_type.name.ar ?? '—'}</span>
                 ) : (
                     '—'
                 ),
         },
         {
             key: 'gov',
-            label: 'Governorate',
+            label: 'المحافظة',
             render: (r) =>
                 r.governorate ? (
-                    <span>
-                        {r.governorate.name.en ?? '—'}
-                        {r.governorate.name.ar && (
-                            <span
-                                className="ml-1 text-xs text-muted-foreground"
-                                dir="rtl"
-                            >
-                                / {r.governorate.name.ar}
-                            </span>
-                        )}
-                    </span>
+                    <span dir="rtl">{r.governorate.name.ar ?? '—'}</span>
                 ) : (
                     '—'
                 ),
@@ -100,17 +74,17 @@ export default function FacilitiesIndex({
 
     return (
         <>
-            <Head title="Facilities" />
-            <div className="w-full space-y-6 p-6">
+            <Head title="المنشآت" />
+            <div className="w-full space-y-6 p-6" dir="rtl">
                 <div className="flex items-center justify-between">
                     <Heading
-                        title="Facilities"
-                        description="Manage facilities in English and Arabic."
+                        title="المنشآت"
+                        description="إدارة المنشآت الطبية."
                     />
                     <Button asChild className="gap-1.5">
                         <Link href="/dashboard/facilities/create">
                             <PlusIcon className="size-4" />
-                            Add Facility
+                            إضافة منشأة
                         </Link>
                     </Button>
                 </div>
@@ -122,6 +96,7 @@ export default function FacilitiesIndex({
                     destroyUrl={(r) => `/dashboard/facilities/${r.id}`}
                     searchUrl="/dashboard/facilities"
                     initialSearch={filters.search}
+                    searchPlaceholder="ابحث بالاسم…"
                 />
             </div>
         </>
@@ -130,7 +105,7 @@ export default function FacilitiesIndex({
 
 FacilitiesIndex.layout = {
     breadcrumbs: [
-        { title: 'Dashboard', href: dashboard() },
-        { title: 'Facilities', href: '/dashboard/facilities' },
+        { title: 'لوحة التحكم', href: dashboard() },
+        { title: 'المنشآت', href: '/dashboard/facilities' },
     ],
 };

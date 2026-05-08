@@ -7,6 +7,7 @@ use App\Http\Controllers\Dashboard\FacilityTypeController;
 use App\Http\Controllers\Dashboard\GovernorateController;
 use App\Http\Controllers\Dashboard\MembershipController;
 use App\Http\Controllers\Dashboard\OfferController;
+use App\Http\Controllers\Dashboard\PageSeoController;
 use App\Http\Controllers\Guest\GuestController;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\Route;
@@ -67,7 +68,7 @@ Route::get('/partners/{id}', [GuestController::class, 'partnerDetail'])->name('p
 Route::get('/contact', [GuestController::class, 'contact'])->name('contact');
 
 Route::get('/card/{number}', [GuestController::class, 'memberCard'])
-    ->where('number', '[0-9]+')
+    ->where('number', '[A-Za-z0-9\-]+')
     ->name('member.card');
 
 Route::middleware(['auth', 'verified'])->group(function () {
@@ -80,6 +81,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::resource('facility-branches', FacilityBranchController::class)->except('show');
         Route::resource('offers', OfferController::class)->except('show');
         Route::resource('memberships', MembershipController::class);
+        Route::resource('page-seos', PageSeoController::class)->only(['index', 'edit', 'update']);
     });
 });
 

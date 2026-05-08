@@ -48,7 +48,7 @@ export default function BranchForm({
     processing,
     errors,
     facilities,
-    primaryLabel = 'Save',
+    primaryLabel = 'حفظ',
     cancelHref,
 }: Props) {
     const phones = data.phone ?? [];
@@ -67,24 +67,25 @@ export default function BranchForm({
         );
 
     return (
-        <form onSubmit={submit} className="w-full space-y-6">
+        <form onSubmit={submit} className="w-full space-y-6" dir="rtl">
             <div className="space-y-6 rounded-3xl border bg-card p-6 shadow-sm">
                 <div className="grid gap-2">
                     <Label>
-                        Facility <span className="text-red-600">*</span>
+                        المنشأة <span className="text-red-600">*</span>
                     </Label>
                     <Select
                         value={String(data.facility_id || '')}
                         onValueChange={(v) => setData('facility_id', Number(v))}
                     >
                         <SelectTrigger className="w-full">
-                            <SelectValue placeholder="Select a facility…" />
+                            <SelectValue placeholder="اختر المنشأة…" />
                         </SelectTrigger>
                         <SelectContent>
                             {facilities.map((f) => (
                                 <SelectItem key={f.id} value={String(f.id)}>
-                                    {f.name.en} —{' '}
-                                    <span dir="rtl">{f.name.ar}</span>
+                                    <span dir="rtl">
+                                        {f.name.ar || f.name.en}
+                                    </span>
                                 </SelectItem>
                             ))}
                         </SelectContent>
@@ -94,7 +95,7 @@ export default function BranchForm({
 
                 <TranslatableInput
                     name="name"
-                    label="Branch Name"
+                    label="اسم الفرع"
                     values={data.name}
                     onChange={(locale, value) =>
                         setData('name', { ...data.name, [locale]: value })
@@ -104,7 +105,7 @@ export default function BranchForm({
 
                 <TranslatableInput
                     name="address"
-                    label="Address"
+                    label="العنوان"
                     values={data.address}
                     onChange={(locale, value) =>
                         setData('address', {
@@ -117,11 +118,11 @@ export default function BranchForm({
                 />
 
                 <div className="grid gap-2">
-                    <Label>Phone numbers</Label>
+                    <Label>أرقام الهواتف</Label>
                     <div className="space-y-2">
                         {phones.length === 0 && (
                             <p className="text-sm text-muted-foreground">
-                                No phone numbers yet.
+                                لا توجد أرقام بعد.
                             </p>
                         )}
                         {phones.map((p, i) => (
@@ -138,7 +139,7 @@ export default function BranchForm({
                                     variant="outline"
                                     onClick={() => removePhone(i)}
                                 >
-                                    Remove
+                                    حذف
                                 </Button>
                             </div>
                         ))}
@@ -149,7 +150,7 @@ export default function BranchForm({
                         className="w-fit"
                         onClick={addPhone}
                     >
-                        + Add phone
+                        + إضافة رقم
                     </Button>
                     <InputError message={errors.phone} />
                 </div>

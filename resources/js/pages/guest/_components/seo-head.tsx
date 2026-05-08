@@ -5,7 +5,7 @@ type JsonLd = Record<string, unknown>;
 type SeoHeadProps = {
     title: string;
     description: string;
-    image?: string;
+    image?: string | null;
     type?: 'website' | 'article' | 'profile';
     keywords?: string[];
     locale?: string;
@@ -13,6 +13,15 @@ type SeoHeadProps = {
     canonical?: string;
     jsonLd?: JsonLd | JsonLd[];
     children?: React.ReactNode;
+};
+
+export type PageSeoProp = {
+    page_key: string;
+    title: string | null;
+    description: string | null;
+    keywords: string[];
+    noindex: boolean;
+    og_image_url: string | null;
 };
 
 type SharedProps = {

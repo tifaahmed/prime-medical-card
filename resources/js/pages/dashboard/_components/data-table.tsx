@@ -37,6 +37,7 @@ interface Props<T extends { id: number }> {
     searchUrl: string;
     initialSearch?: string;
     emptyMessage?: string;
+    searchPlaceholder?: string;
 }
 
 export default function DataTable<T extends { id: number }>({
@@ -47,7 +48,8 @@ export default function DataTable<T extends { id: number }>({
     showUrl,
     searchUrl,
     initialSearch = '',
-    emptyMessage = 'No records found.',
+    emptyMessage = 'لا توجد سجلات.',
+    searchPlaceholder = 'ابحث…',
 }: Props<T>) {
     const [search, setSearch] = useState(initialSearch);
     const [pendingDelete, setPendingDelete] = useState<T | null>(null);
@@ -72,22 +74,22 @@ export default function DataTable<T extends { id: number }>({
     };
 
     return (
-        <>
+        <div dir="rtl">
             <form
                 onSubmit={submitSearch}
                 className="mb-4 flex flex-wrap items-center gap-2 rounded-2xl border bg-card p-3 shadow-sm"
             >
                 <div className="relative max-w-md flex-1">
-                    <SearchIcon className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
+                    <SearchIcon className="pointer-events-none absolute top-1/2 right-3 size-4 -translate-y-1/2 text-muted-foreground" />
                     <Input
-                        placeholder="Search by slug…"
+                        placeholder={searchPlaceholder}
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
-                        className="pl-9"
+                        className="pr-9"
                     />
                 </div>
                 <Button type="submit" variant="secondary">
-                    Search
+                    بحث
                 </Button>
                 {initialSearch && (
                     <Button
@@ -102,7 +104,7 @@ export default function DataTable<T extends { id: number }>({
                             );
                         }}
                     >
-                        Clear
+                        إلغاء
                     </Button>
                 )}
             </form>
@@ -114,13 +116,13 @@ export default function DataTable<T extends { id: number }>({
                             {columns.map((c) => (
                                 <th
                                     key={c.key}
-                                    className="px-4 py-3 text-left font-medium text-muted-foreground"
+                                    className="px-4 py-3 text-right font-medium text-muted-foreground"
                                 >
                                     {c.label}
                                 </th>
                             ))}
-                            <th className="px-4 py-3 text-right font-medium text-muted-foreground">
-                                Actions
+                            <th className="px-4 py-3 text-left font-medium text-muted-foreground">
+                                إجراءات
                             </th>
                         </tr>
                     </thead>
@@ -149,7 +151,7 @@ export default function DataTable<T extends { id: number }>({
                                     </td>
                                 ))}
                                 <td className="px-4 py-3">
-                                    <div className="flex items-center justify-end gap-2">
+                                    <div className="flex items-center justify-start gap-2">
                                         {showUrl && (
                                             <Button
                                                 asChild
@@ -159,7 +161,7 @@ export default function DataTable<T extends { id: number }>({
                                             >
                                                 <Link href={showUrl(row)}>
                                                     <EyeIcon className="size-3.5" />
-                                                    View
+                                                    عرض
                                                 </Link>
                                             </Button>
                                         )}
@@ -171,7 +173,7 @@ export default function DataTable<T extends { id: number }>({
                                         >
                                             <Link href={editUrl(row)}>
                                                 <PencilIcon className="size-3.5" />
-                                                Edit
+                                                تعديل
                                             </Link>
                                         </Button>
                                         <Button
@@ -183,7 +185,7 @@ export default function DataTable<T extends { id: number }>({
                                             className="btn-delete gap-1.5"
                                         >
                                             <TrashIcon className="size-3.5" />
-                                            Delete
+                                            حذف
                                         </Button>
                                     </div>
                                 </td>
@@ -195,7 +197,7 @@ export default function DataTable<T extends { id: number }>({
                 {data.total > 0 && (
                     <div className="flex flex-wrap items-center justify-between gap-2 border-t bg-muted/30 px-4 py-3 text-sm">
                         <p className="text-muted-foreground">
-                            {data.from ?? 0}–{data.to ?? 0} of {data.total}
+                            {data.from ?? 0}–{data.to ?? 0} من {data.total}
                         </p>
                         <div className="flex flex-wrap gap-1">
                             {data.links.map((link, i) => (
@@ -242,9 +244,9 @@ export default function DataTable<T extends { id: number }>({
                     onInteractOutside={(e) => e.preventDefault()}
                 >
                     <DialogHeader>
-                        <DialogTitle>Delete record?</DialogTitle>
+                        <DialogTitle>حذف السجل؟</DialogTitle>
                         <DialogDescription>
-                            This action cannot be undone.
+                            لا يمكن التراجع عن هذا الإجراء.
                         </DialogDescription>
                     </DialogHeader>
                     <DialogFooter>
@@ -252,14 +254,14 @@ export default function DataTable<T extends { id: number }>({
                             variant="outline"
                             onClick={() => setPendingDelete(null)}
                         >
-                            Cancel
+                            إلغاء
                         </Button>
                         <Button variant="destructive" onClick={confirmDelete}>
-                            Delete
+                            حذف
                         </Button>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
-        </>
+        </div>
     );
 }

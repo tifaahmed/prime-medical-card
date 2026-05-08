@@ -39,11 +39,11 @@ export default function BranchEdit({
 
     return (
         <>
-            <Head title={`Edit ${branch.slug}`} />
-            <div className="w-full space-y-6 p-6">
+            <Head title={`تعديل ${branch.name.ar || branch.slug}`} />
+            <div className="w-full space-y-6 p-6" dir="rtl">
                 <Heading
-                    title="Edit Branch"
-                    description={`Slug: ${branch.slug}`}
+                    title="تعديل فرع"
+                    description={`المعرّف: ${branch.slug}`}
                 />
                 <BranchForm
                     data={data}
@@ -62,8 +62,8 @@ export default function BranchEdit({
 
 BranchEdit.layout = {
     breadcrumbs: [
-        { title: 'Dashboard', href: dashboard() },
-        { title: 'Facility Branches', href: '/dashboard/facility-branches' },
-        { title: 'Edit', href: '#' },
+        { title: 'لوحة التحكم', href: dashboard() },
+        { title: 'فروع المنشآت', href: '/dashboard/facility-branches' },
+        { title: 'تعديل', href: '#' },
     ],
 };

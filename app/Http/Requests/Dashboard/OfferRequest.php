@@ -19,7 +19,7 @@ class OfferRequest extends FormRequest
         return [
             'offerable_type' => ['required', 'string', Rule::in([Facility::class, FacilityBranch::class])],
             'offerable_id' => ['required', 'integer'],
-            'title.en' => ['required', 'string', 'max:255'],
+            'title.en' => ['nullable', 'string', 'max:255'],
             'title.ar' => ['required', 'string', 'max:255'],
             'short_description.en' => ['nullable', 'string', 'max:500'],
             'short_description.ar' => ['nullable', 'string', 'max:500'],

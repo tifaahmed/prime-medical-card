@@ -28,11 +28,11 @@ export default function BranchCreate({
 
     return (
         <>
-            <Head title="New Branch" />
-            <div className="w-full space-y-6 p-6">
+            <Head title="فرع جديد" />
+            <div className="w-full space-y-6 p-6" dir="rtl">
                 <Heading
-                    title="New Branch"
-                    description="Bilingual branch with phones"
+                    title="فرع جديد"
+                    description="إضافة فرع لمنشأة مع أرقام الهواتف."
                 />
                 <BranchForm
                     data={data}
@@ -42,7 +42,7 @@ export default function BranchCreate({
                     processing={processing}
                     errors={errors as Record<string, string>}
                     facilities={facilities}
-                    primaryLabel="Create"
+                    primaryLabel="إنشاء"
                     cancelHref="/dashboard/facility-branches"
                 />
             </div>
@@ -52,8 +52,8 @@ export default function BranchCreate({
 
 BranchCreate.layout = {
     breadcrumbs: [
-        { title: 'Dashboard', href: dashboard() },
-        { title: 'Facility Branches', href: '/dashboard/facility-branches' },
-        { title: 'New', href: '/dashboard/facility-branches/create' },
+        { title: 'لوحة التحكم', href: dashboard() },
+        { title: 'فروع المنشآت', href: '/dashboard/facility-branches' },
+        { title: 'جديد', href: '/dashboard/facility-branches/create' },
     ],
 };

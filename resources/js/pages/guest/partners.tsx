@@ -4,6 +4,7 @@ import { createPortal } from 'react-dom';
 import FloatingActions from '@/pages/guest/_components/floating-actions';
 import FloatingLogos from '@/pages/guest/_components/floating-logos';
 import SeoHead, { breadcrumbSchema } from '@/pages/guest/_components/seo-head';
+import type { PageSeoProp } from '@/pages/guest/_components/seo-head';
 import AnnounceBar from '@/pages/guest/_components/home/announce-bar';
 import MobileBottomNav from '@/pages/guest/_components/home/mobile-bottom-nav';
 import useRevealOnScroll from '@/pages/guest/_components/home/reveal-on-scroll';
@@ -88,7 +89,18 @@ const CATEGORIES: { name: PartnerCategory; icon: React.ReactNode }[] = [
     },
 ];
 
-export default function Partners() {
+const FALLBACK_TITLE = 'الشركاء الطبيون — برايم ميديكال كارد';
+const FALLBACK_DESCRIPTION =
+    'استعرض شبكة الشركاء الطبيين لبرايم ميديكال كارد: مستشفيات، صيدليات، معامل تحاليل، مراكز أشعة، عيادات أسنان، بصريات، وأكثر في كل محافظات مصر.';
+const FALLBACK_KEYWORDS = [
+    'شركاء طبيون',
+    'مستشفيات مصر',
+    'صيدليات',
+    'معامل تحاليل',
+    'مراكز أشعة',
+];
+
+export default function Partners({ seo }: { seo?: PageSeoProp | null }) {
     const { auth, appUrl } = usePage<{
         auth: { user: { name: string } | null };
         appUrl: string;
@@ -125,15 +137,13 @@ export default function Partners() {
     return (
         <>
             <SeoHead
-                title="الشركاء الطبيون — برايم ميديكال كارد"
-                description="استعرض شبكة الشركاء الطبيين لبرايم ميديكال كارد: مستشفيات، صيدليات، معامل تحاليل، مراكز أشعة، عيادات أسنان، بصريات، وأكثر في كل محافظات مصر."
-                keywords={[
-                    'شركاء طبيون',
-                    'مستشفيات مصر',
-                    'صيدليات',
-                    'معامل تحاليل',
-                    'مراكز أشعة',
-                ]}
+                title={seo?.title || FALLBACK_TITLE}
+                description={seo?.description || FALLBACK_DESCRIPTION}
+                keywords={
+                    seo?.keywords?.length ? seo.keywords : FALLBACK_KEYWORDS
+                }
+                image={seo?.og_image_url ?? undefined}
+                noindex={seo?.noindex ?? false}
                 jsonLd={[
                     {
                         '@context': 'https://schema.org',

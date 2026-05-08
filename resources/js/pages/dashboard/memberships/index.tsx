@@ -55,26 +55,20 @@ export default function MembershipsIndex({
         },
         {
             key: 'number',
-            label: 'Number',
+            label: 'رقم العضوية',
             render: (r) => (
-                <span className="font-mono text-xs">{r.membership_number}</span>
+                <span dir="ltr" className="font-mono text-xs">
+                    {r.membership_number}
+                </span>
             ),
         },
         {
             key: 'job_title',
-            label: 'Job title',
+            label: 'المسمى الوظيفي',
             render: (r) =>
-                r.job_title.en || r.job_title.ar ? (
-                    <span>
-                        {r.job_title.en ?? ''}
-                        {r.job_title.ar && (
-                            <span
-                                className="ml-1 text-xs text-muted-foreground"
-                                dir="rtl"
-                            >
-                                / {r.job_title.ar}
-                            </span>
-                        )}
+                r.job_title.ar || r.job_title.en ? (
+                    <span dir="rtl">
+                        {r.job_title.ar || r.job_title.en}
                     </span>
                 ) : (
                     '—'
@@ -82,9 +76,9 @@ export default function MembershipsIndex({
         },
         {
             key: 'dates',
-            label: 'Period',
+            label: 'الفترة',
             render: (r) => (
-                <div className="text-xs">
+                <div className="text-xs" dir="ltr">
                     <p>{r.registration_date ?? '—'}</p>
                     <p className="text-muted-foreground">
                         → {r.expiration_date ?? '—'}
@@ -94,7 +88,7 @@ export default function MembershipsIndex({
         },
         {
             key: 'family',
-            label: 'Family',
+            label: 'العائلة',
             render: (r) => (
                 <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
                     {r.family_count}
@@ -103,7 +97,7 @@ export default function MembershipsIndex({
         },
         {
             key: 'status',
-            label: 'Status',
+            label: 'الحالة',
             render: (r) => (
                 <div className="flex flex-wrap gap-1">
                     <span
@@ -113,12 +107,12 @@ export default function MembershipsIndex({
                         )}
                     >
                         <CheckCircle2Icon className="size-3" />
-                        {r.is_active ? 'Active' : 'Inactive'}
+                        {r.is_active ? 'مفعّلة' : 'غير مفعّلة'}
                     </span>
                     {!r.is_visible && (
                         <span className="inline-flex items-center gap-1 rounded-full border border-muted-foreground/20 bg-muted px-2 py-0.5 text-[11px] font-medium text-muted-foreground">
                             <EyeOffIcon className="size-3" />
-                            Hidden
+                            مخفية
                         </span>
                     )}
                 </div>
@@ -128,17 +122,17 @@ export default function MembershipsIndex({
 
     return (
         <>
-            <Head title="Memberships" />
-            <div className="w-full space-y-6 p-6">
+            <Head title="العضويات" />
+            <div className="w-full space-y-6 p-6" dir="rtl">
                 <div className="flex items-center justify-between">
                     <Heading
-                        title="Memberships"
-                        description="Manage memberships and their family members."
+                        title="العضويات"
+                        description="إدارة العضويات والأفراد العائليّين."
                     />
                     <Button asChild className="gap-1.5">
                         <Link href="/dashboard/memberships/create">
                             <PlusIcon className="size-4" />
-                            Add Membership
+                            إضافة عضوية
                         </Link>
                     </Button>
                 </div>
@@ -150,6 +144,7 @@ export default function MembershipsIndex({
                     destroyUrl={(r) => `/dashboard/memberships/${r.id}`}
                     searchUrl="/dashboard/memberships"
                     initialSearch={filters.search}
+                    searchPlaceholder="ابحث برقم العضوية…"
                 />
             </div>
         </>
@@ -158,7 +153,7 @@ export default function MembershipsIndex({
 
 MembershipsIndex.layout = {
     breadcrumbs: [
-        { title: 'Dashboard', href: dashboard() },
-        { title: 'Memberships', href: '/dashboard/memberships' },
+        { title: 'لوحة التحكم', href: dashboard() },
+        { title: 'العضويات', href: '/dashboard/memberships' },
     ],
 };

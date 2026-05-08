@@ -42,7 +42,7 @@ interface Props {
     ) => void;
     submit: (e: FormEvent) => void;
     onSave: (intent: 'stay' | 'return') => void;
-    onPersistBranches?: (branches: BranchItem[]) => void;
+    onPersistBranches?: (branches: BranchItem[]) => Promise<void> | void;
     processing: boolean;
     errors: Record<string, string>;
     facilityTypes: RelatedOption[];
@@ -61,7 +61,7 @@ export default function FacilityForm({
     errors,
     facilityTypes,
     governorates,
-    primaryLabel = 'Save',
+    primaryLabel = 'حفظ',
     cancelHref,
 }: Props) {
     const branchErrorCount = useMemo(
@@ -87,7 +87,7 @@ export default function FacilityForm({
     }, [facilityErrorCount, branchErrorCount]);
 
     return (
-        <form onSubmit={submit} className="w-full space-y-6">
+        <form onSubmit={submit} className="w-full space-y-6" dir="rtl">
             <Tabs
                 value={tab}
                 onValueChange={(v) => setTab(v as 'facility' | 'branches')}
@@ -96,21 +96,21 @@ export default function FacilityForm({
                 <TabsList>
                     <TabsTrigger value="facility">
                         <Building2 className="size-4" />
-                        Facility
+                        المنشأة
                         {facilityErrorCount > 0 && (
-                            <span className="ml-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-destructive px-1.5 text-[10px] font-bold text-white">
+                            <span className="mr-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-destructive px-1.5 text-[10px] font-bold text-white">
                                 {facilityErrorCount}
                             </span>
                         )}
                     </TabsTrigger>
                     <TabsTrigger value="branches">
                         <StoreIcon className="size-4" />
-                        Branches
-                        <span className="ml-1 rounded-full bg-muted-foreground/20 px-1.5 py-0.5 text-[10px] font-semibold">
+                        الفروع
+                        <span className="mr-1 rounded-full bg-muted-foreground/20 px-1.5 py-0.5 text-[10px] font-semibold">
                             {data.branches.filter((b) => !b._delete).length}
                         </span>
                         {branchErrorCount > 0 && (
-                            <span className="ml-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-destructive px-1.5 text-[10px] font-bold text-white">
+                            <span className="mr-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-destructive px-1.5 text-[10px] font-bold text-white">
                                 {branchErrorCount}
                             </span>
                         )}
@@ -121,17 +121,16 @@ export default function FacilityForm({
                     <section className="space-y-6 rounded-3xl border bg-card p-6 shadow-sm">
                         <header>
                             <h3 className="font-heading text-lg font-semibold">
-                                Facility details
+                                بيانات المنشأة
                             </h3>
                             <p className="text-sm text-muted-foreground">
-                                Bilingual name, classification, and contact
-                                info.
+                                الاسم، التصنيف، ومعلومات التواصل.
                             </p>
                         </header>
 
                         <TranslatableInput
                             name="name"
-                            label="Name"
+                            label="الاسم"
                             values={data.name}
                             onChange={(locale, value) =>
                                 setData('name', {
@@ -146,7 +145,7 @@ export default function FacilityForm({
                         <div className="grid gap-3 md:grid-cols-2">
                             <div className="grid gap-2">
                                 <Label>
-                                    Facility Type{' '}
+                                    نوع المنشأة{' '}
                                     <span className="text-red-600">*</span>
                                 </Label>
                                 <Select
@@ -156,7 +155,7 @@ export default function FacilityForm({
                                     }
                                 >
                                     <SelectTrigger className="w-full">
-                                        <SelectValue placeholder="Select a type…" />
+                                        <SelectValue placeholder="اختر النوع…" />
                                     </SelectTrigger>
                                     <SelectContent>
                                         {facilityTypes.map((t) => (
@@ -164,9 +163,8 @@ export default function FacilityForm({
                                                 key={t.id}
                                                 value={String(t.id)}
                                             >
-                                                {t.name.en} —{' '}
                                                 <span dir="rtl">
-                                                    {t.name.ar}
+                                                    {t.name.ar || t.name.en}
                                                 </span>
                                             </SelectItem>
                                         ))}
@@ -177,7 +175,7 @@ export default function FacilityForm({
 
                             <div className="grid gap-2">
                                 <Label>
-                                    Governorate{' '}
+                                    المحافظة{' '}
                                     <span className="text-red-600">*</span>
                                 </Label>
                                 <Select
@@ -187,7 +185,7 @@ export default function FacilityForm({
                                     }
                                 >
                                     <SelectTrigger className="w-full">
-                                        <SelectValue placeholder="Select a governorate…" />
+                                        <SelectValue placeholder="اختر المحافظة…" />
                                     </SelectTrigger>
                                     <SelectContent>
                                         {governorates.map((g) => (
@@ -195,9 +193,8 @@ export default function FacilityForm({
                                                 key={g.id}
                                                 value={String(g.id)}
                                             >
-                                                {g.name.en} —{' '}
                                                 <span dir="rtl">
-                                                    {g.name.ar}
+                                                    {g.name.ar || g.name.en}
                                                 </span>
                                             </SelectItem>
                                         ))}
@@ -209,23 +206,23 @@ export default function FacilityForm({
 
                         <div className="grid gap-3 md:grid-cols-2">
                             <div className="grid gap-2">
-                                <Label>Phone</Label>
+                                <Label>رقم الهاتف</Label>
                                 <div className="relative">
-                                    <PhoneIcon className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
+                                    <PhoneIcon className="pointer-events-none absolute top-1/2 right-3 size-4 -translate-y-1/2 text-muted-foreground" />
                                     <Input
                                         value={data.phone ?? ''}
                                         onChange={(e) =>
                                             setData('phone', e.target.value)
                                         }
                                         placeholder="+20 1xx xxx xxxx"
-                                        className="pl-9"
+                                        className="pr-9"
                                     />
                                 </div>
                                 <InputError message={errors.phone} />
                             </div>
 
                             <ImagePicker
-                                label="Logo"
+                                label="الشعار"
                                 file={data.logo}
                                 existingUrl={data.logo_url}
                                 isRemoved={data.logo_remove}

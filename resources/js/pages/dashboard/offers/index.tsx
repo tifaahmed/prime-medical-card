@@ -21,6 +21,11 @@ interface Offer {
     old_price: number | string | null;
 }
 
+const OFFERABLE_LABELS: Record<string, string> = {
+    Facility: 'منشأة',
+    FacilityBranch: 'فرع',
+};
+
 export default function OffersIndex({
     offers,
     filters,
@@ -31,38 +36,34 @@ export default function OffersIndex({
     const columns: Column<Offer>[] = [
         { key: 'id', label: '#', render: (r) => r.id },
         {
-            key: 'title_en',
-            label: 'Title (EN)',
-            render: (r) => r.title.en ?? '—',
-        },
-        {
             key: 'title_ar',
-            label: 'العنوان (AR)',
+            label: 'العنوان',
             render: (r) => <span dir="rtl">{r.title.ar ?? '—'}</span>,
         },
         {
             key: 'offerable',
-            label: 'Belongs to',
+            label: 'تابع لـ',
             render: (r) => {
-                const label = r.offerable_type.split('\\').pop();
+                const klass = r.offerable_type.split('\\').pop() ?? '';
+                const label = OFFERABLE_LABELS[klass] ?? klass;
 
                 return (
-                    <span>
+                    <span dir="rtl">
                         <span className="text-muted-foreground">{label}: </span>
-                        {r.offerable_name?.en ?? '—'}
+                        {r.offerable_name?.ar ?? '—'}
                     </span>
                 );
             },
         },
         {
             key: 'price',
-            label: 'Price',
+            label: 'السعر',
             render: (r) =>
                 r.price ? (
-                    <span>
+                    <span dir="ltr">
                         {r.price}
                         {r.old_price && (
-                            <span className="ml-2 text-xs text-muted-foreground line-through">
+                            <span className="mr-2 text-xs text-muted-foreground line-through">
                                 {r.old_price}
                             </span>
                         )}
@@ -75,17 +76,17 @@ export default function OffersIndex({
 
     return (
         <>
-            <Head title="Offers" />
-            <div className="w-full space-y-6 p-6">
+            <Head title="العروض" />
+            <div className="w-full space-y-6 p-6" dir="rtl">
                 <div className="flex items-center justify-between">
                     <Heading
-                        title="Offers"
-                        description="Manage offers in English and Arabic."
+                        title="العروض"
+                        description="إدارة العروض والخصومات."
                     />
                     <Button asChild className="gap-1.5">
                         <Link href="/dashboard/offers/create">
                             <PlusIcon className="size-4" />
-                            Add Offer
+                            إضافة عرض
                         </Link>
                     </Button>
                 </div>
@@ -96,6 +97,7 @@ export default function OffersIndex({
                     destroyUrl={(r) => `/dashboard/offers/${r.id}`}
                     searchUrl="/dashboard/offers"
                     initialSearch={filters.search}
+                    searchPlaceholder="ابحث بالعنوان…"
                 />
             </div>
         </>
@@ -104,7 +106,7 @@ export default function OffersIndex({
 
 OffersIndex.layout = {
     breadcrumbs: [
-        { title: 'Dashboard', href: dashboard() },
-        { title: 'Offers', href: '/dashboard/offers' },
+        { title: 'لوحة التحكم', href: dashboard() },
+        { title: 'العروض', href: '/dashboard/offers' },
     ],
 };
