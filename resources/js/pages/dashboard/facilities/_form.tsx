@@ -21,12 +21,12 @@ import type { BranchItem } from '@/pages/dashboard/facilities/_branch-items';
 export interface RelatedOption {
     id: number;
     name: { en: string; ar: string };
+    governorate_id?: number;
 }
 
 export interface FacilityFormData {
     name: { en: string; ar: string };
     facility_type_id: number | string;
-    governorate_id: number | string;
     phone: string;
     logo: File | null;
     logo_url: string | null;
@@ -47,6 +47,7 @@ interface Props {
     errors: Record<string, string>;
     facilityTypes: RelatedOption[];
     governorates: RelatedOption[];
+    cities: RelatedOption[];
     primaryLabel?: string;
     cancelHref: string;
 }
@@ -61,6 +62,7 @@ export default function FacilityForm({
     errors,
     facilityTypes,
     governorates,
+    cities,
     primaryLabel = 'حفظ',
     cancelHref,
 }: Props) {
@@ -172,36 +174,6 @@ export default function FacilityForm({
                                 </Select>
                                 <InputError message={errors.facility_type_id} />
                             </div>
-
-                            <div className="grid gap-2">
-                                <Label>
-                                    المحافظة{' '}
-                                    <span className="text-red-600">*</span>
-                                </Label>
-                                <Select
-                                    value={String(data.governorate_id || '')}
-                                    onValueChange={(v) =>
-                                        setData('governorate_id', Number(v))
-                                    }
-                                >
-                                    <SelectTrigger className="w-full">
-                                        <SelectValue placeholder="اختر المحافظة…" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {governorates.map((g) => (
-                                            <SelectItem
-                                                key={g.id}
-                                                value={String(g.id)}
-                                            >
-                                                <span dir="rtl">
-                                                    {g.name.ar || g.name.en}
-                                                </span>
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                                <InputError message={errors.governorate_id} />
-                            </div>
                         </div>
 
                         <div className="grid gap-3 md:grid-cols-2">
@@ -244,6 +216,8 @@ export default function FacilityForm({
                             onChange={(b) => setData('branches', b)}
                             onPersist={onPersistBranches}
                             errors={errors}
+                            governorates={governorates}
+                            cities={cities}
                         />
                     </section>
                 </TabsContent>

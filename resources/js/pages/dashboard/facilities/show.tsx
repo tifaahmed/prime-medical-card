@@ -33,6 +33,8 @@ interface Branch {
     longitude: number | null;
     header_url: string | null;
     gallery: GalleryImage[];
+    governorate: { id: number; name: Translatable } | null;
+    city: { id: number; name: Translatable } | null;
 }
 
 interface Offer {
@@ -50,7 +52,6 @@ interface Facility {
     phone: string | null;
     logo_url: string | null;
     facility_type: { id: number; name: Translatable } | null;
-    governorate: { id: number; name: Translatable } | null;
     created_at: string | null;
     branches: Branch[];
     offers: Offer[];
@@ -120,16 +121,11 @@ export default function FacilityShow({ facility }: { facility: Facility }) {
                     </div>
                 </div>
 
-                <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+                <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
                     <MetaCard
                         icon={LayersIcon}
                         label="النوع"
                         value={facility.facility_type?.name.ar}
-                    />
-                    <MetaCard
-                        icon={MapPinIcon}
-                        label="المحافظة"
-                        value={facility.governorate?.name.ar}
                     />
                     <MetaCard
                         icon={PhoneIcon}
@@ -200,6 +196,20 @@ export default function FacilityShow({ facility }: { facility: Facility }) {
                                                     </span>
                                                 )}
                                             </p>
+                                            {(b.governorate || b.city) && (
+                                                <p
+                                                    className="flex flex-wrap items-center gap-1 text-sm text-muted-foreground"
+                                                    dir="rtl"
+                                                >
+                                                    <MapPinIcon className="size-3.5" />
+                                                    {[
+                                                        b.governorate?.name.ar,
+                                                        b.city?.name.ar,
+                                                    ]
+                                                        .filter(Boolean)
+                                                        .join(' · ')}
+                                                </p>
+                                            )}
                                             {(b.address.ar || b.address.en) && (
                                                 <p
                                                     className="text-sm text-muted-foreground"

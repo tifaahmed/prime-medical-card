@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Dashboard\CityController;
 use App\Http\Controllers\Dashboard\DashboardController;
 use App\Http\Controllers\Dashboard\FacilityBranchController;
 use App\Http\Controllers\Dashboard\FacilityController;
@@ -76,6 +77,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::prefix('dashboard')->name('dashboard.')->group(function () {
         Route::resource('governorates', GovernorateController::class)->except('show');
+        Route::resource('cities', CityController::class)->except('show');
         Route::resource('facility-types', FacilityTypeController::class)->except('show');
         Route::resource('facilities', FacilityController::class);
         Route::resource('facility-branches', FacilityBranchController::class)->except('show');

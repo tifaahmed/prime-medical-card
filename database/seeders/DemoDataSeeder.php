@@ -13,8 +13,15 @@ class DemoDataSeeder extends Seeder
 {
     public function run(): void
     {
-        $governorates = Governorate::factory()->count(5)->create();
-        $types = FacilityType::factory()->count(5)->create();
+        $governorates = Governorate::query()->get();
+        if ($governorates->isEmpty()) {
+            $governorates = Governorate::factory()->count(5)->create();
+        }
+
+        $types = FacilityType::query()->get();
+        if ($types->isEmpty()) {
+            $types = FacilityType::factory()->count(5)->create();
+        }
 
         $facilities = collect();
         foreach ($types as $type) {
@@ -23,7 +30,6 @@ class DemoDataSeeder extends Seeder
                     ->count(3)
                     ->state(fn () => [
                         'facility_type_id' => $type->id,
-                        'governorate_id' => $governorates->random()->id,
                     ])
                     ->create()
             );
@@ -33,6 +39,9 @@ class DemoDataSeeder extends Seeder
             FacilityBranch::factory()
                 ->count(rand(1, 3))
                 ->for($facility)
+                ->state(fn () => [
+                    'governorate_id' => $governorates->random()->id,
+                ])
                 ->create();
 
             Offer::factory()

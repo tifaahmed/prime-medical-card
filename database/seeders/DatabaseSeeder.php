@@ -14,6 +14,11 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             SuperAdminSeeder::class,
+            GovernorateSeeder::class,
+            CitySeeder::class,
+            FacilityTypeSeeder::class,
+            EgyptianFacilitySeeder::class,
+            OfferSeeder::class,
             DemoDataSeeder::class,
             PageSeoSeeder::class,
         ]);

@@ -38,6 +38,8 @@ class FacilityBranch extends Model implements HasMedia
      */
     protected $fillable = [
         'facility_id',
+        'governorate_id',
+        'city_id',
         'name',
         'slug',
         'address',
@@ -82,6 +84,22 @@ class FacilityBranch extends Model implements HasMedia
     public function facility(): BelongsTo
     {
         return $this->belongsTo(Facility::class);
+    }
+
+    /**
+     * Get the governorate the branch is located in.
+     */
+    public function governorate(): BelongsTo
+    {
+        return $this->belongsTo(Governorate::class);
+    }
+
+    /**
+     * Get the city the branch is located in.
+     */
+    public function city(): BelongsTo
+    {
+        return $this->belongsTo(City::class);
     }
 
     /**

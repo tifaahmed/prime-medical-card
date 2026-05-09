@@ -51,4 +51,12 @@ class Governorate extends Model
     {
         return $this->hasMany(Facility::class);
     }
+
+    /**
+     * Get the cities for the governorate.
+     */
+    public function cities(): HasMany
+    {
+        return $this->hasMany(City::class);
+    }
 }

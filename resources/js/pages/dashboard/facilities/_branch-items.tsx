@@ -21,14 +21,29 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
 import { cn } from '@/lib/utils';
 import GalleryPicker from '@/pages/dashboard/_components/gallery-picker';
 import type { ExistingGalleryItem } from '@/pages/dashboard/_components/gallery-picker';
 import ImagePicker from '@/pages/dashboard/_components/image-picker';
 import TranslatableInput from '@/pages/dashboard/_components/translatable-input';
 
+export interface LocationOption {
+    id: number;
+    name: { en: string; ar: string };
+    governorate_id?: number;
+}
+
 export interface BranchItem {
     id?: number;
+    governorate_id: number | string;
+    city_id: number | string;
     name: { en: string; ar: string };
     address: { en: string; ar: string };
     phone: string[];
@@ -48,9 +63,13 @@ interface Props {
     onChange: (branches: BranchItem[]) => void;
     onPersist?: (branches: BranchItem[]) => Promise<void> | void;
     errors: Record<string, string>;
+    governorates: LocationOption[];
+    cities: LocationOption[];
 }
 
 export const emptyBranch = (): BranchItem => ({
+    governorate_id: '',
+    city_id: '',
     name: { en: '', ar: '' },
     address: { en: '', ar: '' },
     phone: [],
@@ -70,6 +89,8 @@ const branchHasContent = (b: BranchItem): boolean =>
         b.name.ar ||
         b.address.en ||
         b.address.ar ||
+        b.governorate_id ||
+        b.city_id ||
         (b.phone && b.phone.length > 0) ||
         b.header ||
         b.header_url ||
@@ -84,6 +105,8 @@ export default function BranchItems({
     onChange,
     onPersist,
     errors,
+    governorates,
+    cities,
 }: Props) {
     const [editingIndex, setEditingIndex] = useState<number | null>(null);
     const [draft, setDraft] = useState<BranchItem | null>(null);
@@ -254,6 +277,8 @@ export default function BranchItems({
                                 )
                             }
                             errors={errors}
+                            governorates={governorates}
+                            cities={cities}
                         />
                     )}
 
@@ -424,12 +449,26 @@ function BranchEditor({
     branch,
     onChange,
     errors,
+    governorates,
+    cities,
 }: {
     index: number;
     branch: BranchItem;
     onChange: (patch: Partial<BranchItem>) => void;
     errors: Record<string, string>;
+    governorates: LocationOption[];
+    cities: LocationOption[];
 }) {
+    const filteredCities = useMemo(
+        () =>
+            branch.governorate_id
+                ? cities.filter(
+                      (c) => c.governorate_id === Number(branch.governorate_id),
+                  )
+                : cities,
+        [cities, branch.governorate_id],
+    );
+
     return (
         <div className="space-y-5 py-2" dir="rtl">
             <TranslatableInput
@@ -443,6 +482,68 @@ function BranchEditor({
                 }
                 errors={errors}
             />
+
+            <div className="grid gap-3 md:grid-cols-2">
+                <div className="grid gap-2">
+                    <Label>المحافظة</Label>
+                    <Select
+                        value={String(branch.governorate_id || '')}
+                        onValueChange={(v) =>
+                            onChange({
+                                governorate_id: Number(v),
+                                city_id: '',
+                            })
+                        }
+                    >
+                        <SelectTrigger className="w-full">
+                            <SelectValue placeholder="اختر المحافظة…" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {governorates.map((g) => (
+                                <SelectItem key={g.id} value={String(g.id)}>
+                                    <span dir="rtl">
+                                        {g.name.ar || g.name.en}
+                                    </span>
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                    <InputError
+                        message={errors[`branches.${index}.governorate_id`]}
+                    />
+                </div>
+
+                <div className="grid gap-2">
+                    <Label>المدينة</Label>
+                    <Select
+                        value={String(branch.city_id || '')}
+                        onValueChange={(v) => onChange({ city_id: Number(v) })}
+                        disabled={!branch.governorate_id}
+                    >
+                        <SelectTrigger className="w-full">
+                            <SelectValue
+                                placeholder={
+                                    branch.governorate_id
+                                        ? 'اختر المدينة…'
+                                        : 'اختر المحافظة أولاً'
+                                }
+                            />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {filteredCities.map((c) => (
+                                <SelectItem key={c.id} value={String(c.id)}>
+                                    <span dir="rtl">
+                                        {c.name.ar || c.name.en}
+                                    </span>
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                    <InputError
+                        message={errors[`branches.${index}.city_id`]}
+                    />
+                </div>
+            </div>
 
             <TranslatableInput
                 name={`branches.${index}.address`}

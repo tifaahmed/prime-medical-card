@@ -4,7 +4,6 @@ namespace Database\Factories;
 
 use App\Models\Facility;
 use App\Models\FacilityType;
-use App\Models\Governorate;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -24,7 +23,6 @@ class FacilityFactory extends Factory
                 'ar' => $en,
             ],
             'facility_type_id' => FacilityType::factory(),
-            'governorate_id' => Governorate::factory(),
         ];
     }
 }

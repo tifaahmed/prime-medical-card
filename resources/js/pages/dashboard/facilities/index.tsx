@@ -15,7 +15,6 @@ interface Facility {
     logo_url: string | null;
     name: { en: string; ar: string };
     facility_type: { id: number; name: { en: string; ar: string } } | null;
-    governorate: { id: number; name: { en: string; ar: string } } | null;
 }
 
 export default function FacilitiesIndex({
@@ -56,16 +55,6 @@ export default function FacilitiesIndex({
             render: (r) =>
                 r.facility_type ? (
                     <span dir="rtl">{r.facility_type.name.ar ?? '—'}</span>
-                ) : (
-                    '—'
-                ),
-        },
-        {
-            key: 'gov',
-            label: 'المحافظة',
-            render: (r) =>
-                r.governorate ? (
-                    <span dir="rtl">{r.governorate.name.ar ?? '—'}</span>
                 ) : (
                     '—'
                 ),

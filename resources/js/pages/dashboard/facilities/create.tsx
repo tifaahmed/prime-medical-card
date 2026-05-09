@@ -9,14 +9,15 @@ import { dashboard } from '@/routes';
 export default function FacilityCreate({
     facilityTypes,
     governorates,
+    cities,
 }: {
     facilityTypes: RelatedOption[];
     governorates: RelatedOption[];
+    cities: RelatedOption[];
 }) {
     const { data, setData, post, processing, errors } = useForm({
         name: { en: '', ar: '' },
         facility_type_id: '' as number | string,
-        governorate_id: '' as number | string,
         phone: '',
         logo: null as File | null,
         logo_url: null as string | null,
@@ -52,6 +53,7 @@ export default function FacilityCreate({
                     errors={errors as Record<string, string>}
                     facilityTypes={facilityTypes}
                     governorates={governorates}
+                    cities={cities}
                     primaryLabel="إنشاء"
                     cancelHref="/dashboard/facilities"
                 />

@@ -13,7 +13,6 @@ class FacilityResource extends JsonResource
             'id' => $this->id,
             'slug' => $this->slug,
             'facility_type_id' => $this->facility_type_id,
-            'governorate_id' => $this->governorate_id,
             'name' => [
                 'en' => $this->getTranslation('name', 'en', false),
                 'ar' => $this->getTranslation('name', 'ar', false),
@@ -25,12 +24,6 @@ class FacilityResource extends JsonResource
                 'facilityType',
                 fn () => $this->facilityType
                     ? FacilityTypeResource::make($this->facilityType)->resolve($request)
-                    : null,
-            ),
-            'governorate' => $this->whenLoaded(
-                'governorate',
-                fn () => $this->governorate
-                    ? GovernorateResource::make($this->governorate)->resolve($request)
                     : null,
             ),
             'branches' => $this->whenLoaded(

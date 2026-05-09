@@ -4,9 +4,11 @@ namespace App\Http\Controllers\Dashboard;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Dashboard\FacilityRequest;
+use App\Http\Resources\Dashboard\CityResource;
 use App\Http\Resources\Dashboard\FacilityResource;
 use App\Http\Resources\Dashboard\FacilityTypeResource;
 use App\Http\Resources\Dashboard\GovernorateResource;
+use App\Models\City;
 use App\Models\Facility;
 use App\Models\FacilityBranch;
 use App\Models\FacilityType;
@@ -24,7 +26,7 @@ class FacilityController extends Controller
         $search = $request->string('search')->toString();
 
         $facilities = Facility::query()
-            ->with(['facilityType', 'governorate', 'media'])
+            ->with(['facilityType', 'media'])
             ->when($search, fn ($q) => $q->where('slug', 'like', "%{$search}%"))
             ->orderBy('id', 'desc')
             ->paginate(10)
@@ -41,8 +43,9 @@ class FacilityController extends Controller
     {
         $facility->load([
             'facilityType',
-            'governorate',
             'branches' => fn ($q) => $q->orderBy('id'),
+            'branches.governorate',
+            'branches.city',
             'branches.media',
             'offers',
             'offers.offerable',
@@ -59,6 +62,7 @@ class FacilityController extends Controller
         return Inertia::render('dashboard/facilities/create', [
             'facilityTypes' => $this->facilityTypeOptions($request),
             'governorates' => $this->governorateOptions($request),
+            'cities' => $this->cityOptions($request),
         ]);
     }
 
@@ -90,6 +94,8 @@ class FacilityController extends Controller
     {
         $facility->load([
             'branches' => fn ($q) => $q->orderBy('id'),
+            'branches.governorate',
+            'branches.city',
             'branches.media',
             'media',
         ]);
@@ -98,6 +104,7 @@ class FacilityController extends Controller
             'facility' => FacilityResource::make($facility)->resolve($request),
             'facilityTypes' => $this->facilityTypeOptions($request),
             'governorates' => $this->governorateOptions($request),
+            'cities' => $this->cityOptions($request),
         ]);
     }
 
@@ -151,6 +158,8 @@ class FacilityController extends Controller
             }
 
             $attributes = [
+                'governorate_id' => $payload['governorate_id'] ?? null,
+                'city_id' => $payload['city_id'] ?? null,
                 'name' => $payload['name'] ?? ['en' => null, 'ar' => null],
                 'address' => $payload['address'] ?? ['en' => null, 'ar' => null],
                 'phone' => $payload['phone'] ?? [],
@@ -251,6 +260,15 @@ class FacilityController extends Controller
             ->orderBy('id')
             ->get()
             ->map(fn ($gov) => GovernorateResource::make($gov)->resolve($request))
+            ->all();
+    }
+
+    private function cityOptions(Request $request): array
+    {
+        return City::query()
+            ->orderBy('id')
+            ->get()
+            ->map(fn ($city) => CityResource::make($city)->resolve($request))
             ->all();
     }
 }

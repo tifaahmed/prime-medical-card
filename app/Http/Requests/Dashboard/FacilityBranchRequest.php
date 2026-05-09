@@ -15,12 +15,16 @@ class FacilityBranchRequest extends FormRequest
     {
         return [
             'facility_id' => ['required', 'integer', 'exists:facilities,id'],
+            'governorate_id' => ['nullable', 'integer', 'exists:governorates,id'],
+            'city_id' => ['nullable', 'integer', 'exists:cities,id'],
             'name.en' => ['nullable', 'string', 'max:255'],
             'name.ar' => ['nullable', 'string', 'max:255'],
             'address.en' => ['nullable', 'string', 'max:500'],
             'address.ar' => ['nullable', 'string', 'max:500'],
             'phone' => ['nullable', 'array'],
             'phone.*' => ['nullable', 'string', 'max:50'],
+            'latitude' => ['nullable', 'numeric', 'between:-90,90'],
+            'longitude' => ['nullable', 'numeric', 'between:-180,180'],
         ];
     }
 

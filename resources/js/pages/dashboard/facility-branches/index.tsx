@@ -13,6 +13,8 @@ interface Branch {
     id: number;
     slug: string;
     facility: { id: number; name: { en: string; ar: string } } | null;
+    governorate: { id: number; name: { en: string; ar: string } } | null;
+    city: { id: number; name: { en: string; ar: string } } | null;
     name: { en: string; ar: string };
     address: { en: string; ar: string };
     phone: string[];
@@ -38,6 +40,18 @@ export default function BranchesIndex({
             key: 'name_ar',
             label: 'الفرع',
             render: (r) => <span dir="rtl">{r.name.ar ?? '—'}</span>,
+        },
+        {
+            key: 'gov',
+            label: 'المحافظة',
+            render: (r) => (
+                <span dir="rtl">{r.governorate?.name.ar ?? '—'}</span>
+            ),
+        },
+        {
+            key: 'city',
+            label: 'المدينة',
+            render: (r) => <span dir="rtl">{r.city?.name.ar ?? '—'}</span>,
         },
         {
             key: 'phone',

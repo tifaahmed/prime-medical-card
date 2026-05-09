@@ -2,6 +2,7 @@ import { Link } from '@inertiajs/react';
 import {
     Building2,
     CreditCard,
+    Landmark,
     Layers,
     LayoutGrid,
     MapPin,
@@ -39,6 +40,12 @@ const cataloguesNav: NavItem[] = [
         href: '/dashboard/governorates',
         icon: MapPin,
         iconClassName: 'bg-emerald-500/15 text-emerald-300',
+    },
+    {
+        title: 'المدن',
+        href: '/dashboard/cities',
+        icon: Landmark,
+        iconClassName: 'bg-lime-500/15 text-lime-300',
     },
     {
         title: 'أنواع المنشآت',

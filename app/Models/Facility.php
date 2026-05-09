@@ -40,7 +40,6 @@ class Facility extends Model implements HasMedia
         'name',
         'slug',
         'facility_type_id',
-        'governorate_id',
         'phone',
     ];
 
@@ -60,14 +59,6 @@ class Facility extends Model implements HasMedia
     public function facilityType(): BelongsTo
     {
         return $this->belongsTo(FacilityType::class);
-    }
-
-    /**
-     * Get the governorate that owns the facility.
-     */
-    public function governorate(): BelongsTo
-    {
-        return $this->belongsTo(Governorate::class);
     }
 
     /**

@@ -9,6 +9,8 @@ import { dashboard } from '@/routes';
 
 interface FacilityBranchPayload {
     id: number;
+    governorate_id: number | null;
+    city_id: number | null;
     name: { en: string; ar: string };
     address: { en: string; ar: string };
     phone: string[];
@@ -22,7 +24,6 @@ interface Facility {
     id: number;
     slug: string;
     facility_type_id: number;
-    governorate_id: number;
     name: { en: string; ar: string };
     phone: string | null;
     logo_url: string | null;
@@ -33,21 +34,24 @@ export default function FacilityEdit({
     facility,
     facilityTypes,
     governorates,
+    cities,
 }: {
     facility: Facility;
     facilityTypes: RelatedOption[];
     governorates: RelatedOption[];
+    cities: RelatedOption[];
 }) {
     const { data, setData, processing, errors, setError, clearErrors } = useForm({
         name: facility.name,
         facility_type_id: facility.facility_type_id as number | string,
-        governorate_id: facility.governorate_id as number | string,
         phone: facility.phone ?? '',
         logo: null as File | null,
         logo_url: facility.logo_url,
         logo_remove: false,
         branches: facility.branches.map<BranchItem>((b) => ({
             id: b.id,
+            governorate_id: b.governorate_id ?? '',
+            city_id: b.city_id ?? '',
             name: b.name,
             address: b.address,
             phone: b.phone ?? [],
@@ -116,6 +120,7 @@ export default function FacilityEdit({
                     errors={errors as Record<string, string>}
                     facilityTypes={facilityTypes}
                     governorates={governorates}
+                    cities={cities}
                     cancelHref="/dashboard/facilities"
                 />
             </div>
