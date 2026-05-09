@@ -18,6 +18,14 @@ import {
     type PartnerBranch,
     type PartnerCategory,
 } from '@/pages/guest/_data/partners';
+import {
+    facilityToPartner,
+    type DbBranch,
+    type Facility,
+} from '@/pages/guest/_data/facility';
+import BranchesMap, {
+    type MapBranch,
+} from '@/pages/guest/_components/branches-map';
 
 const CATEGORY_ICON: Record<PartnerCategory, React.ReactNode> = {
     مستشفيات: (
@@ -66,16 +74,20 @@ const CATEGORY_ICON: Record<PartnerCategory, React.ReactNode> = {
 };
 
 export default function PartnerDetail() {
-    const { auth, id, appUrl } = usePage<{
+    const { auth, slug, facility, appUrl } = usePage<{
         auth: { user: { name: string } | null };
-        id: string;
+        slug: string;
+        facility: Facility | null;
         appUrl: string;
     }>().props;
     const authUser = auth?.user ?? null;
-    const partner = findPartner(id);
+    const partner = facility ? facilityToPartner(facility) : findPartner(slug);
     const [copied, setCopied] = useState(false);
     const [saved, setSaved] = useState(false);
     const [quickPartner, setQuickPartner] = useState<Partner | null>(null);
+    const [activeBranchId, setActiveBranchId] = useState<
+        MapBranch['id'] | null
+    >(null);
 
     const handleShare = async () => {
         const url = typeof window !== 'undefined' ? window.location.href : '';
@@ -142,6 +154,17 @@ export default function PartnerDetail() {
     const whatsapp = partner.whatsapp ?? partner.phone;
     const whatsappHref = `https://wa.me/${whatsapp.replace(/[^\d]/g, '')}`;
     const branches = getPartnerLocations(partner);
+    const dbBranches: DbBranch[] = facility?.branches ?? [];
+    const mapBranches: MapBranch[] = dbBranches.map((b) => ({
+        id: b.id,
+        name: b.name,
+        address: b.address,
+        latitude: b.latitude,
+        longitude: b.longitude,
+    }));
+    const hasMapBranches = mapBranches.some(
+        (b) => typeof b.latitude === 'number' && typeof b.longitude === 'number',
+    );
 
     return (
         <>
@@ -359,12 +382,32 @@ export default function PartnerDetail() {
                                 </dl>
                             </div>
 
-                            <CompactMap address={address} name={partner.name} />
+                            {hasMapBranches ? (
+                                <BranchesMap
+                                    branches={mapBranches}
+                                    activeId={activeBranchId}
+                                    onMarkerEnter={setActiveBranchId}
+                                    onMarkerLeave={() =>
+                                        setActiveBranchId(null)
+                                    }
+                                />
+                            ) : (
+                                <CompactMap
+                                    address={address}
+                                    name={partner.name}
+                                />
+                            )}
                         </div>
 
                         {branches.length > 0 && (
                             <div className="lg:col-span-1">
-                                <BranchesPreview branches={branches} />
+                                <BranchesPreview
+                                    branches={branches}
+                                    branchIds={dbBranches.map((b) => b.id)}
+                                    activeId={activeBranchId}
+                                    onHover={setActiveBranchId}
+                                    onLeave={() => setActiveBranchId(null)}
+                                />
                             </div>
                         )}
                     </div>
@@ -426,7 +469,19 @@ function CompactDetail({ label, value }: { label: string; value: string }) {
     );
 }
 
-function BranchesPreview({ branches }: { branches: PartnerBranch[] }) {
+function BranchesPreview({
+    branches,
+    branchIds,
+    activeId,
+    onHover,
+    onLeave,
+}: {
+    branches: PartnerBranch[];
+    branchIds?: (number | string)[];
+    activeId?: number | string | null;
+    onHover?: (id: number | string) => void;
+    onLeave?: () => void;
+}) {
     return (
         <div className="flex h-full flex-col rounded-2xl border border-[rgba(11,46,44,0.08)] bg-white p-3">
             <div className="mb-2 flex items-center justify-between">
@@ -438,7 +493,10 @@ function BranchesPreview({ branches }: { branches: PartnerBranch[] }) {
                 </span>
             </div>
             <ul className="flex max-h-80 flex-1 flex-col gap-2 overflow-y-auto">
-                {branches.map((b, i) => (
+                {branches.map((b, i) => {
+                    const id = branchIds?.[i];
+                    const active = id !== undefined && id === activeId;
+                    return (
                     <li key={`${b.name}-${i}`}>
                         <a
                             href={
@@ -448,7 +506,24 @@ function BranchesPreview({ branches }: { branches: PartnerBranch[] }) {
                             }
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="group flex items-start gap-2 rounded-xl border border-[rgba(11,46,44,0.06)] p-2 transition hover:border-[var(--teal-700)] hover:bg-[rgba(11,46,44,0.03)]"
+                            onMouseEnter={
+                                id !== undefined && onHover
+                                    ? () => onHover(id)
+                                    : undefined
+                            }
+                            onMouseLeave={onLeave}
+                            onFocus={
+                                id !== undefined && onHover
+                                    ? () => onHover(id)
+                                    : undefined
+                            }
+                            onBlur={onLeave}
+                            className={
+                                'group flex items-start gap-2 rounded-xl border p-2 transition hover:border-[var(--teal-700)] hover:bg-[rgba(11,46,44,0.03)] ' +
+                                (active
+                                    ? 'border-[var(--amber-500)] bg-[var(--amber-100)]/40'
+                                    : 'border-[rgba(11,46,44,0.06)]')
+                            }
                         >
                             {b.image ? (
                                 <img
@@ -477,7 +552,8 @@ function BranchesPreview({ branches }: { branches: PartnerBranch[] }) {
                             </div>
                         </a>
                     </li>
-                ))}
+                    );
+                })}
             </ul>
         </div>
     );

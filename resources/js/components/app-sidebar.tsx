@@ -5,6 +5,7 @@ import {
     Landmark,
     Layers,
     LayoutGrid,
+    Mail,
     MapPin,
     Search,
     Store,
@@ -94,6 +95,15 @@ const seoNav: NavItem[] = [
     },
 ];
 
+const messagesNav: NavItem[] = [
+    {
+        title: 'رسائل التواصل',
+        href: '/dashboard/contact-messages',
+        icon: Mail,
+        iconClassName: 'bg-fuchsia-500/15 text-fuchsia-300',
+    },
+];
+
 export function AppSidebar() {
     return (
         <Sidebar collapsible="icon" variant="inset">
@@ -115,6 +125,7 @@ export function AppSidebar() {
                 <NavMain items={networkNav} label="الشبكة" />
                 <NavMain items={membersNav} label="الأعضاء" />
                 <NavMain items={seoNav} label="تحسين البحث" />
+                <NavMain items={messagesNav} label="الرسائل" />
             </SidebarContent>
 
             <SidebarFooter>

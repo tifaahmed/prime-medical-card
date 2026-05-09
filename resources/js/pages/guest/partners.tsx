@@ -3,22 +3,28 @@ import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import FloatingActions from '@/pages/guest/_components/floating-actions';
 import FloatingLogos from '@/pages/guest/_components/floating-logos';
-import SeoHead, { breadcrumbSchema } from '@/pages/guest/_components/seo-head';
-import type { PageSeoProp } from '@/pages/guest/_components/seo-head';
 import AnnounceBar from '@/pages/guest/_components/home/announce-bar';
 import MobileBottomNav from '@/pages/guest/_components/home/mobile-bottom-nav';
 import useRevealOnScroll from '@/pages/guest/_components/home/reveal-on-scroll';
 import SiteFooter from '@/pages/guest/_components/home/site-footer';
 import SiteNav from '@/pages/guest/_components/home/site-nav';
 import { homeStyles } from '@/pages/guest/_components/home/styles';
+import type { PageSeoProp } from '@/pages/guest/_components/seo-head';
+import SeoHead, { breadcrumbSchema } from '@/pages/guest/_components/seo-head';
 import {
     ALL,
     ALL_GOV,
     GOVERNORATES,
     PARTNERS,
-    type Partner,
-    type PartnerCategory,
 } from '@/pages/guest/_data/partners';
+import type { Partner, PartnerCategory } from '@/pages/guest/_data/partners';
+import {
+    facilityToPartner,
+    type DbBranch,
+    type Facility,
+} from '@/pages/guest/_data/facility';
+
+const ALL_CITY = 'كل المدن';
 
 const CATEGORIES: { name: PartnerCategory; icon: React.ReactNode }[] = [
     {
@@ -100,7 +106,13 @@ const FALLBACK_KEYWORDS = [
     'مراكز أشعة',
 ];
 
-export default function Partners({ seo }: { seo?: PageSeoProp | null }) {
+export default function Partners({
+    seo,
+    facilities,
+}: {
+    seo?: PageSeoProp | null;
+    facilities?: Facility[];
+}) {
     const { auth, appUrl } = usePage<{
         auth: { user: { name: string } | null };
         appUrl: string;
@@ -109,21 +121,114 @@ export default function Partners({ seo }: { seo?: PageSeoProp | null }) {
 
     const [activeCategory, setActiveCategory] = useState<string>(ALL);
     const [activeGov, setActiveGov] = useState<string>(ALL_GOV);
+    const [activeCity, setActiveCity] = useState<string>(ALL_CITY);
     const [query, setQuery] = useState('');
-    const [contactPartner, setContactPartner] = useState<Partner | null>(null);
+    const [contactPartner, setContactPartner] = useState<
+        (Partner & { dbBranches?: DbBranch[] }) | null
+    >(null);
 
     useRevealOnScroll();
+
+    const sourceList = useMemo(() => {
+        if (facilities && facilities.length > 0) {
+            return facilities.map(facilityToPartner);
+        }
+
+        return PARTNERS as (Partner & { dbBranches?: DbBranch[] })[];
+    }, [facilities]);
+
+    const govOptions = useMemo(() => {
+        if (facilities && facilities.length > 0) {
+            const set = new Set<string>();
+            facilities.forEach((f) =>
+                f.branches.forEach((b) => {
+                    if (b.governorate?.name) {
+                        set.add(b.governorate.name);
+                    }
+                }),
+            );
+
+            return [ALL_GOV, ...Array.from(set)];
+        }
+
+        return GOVERNORATES;
+    }, [facilities]);
+
+    const cityOptions = useMemo(() => {
+        if (!facilities || facilities.length === 0) {
+            return [ALL_CITY];
+        }
+        const set = new Set<string>();
+        facilities.forEach((f) =>
+            f.branches.forEach((b) => {
+                if (!b.city?.name) {
+                    return;
+                }
+                if (
+                    activeGov !== ALL_GOV &&
+                    b.governorate?.name !== activeGov
+                ) {
+                    return;
+                }
+                set.add(b.city.name);
+            }),
+        );
+
+        return [ALL_CITY, ...Array.from(set)];
+    }, [facilities, activeGov]);
+
+    const typeOptions = useMemo(() => {
+        if (!facilities || facilities.length === 0) {
+            return null;
+        }
+        const set = new Set<string>();
+        facilities.forEach((f) => {
+            if (f.facility_type?.name) {
+                set.add(f.facility_type.name);
+            }
+        });
+
+        return Array.from(set);
+    }, [facilities]);
+
+    const effectiveCity = cityOptions.includes(activeCity)
+        ? activeCity
+        : ALL_CITY;
 
     const filtered = useMemo(() => {
         const q = query.trim();
 
-        return PARTNERS.filter((p) => {
+        return sourceList.filter((p) => {
             if (activeCategory !== ALL && p.category !== activeCategory) {
                 return false;
             }
 
-            if (activeGov !== ALL_GOV && p.governorate !== activeGov) {
-                return false;
+            const branchMatchesGov = (b: DbBranch) =>
+                activeGov === ALL_GOV || b.governorate?.name === activeGov;
+            const branchMatchesCity = (b: DbBranch) =>
+                effectiveCity === ALL_CITY || b.city?.name === effectiveCity;
+
+            if (activeGov !== ALL_GOV) {
+                if (p.dbBranches && p.dbBranches.length > 0) {
+                    if (!p.dbBranches.some(branchMatchesGov)) {
+                        return false;
+                    }
+                } else if (p.governorate !== activeGov) {
+                    return false;
+                }
+            }
+
+            if (effectiveCity !== ALL_CITY) {
+                if (!p.dbBranches || p.dbBranches.length === 0) {
+                    return false;
+                }
+                if (
+                    !p.dbBranches.some(
+                        (b) => branchMatchesGov(b) && branchMatchesCity(b),
+                    )
+                ) {
+                    return false;
+                }
             }
 
             if (q && !p.name.includes(q) && !p.description.includes(q)) {
@@ -132,7 +237,7 @@ export default function Partners({ seo }: { seo?: PageSeoProp | null }) {
 
             return true;
         });
-    }, [activeCategory, activeGov, query]);
+    }, [activeCategory, activeGov, effectiveCity, query, sourceList]);
 
     return (
         <>
@@ -220,8 +325,17 @@ export default function Partners({ seo }: { seo?: PageSeoProp | null }) {
                                 <GovernorateCombobox
                                     value={activeGov}
                                     onChange={setActiveGov}
-                                    options={GOVERNORATES}
+                                    options={govOptions}
                                 />
+                                {cityOptions.length > 1 && (
+                                    <GovernorateCombobox
+                                        value={effectiveCity}
+                                        onChange={setActiveCity}
+                                        options={cityOptions}
+                                        searchPlaceholder="ابحث عن مدينة..."
+                                        emptyLabel="لا توجد مدن مطابقة"
+                                    />
+                                )}
                             </div>
                         </div>
                     </div>
@@ -235,15 +349,28 @@ export default function Partners({ seo }: { seo?: PageSeoProp | null }) {
                                 onClick={() => setActiveCategory(ALL)}
                                 label={ALL}
                             />
-                            {CATEGORIES.map((c) => (
-                                <CategoryPill
-                                    key={c.name}
-                                    active={activeCategory === c.name}
-                                    onClick={() => setActiveCategory(c.name)}
-                                    label={c.name}
-                                    icon={c.icon}
-                                />
-                            ))}
+                            {typeOptions
+                                ? typeOptions.map((name) => (
+                                      <CategoryPill
+                                          key={name}
+                                          active={activeCategory === name}
+                                          onClick={() =>
+                                              setActiveCategory(name)
+                                          }
+                                          label={name}
+                                      />
+                                  ))
+                                : CATEGORIES.map((c) => (
+                                      <CategoryPill
+                                          key={c.name}
+                                          active={activeCategory === c.name}
+                                          onClick={() =>
+                                              setActiveCategory(c.name)
+                                          }
+                                          label={c.name}
+                                          icon={c.icon}
+                                      />
+                                  ))}
                         </div>
 
                         <div className="mt-6 flex items-center justify-between text-sm text-[var(--ink-soft)]">
@@ -255,12 +382,14 @@ export default function Partners({ seo }: { seo?: PageSeoProp | null }) {
                             </span>
                             {(activeCategory !== ALL ||
                                 activeGov !== ALL_GOV ||
+                                effectiveCity !== ALL_CITY ||
                                 query) && (
                                 <button
                                     type="button"
                                     onClick={() => {
                                         setActiveCategory(ALL);
                                         setActiveGov(ALL_GOV);
+                                        setActiveCity(ALL_CITY);
                                         setQuery('');
                                     }}
                                     className="text-xs font-semibold text-[var(--teal-700)] underline-offset-4 hover:underline"
@@ -460,33 +589,44 @@ function PartnerCard({
 
 function fuzzyScore(query: string, target: string): number | null {
     const q = query.trim();
+
     if (!q) {
         return 0;
     }
+
     if (target === q) {
         return 1000;
     }
+
     if (target.startsWith(q)) {
         return 500 - target.length;
     }
+
     const sub = target.indexOf(q);
+
     if (sub !== -1) {
         return 300 - sub - target.length;
     }
+
     let ti = 0;
     let matched = 0;
     let firstIdx = -1;
+
     for (const ch of q) {
         const idx = target.indexOf(ch, ti);
+
         if (idx === -1) {
             return null;
         }
+
         if (firstIdx === -1) {
             firstIdx = idx;
         }
+
         matched++;
         ti = idx + 1;
     }
+
     return matched > 0 ? 100 - firstIdx - (target.length - matched) : null;
 }
 
@@ -496,10 +636,14 @@ function GovernorateCombobox({
     value,
     onChange,
     options,
+    searchPlaceholder = 'ابحث عن محافظة...',
+    emptyLabel = 'لا توجد محافظات مطابقة',
 }: {
     value: string;
     onChange: (v: string) => void;
     options: string[];
+    searchPlaceholder?: string;
+    emptyLabel?: string;
 }) {
     const [open, setOpen] = useState(false);
     const [query, setQuery] = useState('');
@@ -512,9 +656,11 @@ function GovernorateCombobox({
 
     const ranked: Ranked[] = useMemo(() => {
         const q = query.trim();
+
         if (!q) {
             return options.map((o) => ({ value: o, score: 0 }));
         }
+
         return options
             .map((o) => ({ value: o, score: fuzzyScore(q, o) }))
             .filter((r): r is Ranked => r.score !== null)
@@ -525,8 +671,10 @@ function GovernorateCombobox({
         if (!open) {
             return;
         }
+
         const update = () => {
             const r = triggerRef.current?.getBoundingClientRect();
+
             if (r) {
                 setRect(r);
             }
@@ -534,6 +682,7 @@ function GovernorateCombobox({
         update();
         window.addEventListener('resize', update);
         window.addEventListener('scroll', update, true);
+
         return () => {
             window.removeEventListener('resize', update);
             window.removeEventListener('scroll', update, true);
@@ -544,8 +693,10 @@ function GovernorateCombobox({
         if (!open) {
             return;
         }
+
         const onDoc = (e: MouseEvent) => {
             const t = e.target as Node;
+
             if (
                 !triggerRef.current?.contains(t) &&
                 !panelRef.current?.contains(t)
@@ -554,6 +705,7 @@ function GovernorateCombobox({
             }
         };
         document.addEventListener('mousedown', onDoc);
+
         return () => document.removeEventListener('mousedown', onDoc);
     }, [open]);
 
@@ -574,6 +726,7 @@ function GovernorateCombobox({
         if (!open) {
             return;
         }
+
         const node = listRef.current?.children[highlight] as
             | HTMLElement
             | undefined;
@@ -590,6 +743,7 @@ function GovernorateCombobox({
         } else if (e.key === 'Enter') {
             e.preventDefault();
             const item = ranked[highlight];
+
             if (item) {
                 onChange(item.value);
                 setOpen(false);
@@ -634,7 +788,7 @@ function GovernorateCombobox({
                                   value={query}
                                   onChange={(e) => setQuery(e.target.value)}
                                   onKeyDown={onKey}
-                                  placeholder="ابحث عن محافظة..."
+                                  placeholder={searchPlaceholder}
                                   className="w-full rounded-xl border border-[rgba(11,46,44,0.1)] bg-[rgba(11,46,44,0.03)] py-2 ps-9 pe-3 text-sm text-[var(--ink)] outline-none placeholder:text-[var(--ink-soft)] focus:border-[var(--teal-700)] focus:bg-white"
                               />
                           </div>
@@ -647,12 +801,13 @@ function GovernorateCombobox({
                       >
                           {ranked.length === 0 ? (
                               <li className="px-3 py-4 text-center text-xs text-[var(--ink-soft)]">
-                                  لا توجد محافظات مطابقة
+                                  {emptyLabel}
                               </li>
                           ) : (
                               ranked.map((item, i) => {
                                   const selected = item.value === value;
                                   const active = i === highlight;
+
                                   return (
                                       <li key={item.value}>
                                           <button
@@ -814,7 +969,7 @@ function ContactModal({
     partner,
     onClose,
 }: {
-    partner: Partner;
+    partner: Partner & { dbBranches?: DbBranch[] };
     onClose: () => void;
 }) {
     useEffect(() => {
@@ -837,7 +992,11 @@ function ContactModal({
         partner.subject ?? `${partner.category} في ${partner.governorate}`;
     const address = partner.address ?? `${partner.governorate}، مصر`;
     const whatsapp = partner.whatsapp ?? partner.phone;
-    const whatsappHref = `https://wa.me/${whatsapp.replace(/[^\d]/g, '')}`;
+    const whatsappHref = whatsapp
+        ? `https://wa.me/${whatsapp.replace(/[^\d]/g, '')}`
+        : '#';
+    const hasDbBranches =
+        Array.isArray(partner.dbBranches) && partner.dbBranches.length > 0;
 
     return (
         <div
@@ -848,7 +1007,10 @@ function ContactModal({
             onClick={onClose}
         >
             <div
-                className="relative w-full max-w-md overflow-hidden rounded-3xl bg-white shadow-2xl"
+                className={
+                    'relative w-full overflow-hidden rounded-3xl bg-white shadow-2xl ' +
+                    (hasDbBranches ? 'max-w-2xl' : 'max-w-md')
+                }
                 onClick={(e) => e.stopPropagation()}
                 dir="rtl"
             >
@@ -889,9 +1051,11 @@ function ContactModal({
 
                 <div className="space-y-4 p-5 sm:p-6">
                     <div>
-                        <span className="rounded-full bg-[var(--amber-100)] px-3 py-1 text-[11px] font-bold text-[var(--amber-600)]">
-                            {partner.discount}
-                        </span>
+                        {partner.discount && (
+                            <span className="rounded-full bg-[var(--amber-100)] px-3 py-1 text-[11px] font-bold text-[var(--amber-600)]">
+                                {partner.discount}
+                            </span>
+                        )}
                         <h2 className="mt-2 text-lg font-bold text-[var(--teal-900)] sm:text-xl">
                             {partner.name}
                         </h2>
@@ -900,51 +1064,66 @@ function ContactModal({
                         </p>
                     </div>
 
-                    <dl className="space-y-2 rounded-2xl bg-[rgba(11,46,44,0.04)] p-4 text-sm">
-                        <ContactRow label="النوع" value={partner.category} />
-                        <ContactRow
-                            label="المحافظة"
-                            value={partner.governorate}
-                        />
-                        <ContactRow label="العنوان" value={address} />
-                        <ContactRow label="الهاتف" value={partner.phone} />
-                        <ContactRow label="واتساب" value={whatsapp} />
-                        {partner.email && (
-                            <ContactRow label="البريد" value={partner.email} />
-                        )}
-                    </dl>
+                    {hasDbBranches ? (
+                        <BranchesTabs branches={partner.dbBranches!} />
+                    ) : (
+                        <dl className="space-y-2 rounded-2xl bg-[rgba(11,46,44,0.04)] p-4 text-sm">
+                            <ContactRow
+                                label="النوع"
+                                value={partner.category}
+                            />
+                            <ContactRow
+                                label="المحافظة"
+                                value={partner.governorate}
+                            />
+                            <ContactRow label="العنوان" value={address} />
+                            <ContactRow label="الهاتف" value={partner.phone} />
+                            <ContactRow label="واتساب" value={whatsapp} />
+                            {partner.email && (
+                                <ContactRow
+                                    label="البريد"
+                                    value={partner.email}
+                                />
+                            )}
+                        </dl>
+                    )}
 
-                    <div className="grid grid-cols-3 gap-2">
-                        <a
-                            href={`tel:${partner.phone}`}
-                            className="inline-flex items-center justify-center gap-1 rounded-full bg-[var(--teal-900)] px-3 py-2.5 text-xs font-semibold text-[var(--cream)] transition hover:bg-[var(--teal-800)]"
-                        >
-                            <PhoneIconSm />
-                            اتصل
-                        </a>
-                        <a
-                            href={whatsappHref}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center justify-center gap-1 rounded-full bg-[#25D366] px-3 py-2.5 text-xs font-semibold text-white transition hover:bg-[#1fb358]"
-                        >
-                            <WhatsappIcon />
-                            واتساب
-                        </a>
-                        {partner.email ? (
+                    {partner.phone && (
+                        <div className="grid grid-cols-3 gap-2">
                             <a
-                                href={`mailto:${partner.email}`}
-                                className="inline-flex items-center justify-center gap-1 rounded-full border border-[rgba(11,46,44,0.15)] px-3 py-2.5 text-xs font-semibold text-[var(--teal-900)] transition hover:border-[var(--teal-700)]"
+                                href={`tel:${partner.phone}`}
+                                className="inline-flex items-center justify-center gap-1 rounded-full bg-[var(--teal-900)] px-3 py-2.5 text-xs font-semibold text-[var(--cream)] transition hover:bg-[var(--teal-800)]"
                             >
-                                <MailIcon />
-                                بريد
+                                <PhoneIconSm />
+                                اتصل
                             </a>
-                        ) : (
-                            <span className="inline-flex items-center justify-center gap-1 rounded-full border border-[rgba(11,46,44,0.08)] px-3 py-2.5 text-xs font-semibold text-[var(--ink-soft)]">
-                                —
-                            </span>
-                        )}
-                    </div>
+                            <a
+                                href={whatsappHref}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center justify-center gap-1 rounded-full bg-[#25D366] px-3 py-2.5 text-xs font-semibold text-white transition hover:bg-[#1fb358]"
+                            >
+                                <WhatsappIcon />
+                                واتساب
+                            </a>
+                            {partner.email ? (
+                                <a
+                                    href={`mailto:${partner.email}`}
+                                    className="inline-flex items-center justify-center gap-1 rounded-full border border-[rgba(11,46,44,0.15)] px-3 py-2.5 text-xs font-semibold text-[var(--teal-900)] transition hover:border-[var(--teal-700)]"
+                                >
+                                    <MailIcon />
+                                    بريد
+                                </a>
+                            ) : (
+                                <Link
+                                    href={`/partners/${partner.id}`}
+                                    className="inline-flex items-center justify-center gap-1 rounded-full border border-[rgba(11,46,44,0.15)] px-3 py-2.5 text-xs font-semibold text-[var(--teal-900)] transition hover:border-[var(--teal-700)]"
+                                >
+                                    تفاصيل
+                                </Link>
+                            )}
+                        </div>
+                    )}
                 </div>
             </div>
         </div>
@@ -984,5 +1163,191 @@ function MailIcon() {
             <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
             <polyline points="22,6 12,13 2,6" />
         </svg>
+    );
+}
+
+const NO_GOV_LABEL = 'بدون محافظة';
+const NO_CITY_LABEL = 'بدون مدينة';
+
+function BranchesTabs({ branches }: { branches: DbBranch[] }) {
+    const govGroups = useMemo(() => {
+        const map = new Map<
+            string,
+            { id: number | null; name: string; branches: DbBranch[] }
+        >();
+        branches.forEach((b) => {
+            const id = b.governorate?.id ?? null;
+            const name = b.governorate?.name ?? NO_GOV_LABEL;
+            const key = id !== null ? `g-${id}` : 'g-none';
+
+            if (!map.has(key)) {
+                map.set(key, { id, name, branches: [] });
+            }
+
+            map.get(key)!.branches.push(b);
+        });
+
+        return Array.from(map.entries()).map(([key, val]) => ({ key, ...val }));
+    }, [branches]);
+
+    const [activeGovKey, setActiveGovKey] = useState<string>(
+        govGroups[0]?.key ?? '',
+    );
+
+    const activeGov =
+        govGroups.find((g) => g.key === activeGovKey) ?? govGroups[0];
+
+    const cityGroups = useMemo(() => {
+        if (!activeGov) {
+            return [];
+        }
+
+        const map = new Map<
+            string,
+            { id: number | null; name: string; branches: DbBranch[] }
+        >();
+        activeGov.branches.forEach((b) => {
+            const id = b.city?.id ?? null;
+            const name = b.city?.name ?? NO_CITY_LABEL;
+            const key = id !== null ? `c-${id}` : 'c-none';
+
+            if (!map.has(key)) {
+                map.set(key, { id, name, branches: [] });
+            }
+
+            map.get(key)!.branches.push(b);
+        });
+
+        return Array.from(map.entries()).map(([key, val]) => ({ key, ...val }));
+    }, [activeGov]);
+
+    const [cityKeyByGov, setCityKeyByGov] = useState<Record<string, string>>(
+        {},
+    );
+    const activeCityKey =
+        cityKeyByGov[activeGovKey] ?? cityGroups[0]?.key ?? '';
+    const activeCity =
+        cityGroups.find((c) => c.key === activeCityKey) ?? cityGroups[0];
+
+    if (!activeGov) {
+        return (
+            <div className="rounded-2xl bg-[rgba(11,46,44,0.04)] p-4 text-sm text-[var(--ink-soft)]">
+                لا توجد فروع لهذه المنشأة بعد.
+            </div>
+        );
+    }
+
+    return (
+        <div className="space-y-3">
+            <div className="flex flex-wrap gap-2">
+                {govGroups.map((g) => {
+                    const active = g.key === activeGov.key;
+
+                    return (
+                        <button
+                            key={g.key}
+                            type="button"
+                            onClick={() => setActiveGovKey(g.key)}
+                            className={
+                                'inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold transition ' +
+                                (active
+                                    ? 'border-[var(--teal-900)] bg-[var(--teal-900)] text-[var(--cream)]'
+                                    : 'border-[rgba(11,46,44,0.15)] bg-white text-[var(--teal-900)] hover:border-[var(--teal-700)]')
+                            }
+                        >
+                            <PinIconSm />
+                            {g.name}
+                            <span
+                                className={
+                                    'rounded-full px-1.5 py-0.5 text-[10px] font-bold ' +
+                                    (active
+                                        ? 'bg-[rgba(247,242,234,0.2)] text-[var(--cream)]'
+                                        : 'bg-[var(--amber-100)] text-[var(--amber-600)]')
+                                }
+                            >
+                                {g.branches.length}
+                            </span>
+                        </button>
+                    );
+                })}
+            </div>
+
+            <div className="rounded-2xl bg-[rgba(11,46,44,0.04)] p-3 sm:p-4">
+                <div className="flex flex-wrap gap-1.5">
+                    {cityGroups.map((c) => {
+                        const active =
+                            activeCity && c.key === activeCity.key;
+
+                        return (
+                            <button
+                                key={c.key}
+                                type="button"
+                                onClick={() =>
+                                    setCityKeyByGov((prev) => ({
+                                        ...prev,
+                                        [activeGovKey]: c.key,
+                                    }))
+                                }
+                                className={
+                                    'inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-semibold transition ' +
+                                    (active
+                                        ? 'bg-[var(--teal-700)] text-[var(--cream)]'
+                                        : 'bg-white text-[var(--teal-900)] hover:bg-[var(--amber-100)]')
+                                }
+                            >
+                                {c.name}
+                                <span
+                                    className={
+                                        'rounded-full px-1 text-[9px] font-bold ' +
+                                        (active
+                                            ? 'bg-[rgba(247,242,234,0.2)]'
+                                            : 'bg-[rgba(11,46,44,0.08)] text-[var(--ink-soft)]')
+                                    }
+                                >
+                                    {c.branches.length}
+                                </span>
+                            </button>
+                        );
+                    })}
+                </div>
+
+                <ul className="mt-3 space-y-2">
+                    {activeCity?.branches.map((branch) => (
+                        <BranchItem key={branch.id} branch={branch} />
+                    ))}
+                </ul>
+            </div>
+        </div>
+    );
+}
+
+function BranchItem({ branch }: { branch: DbBranch }) {
+    const phone = branch.phone?.[0] ?? null;
+
+    return (
+        <li className="rounded-xl border border-[rgba(11,46,44,0.08)] bg-white p-3">
+            <div className="flex items-start justify-between gap-2">
+                <div className="min-w-0 flex-1">
+                    <h4 className="truncate text-sm font-bold text-[var(--teal-900)]">
+                        {branch.name || 'فرع'}
+                    </h4>
+                    {branch.address && (
+                        <p className="mt-0.5 line-clamp-2 text-xs text-[var(--ink-soft)]">
+                            {branch.address}
+                        </p>
+                    )}
+                </div>
+                {phone && (
+                    <a
+                        href={`tel:${phone}`}
+                        onClick={(e) => e.stopPropagation()}
+                        className="inline-flex shrink-0 items-center gap-1 rounded-full bg-[var(--teal-900)] px-2.5 py-1.5 text-[10px] font-semibold text-[var(--cream)] transition hover:bg-[var(--teal-800)]"
+                    >
+                        <PhoneIconSm />
+                        {phone}
+                    </a>
+                )}
+            </div>
+        </li>
     );
 }

@@ -19,7 +19,6 @@ class DatabaseSeeder extends Seeder
             FacilityTypeSeeder::class,
             EgyptianFacilitySeeder::class,
             OfferSeeder::class,
-            DemoDataSeeder::class,
             PageSeoSeeder::class,
         ]);
     }

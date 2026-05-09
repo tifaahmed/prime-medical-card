@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Dashboard\CityController;
+use App\Http\Controllers\Dashboard\ContactMessageController;
 use App\Http\Controllers\Dashboard\DashboardController;
 use App\Http\Controllers\Dashboard\FacilityBranchController;
 use App\Http\Controllers\Dashboard\FacilityController;
@@ -65,8 +66,9 @@ Route::get('/about', [GuestController::class, 'about'])->name('about');
 Route::get('/services', [GuestController::class, 'services'])->name('services');
 Route::get('/services/{id}', [GuestController::class, 'serviceDetail'])->name('service.show');
 Route::get('/partners', [GuestController::class, 'partners'])->name('partners');
-Route::get('/partners/{id}', [GuestController::class, 'partnerDetail'])->name('partner.show');
+Route::get('/partners/{slug}', [GuestController::class, 'partnerDetail'])->name('partner.show');
 Route::get('/contact', [GuestController::class, 'contact'])->name('contact');
+Route::post('/contact', [GuestController::class, 'submitContact'])->name('contact.submit');
 
 Route::get('/card/{number}', [GuestController::class, 'memberCard'])
     ->where('number', '[A-Za-z0-9\-]+')
@@ -84,6 +86,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::resource('offers', OfferController::class)->except('show');
         Route::resource('memberships', MembershipController::class);
         Route::resource('page-seos', PageSeoController::class)->only(['index', 'edit', 'update']);
+        Route::resource('contact-messages', ContactMessageController::class)->only(['index', 'update', 'destroy']);
     });
 });
 

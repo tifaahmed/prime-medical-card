@@ -1,5 +1,5 @@
-import { usePage } from '@inertiajs/react';
-import { useState } from 'react';
+import { useForm, usePage } from '@inertiajs/react';
+import { useEffect, useState } from 'react';
 import type { FormEvent } from 'react';
 import FloatingActions from '@/pages/guest/_components/floating-actions';
 import FloatingLogos from '@/pages/guest/_components/floating-logos';
@@ -32,18 +32,32 @@ const FALLBACK_DESCRIPTION =
     'تواصل مع فريق برايم ميديكال كارد عبر الهاتف أو الواتساب أو البريد الإلكتروني. نحن هنا للإجابة على أسئلتك ومساعدتك في الاشتراك.';
 
 export default function Contact({ seo }: { seo?: PageSeoProp | null }) {
-    const { auth, appUrl } = usePage<{
+    const { auth, appUrl, flash } = usePage<{
         auth: { user: { name: string } | null };
         appUrl: string;
+        flash?: { contact_submitted?: boolean };
     }>().props;
     const authUser = auth?.user ?? null;
     const [submitted, setSubmitted] = useState(false);
 
+    const { data, setData, post, processing, errors, reset } = useForm({
+        name: '',
+        phone: '',
+        subject: '',
+    });
+
     useRevealOnScroll();
+
+    useEffect(() => {
+        if (flash?.contact_submitted) {
+            setSubmitted(true);
+            reset();
+        }
+    }, [flash?.contact_submitted, reset]);
 
     const onSubmit = (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        setSubmitted(true);
+        post('/contact', { preserveScroll: true });
     };
 
     return (
@@ -225,6 +239,12 @@ export default function Contact({ seo }: { seo?: PageSeoProp | null }) {
                                                 type="text"
                                                 placeholder="الاسم الكامل"
                                                 required
+                                                value={data.name}
+                                                onChange={(v) =>
+                                                    setData('name', v)
+                                                }
+                                                error={errors.name}
+                                                disabled={processing}
                                             />
                                             <Field
                                                 label="رقم الهاتف"
@@ -232,6 +252,12 @@ export default function Contact({ seo }: { seo?: PageSeoProp | null }) {
                                                 type="tel"
                                                 placeholder="01xxxxxxxxx"
                                                 required
+                                                value={data.phone}
+                                                onChange={(v) =>
+                                                    setData('phone', v)
+                                                }
+                                                error={errors.phone}
+                                                disabled={processing}
                                             />
                                             <Field
                                                 label="الموضوع"
@@ -241,12 +267,21 @@ export default function Contact({ seo }: { seo?: PageSeoProp | null }) {
                                                 required
                                                 multiline
                                                 rows={5}
+                                                value={data.subject}
+                                                onChange={(v) =>
+                                                    setData('subject', v)
+                                                }
+                                                error={errors.subject}
+                                                disabled={processing}
                                             />
                                             <button
                                                 type="submit"
-                                                className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-[#0b2e2c] px-6 py-3.5 text-sm font-semibold text-white transition hover:bg-[#12403d] sm:w-auto sm:self-start"
+                                                disabled={processing}
+                                                className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-[#0b2e2c] px-6 py-3.5 text-sm font-semibold text-white transition hover:bg-[#12403d] disabled:opacity-60 sm:w-auto sm:self-start"
                                             >
-                                                إرسال الرسالة
+                                                {processing
+                                                    ? 'جارٍ الإرسال...'
+                                                    : 'إرسال الرسالة'}
                                                 <ArrowIcon />
                                             </button>
                                         </form>
@@ -344,6 +379,10 @@ function Field({
     required,
     multiline,
     rows,
+    value,
+    onChange,
+    error,
+    disabled,
 }: {
     label: string;
     name: string;
@@ -352,9 +391,16 @@ function Field({
     required?: boolean;
     multiline?: boolean;
     rows?: number;
+    value?: string;
+    onChange?: (v: string) => void;
+    error?: string;
+    disabled?: boolean;
 }) {
     const sharedClasses =
-        'w-full border border-[rgba(11,46,44,0.15)] bg-[#f7f2ea] px-4 py-3 text-sm text-[#0a1a19] outline-none transition focus:border-[#236b64] focus:bg-white focus:ring-2 focus:ring-[#7fb3ad]';
+        'w-full border bg-[#f7f2ea] px-4 py-3 text-sm text-[#0a1a19] outline-none transition focus:bg-white focus:ring-2 ' +
+        (error
+            ? 'border-red-500 focus:border-red-600 focus:ring-red-200'
+            : 'border-[rgba(11,46,44,0.15)] focus:border-[#236b64] focus:ring-[#7fb3ad]');
 
     return (
         <div>
@@ -371,6 +417,9 @@ function Field({
                     placeholder={placeholder}
                     required={required}
                     rows={rows ?? 4}
+                    value={value ?? ''}
+                    onChange={(e) => onChange?.(e.target.value)}
+                    disabled={disabled}
                     className={`${sharedClasses} resize-y rounded-2xl leading-relaxed`}
                 />
             ) : (
@@ -380,8 +429,16 @@ function Field({
                     type={type}
                     placeholder={placeholder}
                     required={required}
+                    value={value ?? ''}
+                    onChange={(e) => onChange?.(e.target.value)}
+                    disabled={disabled}
                     className={`${sharedClasses} rounded-full`}
                 />
+            )}
+            {error && (
+                <p className="mt-1 text-xs font-semibold text-red-600">
+                    {error}
+                </p>
             )}
         </div>
     );

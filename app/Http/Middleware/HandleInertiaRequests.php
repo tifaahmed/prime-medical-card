@@ -46,6 +46,9 @@ class HandleInertiaRequests extends Middleware
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
             'appUrl' => $appUrl,
             'currentUrl' => '/'.ltrim($request->path(), '/'),
+            'flash' => [
+                'contact_submitted' => fn () => $request->session()->get('contact_submitted'),
+            ],
         ];
     }
 }
