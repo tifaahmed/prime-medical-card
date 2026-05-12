@@ -1,73 +1,68 @@
+import { usePageContent } from '@/hooks/use-page-content';
 import { useDragScroll } from './use-drag-scroll';
 
 type Testimonial = {
-    avatar: string;
-    quote: string;
+    id: number;
     name: string;
-    role: string;
-    featured?: boolean;
+    role: string | null;
+    quote: string;
+    avatar: string | null;
+    is_featured: boolean;
 };
-
-const TESTIMONIALS: Testimonial[] = [
-    {
-        featured: true,
-        avatar: 'أم',
-        quote: 'اشتركت في الباقة العائلية من سنتين والصراحة ما ندمتش. وفرت على عائلتي آلاف الجنيهات في العلاج والتحاليل والأدوية. خصوصاً لما بنتي محتاجة كشف أسنان، الخصم كان هائل. أفضل استثمار ممكن تعمله لصحة أسرتك.',
-        name: 'أحمد مصطفى',
-        role: 'القاهرة الجديدة — عضو منذ ٢٠٢٣',
-    },
-    {
-        avatar: 'فس',
-        quote: 'التطبيق سهل جداً وشبكة الأطباء ضخمة. في أي مكان بروح البطاقة مقبولة بدون مشاكل. الخصومات حقيقية مش زي شركات تانية.',
-        name: 'فاطمة السيد',
-        role: 'الجيزة',
-    },
-    {
-        avatar: 'مع',
-        quote: 'كعائلة فيها ٤ أطفال، الباقة العائلية غيرت حياتنا. الصيدلية عند البيت بيقبلوها والتحاليل بنص التمن. الدعم الفني محترم جداً.',
-        name: 'محمد عبدالله',
-        role: 'الإسكندرية',
-    },
-];
 
 function TestimonialCard({ t }: { t: Testimonial }) {
     return (
-        <div className={'testimonial ' + (t.featured ? 'testimonial-big' : '')}>
+        <div className={'testimonial ' + (t.is_featured ? 'testimonial-big' : '')}>
             <span className="quote-mark">&ldquo;</span>
             <blockquote>{t.quote}</blockquote>
             <div className="t-author">
-                <div className="t-avatar">{t.avatar}</div>
+                {t.avatar && <div className="t-avatar">{t.avatar}</div>}
                 <div>
                     <div className="t-name">{t.name}</div>
-                    <div className="t-role">{t.role}</div>
+                    {t.role && <div className="t-role">{t.role}</div>}
                 </div>
             </div>
         </div>
     );
 }
 
-export default function Testimonials() {
+export default function Testimonials({
+    items = [],
+}: {
+    items?: Testimonial[];
+}) {
     const { ref: gridRef, handlers } = useDragScroll<HTMLDivElement>();
+    const eyebrow = usePageContent(
+        'testimonials_header',
+        'eyebrow',
+        'آراء الأعضاء',
+    );
+    const paragraph = usePageContent(
+        'testimonials_header',
+        'paragraph',
+        'استمع إلى تجارب أعضائنا الحقيقية — قصص نجاح من كل محافظات الجمهورية',
+    );
+
+    if (items.length === 0) {
+        return null;
+    }
 
     return (
         <section className="testimonials-section">
             <div className="container">
                 <div className="section-header">
-                    <span className="section-eyebrow">آراء الأعضاء</span>
+                    <span className="section-eyebrow">{eyebrow}</span>
                     <h2>
                         أكثر من ١٢٠ ألف عائلة
                         <br />
                         <em>تثق بنا</em>
                     </h2>
-                    <p>
-                        استمع إلى تجارب أعضائنا الحقيقية — قصص نجاح من كل
-                        محافظات الجمهورية
-                    </p>
+                    <p>{paragraph}</p>
                 </div>
 
                 <div ref={gridRef} className="testimonials-grid" {...handlers}>
-                    {TESTIMONIALS.map((t) => (
-                        <TestimonialCard t={t} key={t.name} />
+                    {items.map((t) => (
+                        <TestimonialCard t={t} key={t.id} />
                     ))}
                 </div>
             </div>

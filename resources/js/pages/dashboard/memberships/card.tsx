@@ -1,0 +1,972 @@
+import { Head, Link, useForm, usePage } from '@inertiajs/react';
+import {
+    ArrowRightIcon,
+    MoveIcon,
+    RotateCcwIcon,
+    SaveIcon,
+} from 'lucide-react';
+import { QRCodeSVG } from 'qrcode.react';
+import {
+    useCallback,
+    useEffect,
+    useMemo,
+    useRef,
+    useState,
+    type CSSProperties,
+    type FormEvent,
+    type PointerEvent as ReactPointerEvent,
+    type ReactNode,
+} from 'react';
+import Heading from '@/components/heading';
+import InputError from '@/components/input-error';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { cn } from '@/lib/utils';
+import ImagePicker from '@/pages/dashboard/_components/image-picker';
+import { dashboard } from '@/routes';
+
+type TextLayout = { top: number; left: number; fontSize: number };
+type ImageLayout = {
+    top: number;
+    left: number;
+    width: number;
+    height: number;
+};
+
+interface CardLayout {
+    first_name: TextLayout;
+    full_name: TextLayout;
+    work_place: TextLayout;
+    company: TextLayout;
+    date: TextLayout;
+    photo: ImageLayout;
+    qr: ImageLayout;
+}
+
+type LayoutKey = keyof CardLayout;
+type TextKey = 'first_name' | 'full_name' | 'work_place' | 'company' | 'date';
+type ImageKey = 'photo' | 'qr';
+
+interface CardMembership {
+    id: number;
+    membership_number: string;
+    expiration_date: string | null;
+    job_title_en: string | null;
+    job_title_ar: string | null;
+    company_name: string | null;
+    card_first_name: string | null;
+    card_full_name: string | null;
+    photo_url: string | null;
+    holder_name: string | null;
+    first_name: string | null;
+    second_name: string | null;
+    third_name: string | null;
+    fourth_name: string | null;
+    card_layout: CardLayout;
+}
+
+const TEXT_KEYS: TextKey[] = [
+    'first_name',
+    'full_name',
+    'work_place',
+    'company',
+    'date',
+];
+const IMAGE_KEYS: ImageKey[] = ['photo', 'qr'];
+
+const LABELS: Record<LayoutKey, string> = {
+    first_name: 'الاسم الأول (كبير)',
+    full_name: 'الاسم الكامل',
+    work_place: 'جهة العمل',
+    company: 'اسم الشركة',
+    date: 'تاريخ الانتهاء',
+    photo: 'الصورة',
+    qr: 'رمز QR',
+};
+
+export default function MembershipCard({
+    membership,
+    default_card_layout,
+}: {
+    membership: CardMembership;
+    default_card_layout: CardLayout;
+}) {
+    const { appUrl } = usePage<{ appUrl: string }>().props;
+    const cardUrl = `${appUrl?.replace(/\/$/, '') ?? ''}/card/${membership.membership_number}`;
+
+    const restOfName = [
+        membership.second_name,
+        membership.third_name,
+        membership.fourth_name,
+    ]
+        .filter(Boolean)
+        .join(' ');
+
+    const { data, setData, post, processing, errors } = useForm({
+        card_first_name:
+            membership.card_first_name ?? membership.first_name ?? '',
+        card_full_name: membership.card_full_name ?? restOfName,
+        job_title_en: membership.job_title_en ?? '',
+        company_name: membership.company_name ?? '',
+        expiration_date: membership.expiration_date ?? '',
+        photo: null as File | null,
+        photo_remove: false,
+        card_layout: membership.card_layout,
+        _method: 'POST',
+    });
+
+    const [selected, setSelected] = useState<LayoutKey | null>(null);
+
+    const photoPreview = useMemo(
+        () => (data.photo ? URL.createObjectURL(data.photo) : null),
+        [data.photo],
+    );
+
+    useEffect(
+        () => () => {
+            if (photoPreview) {
+                URL.revokeObjectURL(photoPreview);
+            }
+        },
+        [photoPreview],
+    );
+
+    const displayedPhoto = data.photo_remove
+        ? null
+        : photoPreview ?? membership.photo_url;
+
+    const updateLayout = useCallback(
+        <K extends LayoutKey>(key: K, patch: Partial<CardLayout[K]>) => {
+            setData('card_layout', {
+                ...data.card_layout,
+                [key]: { ...data.card_layout[key], ...patch },
+            });
+        },
+        [data.card_layout, setData],
+    );
+
+    const resetLayout = () => {
+        setData('card_layout', default_card_layout);
+    };
+
+    const submit = (e: FormEvent) => {
+        e.preventDefault();
+        post(`/dashboard/memberships/${membership.id}/card`, {
+            forceFormData: true,
+            preserveScroll: true,
+        });
+    };
+
+    return (
+        <>
+            <Head title={`بطاقة ${membership.membership_number}`} />
+            <div className="w-full space-y-6 p-6" dir="rtl">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                    <Heading
+                        title={membership.holder_name ?? 'تصميم البطاقة'}
+                        description={`رقم العضوية: ${membership.membership_number}`}
+                    />
+                    <Button asChild variant="outline" className="gap-1.5">
+                        <Link href="/dashboard/memberships">
+                            <ArrowRightIcon className="size-4" />
+                            عودة
+                        </Link>
+                    </Button>
+                </div>
+
+                <section className="rounded-3xl border bg-card p-5 shadow-sm">
+                    <h3 className="mb-3 font-heading text-sm font-semibold text-muted-foreground">
+                        أسماء العضو
+                    </h3>
+                    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                        <NameField
+                            label="الاسم الأول"
+                            value={membership.first_name}
+                        />
+                        <NameField
+                            label="الاسم الثاني"
+                            value={membership.second_name}
+                        />
+                        <NameField
+                            label="الاسم الثالث"
+                            value={membership.third_name}
+                        />
+                        <NameField
+                            label="الاسم الرابع"
+                            value={membership.fourth_name}
+                        />
+                    </div>
+                </section>
+
+                <div className="grid gap-6 lg:grid-cols-[minmax(0,360px)_1fr]">
+                    <form
+                        onSubmit={submit}
+                        className="space-y-4 rounded-3xl border bg-card p-6 shadow-sm"
+                    >
+                        <h3 className="font-heading text-lg font-semibold">
+                            بيانات البطاقة
+                        </h3>
+
+                        <div className="grid gap-2">
+                            <Label>الاسم الأول (كبير)</Label>
+                            <Input
+                                dir="ltr"
+                                value={data.card_first_name}
+                                onChange={(e) =>
+                                    setData('card_first_name', e.target.value)
+                                }
+                                placeholder="MOHAMMED"
+                            />
+                            <InputError message={errors.card_first_name} />
+                        </div>
+
+                        <div className="grid gap-2">
+                            <Label>الاسم الكامل</Label>
+                            <Input
+                                dir="ltr"
+                                value={data.card_full_name}
+                                onChange={(e) =>
+                                    setData('card_full_name', e.target.value)
+                                }
+                                placeholder="AHMED MOHAMMED ALI NASSAR"
+                            />
+                            <InputError message={errors.card_full_name} />
+                        </div>
+
+                        <div className="grid gap-2">
+                            <Label>جهة العمل (Work Place)</Label>
+                            <Input
+                                dir="ltr"
+                                value={data.job_title_en}
+                                onChange={(e) =>
+                                    setData('job_title_en', e.target.value)
+                                }
+                                placeholder="ADMINISTRATIVE AFFAIRS MANAGER"
+                            />
+                            <InputError message={errors.job_title_en} />
+                        </div>
+
+                        <div className="grid gap-2">
+                            <Label>اسم الشركة</Label>
+                            <Input
+                                value={data.company_name}
+                                onChange={(e) =>
+                                    setData('company_name', e.target.value)
+                                }
+                                placeholder="اسم الشركة"
+                            />
+                            <InputError message={errors.company_name} />
+                        </div>
+
+                        <div className="grid gap-2">
+                            <Label>تاريخ الانتهاء</Label>
+                            <Input
+                                type="date"
+                                value={data.expiration_date}
+                                onChange={(e) =>
+                                    setData('expiration_date', e.target.value)
+                                }
+                            />
+                            <InputError message={errors.expiration_date} />
+                        </div>
+
+                        <ImagePicker
+                            label="صورة العضو"
+                            file={data.photo}
+                            existingUrl={membership.photo_url}
+                            isRemoved={data.photo_remove}
+                            onFileChange={(f) => setData('photo', f)}
+                            onRemoveExistingChange={(rm) =>
+                                setData('photo_remove', rm)
+                            }
+                            error={errors.photo}
+                            aspect="square"
+                            size="sm"
+                        />
+
+                        <Button
+                            type="submit"
+                            disabled={processing}
+                            className="w-full gap-1.5"
+                        >
+                            <SaveIcon className="size-4" />
+                            حفظ البطاقة
+                        </Button>
+                    </form>
+
+                    <div className="space-y-6">
+                        <section className="space-y-3 rounded-3xl border bg-card p-6 shadow-sm">
+                            <header className="flex flex-wrap items-center justify-between gap-2">
+                                <h3 className="font-heading text-lg font-semibold">
+                                    معاينة البطاقة
+                                </h3>
+                                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                    <MoveIcon className="size-3.5" />
+                                    اسحب العناصر لتغيير مكانها
+                                </div>
+                            </header>
+                            <CardFrontPreview
+                                firstName={data.card_first_name}
+                                fullName={data.card_full_name}
+                                workPlace={data.job_title_en}
+                                companyName={data.company_name}
+                                expirationDate={data.expiration_date}
+                                photoUrl={displayedPhoto}
+                                qrValue={cardUrl}
+                                layout={data.card_layout}
+                                onLayoutChange={updateLayout}
+                                selected={selected}
+                                onSelect={setSelected}
+                            />
+                            <p
+                                className="break-all text-center text-xs text-muted-foreground"
+                                dir="ltr"
+                            >
+                                QR → {cardUrl}
+                            </p>
+                        </section>
+
+                        <section className="space-y-4 rounded-3xl border bg-card p-6 shadow-sm">
+                            <header className="flex flex-wrap items-center justify-between gap-2">
+                                <h3 className="font-heading text-lg font-semibold">
+                                    التخطيط (الموقع والحجم)
+                                </h3>
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    size="sm"
+                                    className="gap-1.5"
+                                    onClick={resetLayout}
+                                >
+                                    <RotateCcwIcon className="size-3.5" />
+                                    إعادة تعيين
+                                </Button>
+                            </header>
+
+                            <div className="grid gap-4 md:grid-cols-2">
+                                {TEXT_KEYS.map((key) => (
+                                    <TextLayoutControls
+                                        key={key}
+                                        label={LABELS[key]}
+                                        active={selected === key}
+                                        onActivate={() => setSelected(key)}
+                                        value={data.card_layout[key]}
+                                        onChange={(patch) =>
+                                            updateLayout(key, patch)
+                                        }
+                                    />
+                                ))}
+                                {IMAGE_KEYS.map((key) => (
+                                    <ImageLayoutControls
+                                        key={key}
+                                        label={LABELS[key]}
+                                        active={selected === key}
+                                        onActivate={() => setSelected(key)}
+                                        value={data.card_layout[key]}
+                                        onChange={(patch) =>
+                                            updateLayout(key, patch)
+                                        }
+                                    />
+                                ))}
+                            </div>
+                        </section>
+
+                        <section className="space-y-3 rounded-3xl border bg-card p-6 shadow-sm">
+                            <header className="flex items-center justify-between">
+                                <h3 className="font-heading text-lg font-semibold">
+                                    الوجه الخلفي
+                                </h3>
+                            </header>
+                            <div
+                                className="relative w-full overflow-hidden rounded-2xl border shadow-sm"
+                                style={{ aspectRatio: '1096 / 686' }}
+                            >
+                                <img
+                                    src="/images/card/back.jpeg"
+                                    alt=""
+                                    className="absolute inset-0 h-full w-full object-cover"
+                                />
+                            </div>
+                        </section>
+
+                        <section className="space-y-3 rounded-3xl border bg-card p-6 shadow-sm">
+                            <header className="flex items-center justify-between">
+                                <h3 className="font-heading text-lg font-semibold">
+                                    قالب مرجعي
+                                </h3>
+                                <span className="text-xs text-muted-foreground">
+                                    Example
+                                </span>
+                            </header>
+                            <div
+                                className="relative w-full overflow-hidden rounded-2xl border shadow-sm"
+                                style={{ aspectRatio: '1096 / 686' }}
+                            >
+                                <img
+                                    src="/images/card/front-example.jpeg"
+                                    alt=""
+                                    className="absolute inset-0 h-full w-full object-cover"
+                                />
+                            </div>
+                        </section>
+                    </div>
+                </div>
+            </div>
+        </>
+    );
+}
+
+function NameField({
+    label,
+    value,
+}: {
+    label: string;
+    value: string | null;
+}) {
+    return (
+        <div className="rounded-2xl border bg-muted/30 px-3 py-2">
+            <p className="text-[11px] font-semibold tracking-wider text-muted-foreground">
+                {label}
+            </p>
+            <p className="mt-0.5 font-medium" dir="rtl">
+                {value || '—'}
+            </p>
+        </div>
+    );
+}
+
+function CardFrontPreview({
+    firstName,
+    fullName,
+    workPlace,
+    companyName,
+    expirationDate,
+    photoUrl,
+    qrValue,
+    layout,
+    onLayoutChange,
+    selected,
+    onSelect,
+}: {
+    firstName: string;
+    fullName: string;
+    workPlace: string;
+    companyName: string;
+    expirationDate: string;
+    photoUrl: string | null;
+    qrValue: string;
+    layout: CardLayout;
+    onLayoutChange: <K extends LayoutKey>(
+        key: K,
+        patch: Partial<CardLayout[K]>,
+    ) => void;
+    selected: LayoutKey | null;
+    onSelect: (key: LayoutKey | null) => void;
+}) {
+    const cardRef = useRef<HTMLDivElement | null>(null);
+    const formattedDate = formatDate(expirationDate);
+
+    const layoutRef = useRef(layout);
+    const selectedRef = useRef(selected);
+    const onLayoutChangeRef = useRef(onLayoutChange);
+    useEffect(() => {
+        layoutRef.current = layout;
+    }, [layout]);
+    useEffect(() => {
+        selectedRef.current = selected;
+    }, [selected]);
+    useEffect(() => {
+        onLayoutChangeRef.current = onLayoutChange;
+    }, [onLayoutChange]);
+
+    const resizeBy = useCallback((direction: number) => {
+        const key = selectedRef.current;
+        if (!key) {
+            return;
+        }
+        const item = layoutRef.current[key];
+        if ('fontSize' in item) {
+            onLayoutChangeRef.current(key, {
+                fontSize: clamp(item.fontSize + direction * 0.2, 0.4, 30),
+            } as Partial<CardLayout[typeof key]>);
+            return;
+        }
+        const scale = 1 + direction * 0.05;
+        onLayoutChangeRef.current(key, {
+            width: clamp(item.width * scale, 1, 100),
+            height: clamp(item.height * scale, 1, 100),
+        } as Partial<CardLayout[typeof key]>);
+    }, []);
+
+    const scaleSelected = useCallback(
+        (ratio: number, baseline: TextLayout | ImageLayout) => {
+            const key = selectedRef.current;
+            if (!key) {
+                return;
+            }
+            if ('fontSize' in baseline) {
+                onLayoutChangeRef.current(key, {
+                    fontSize: clamp(baseline.fontSize * ratio, 0.4, 30),
+                } as Partial<CardLayout[typeof key]>);
+                return;
+            }
+            onLayoutChangeRef.current(key, {
+                width: clamp(baseline.width * ratio, 1, 100),
+                height: clamp(baseline.height * ratio, 1, 100),
+            } as Partial<CardLayout[typeof key]>);
+        },
+        [],
+    );
+
+    useEffect(() => {
+        const el = cardRef.current;
+        if (!el) {
+            return;
+        }
+
+        const onWheel = (e: WheelEvent) => {
+            if (!selectedRef.current) {
+                return;
+            }
+            e.preventDefault();
+            resizeBy(-Math.sign(e.deltaY));
+        };
+
+        let pinchBaseDistance = 0;
+        let pinchBaseline: TextLayout | ImageLayout | null = null;
+
+        const distanceOf = (touches: TouchList): number => {
+            const a = touches[0];
+            const b = touches[1];
+            const dx = a.clientX - b.clientX;
+            const dy = a.clientY - b.clientY;
+            return Math.hypot(dx, dy);
+        };
+
+        const onTouchStart = (e: TouchEvent) => {
+            if (e.touches.length === 2 && selectedRef.current) {
+                e.preventDefault();
+                pinchBaseDistance = distanceOf(e.touches);
+                const item = layoutRef.current[selectedRef.current];
+                pinchBaseline = { ...item } as TextLayout | ImageLayout;
+            }
+        };
+
+        const onTouchMove = (e: TouchEvent) => {
+            if (
+                e.touches.length === 2 &&
+                pinchBaseline &&
+                pinchBaseDistance > 0
+            ) {
+                e.preventDefault();
+                const ratio = distanceOf(e.touches) / pinchBaseDistance;
+                scaleSelected(ratio, pinchBaseline);
+            }
+        };
+
+        const onTouchEnd = () => {
+            pinchBaseline = null;
+            pinchBaseDistance = 0;
+        };
+
+        el.addEventListener('wheel', onWheel, { passive: false });
+        el.addEventListener('touchstart', onTouchStart, { passive: false });
+        el.addEventListener('touchmove', onTouchMove, { passive: false });
+        el.addEventListener('touchend', onTouchEnd);
+        el.addEventListener('touchcancel', onTouchEnd);
+
+        return () => {
+            el.removeEventListener('wheel', onWheel);
+            el.removeEventListener('touchstart', onTouchStart);
+            el.removeEventListener('touchmove', onTouchMove);
+            el.removeEventListener('touchend', onTouchEnd);
+            el.removeEventListener('touchcancel', onTouchEnd);
+        };
+    }, [resizeBy, scaleSelected]);
+
+    const startDrag = (
+        e: ReactPointerEvent<HTMLDivElement>,
+        key: LayoutKey,
+    ) => {
+        if (!e.isPrimary) {
+            return;
+        }
+        e.preventDefault();
+        e.stopPropagation();
+        onSelect(key);
+        const card = cardRef.current;
+        if (!card) {
+            return;
+        }
+        const rect = card.getBoundingClientRect();
+        const item = layout[key];
+        const startX = e.clientX;
+        const startY = e.clientY;
+        const startTop = item.top;
+        const startLeft = item.left;
+        const pointerId = e.pointerId;
+
+        const onMove = (moveE: PointerEvent) => {
+            if (moveE.pointerId !== pointerId) {
+                return;
+            }
+            const dx = ((moveE.clientX - startX) / rect.width) * 100;
+            const dy = ((moveE.clientY - startY) / rect.height) * 100;
+            onLayoutChange(key, {
+                top: clamp(startTop + dy, 0, 100),
+                left: clamp(startLeft + dx, 0, 100),
+            } as Partial<CardLayout[typeof key]>);
+        };
+
+        const onUp = (upE: PointerEvent) => {
+            if (upE.pointerId !== pointerId) {
+                return;
+            }
+            window.removeEventListener('pointermove', onMove);
+            window.removeEventListener('pointerup', onUp);
+            window.removeEventListener('pointercancel', onUp);
+        };
+
+        window.addEventListener('pointermove', onMove);
+        window.addEventListener('pointerup', onUp);
+        window.addEventListener('pointercancel', onUp);
+    };
+
+    const textStyle = (item: TextLayout): CSSProperties => ({
+        top: `${item.top}%`,
+        left: `${item.left}%`,
+        right: '4%',
+        fontSize: `${item.fontSize}cqi`,
+        lineHeight: 1.1,
+    });
+
+    const imageStyle = (item: ImageLayout): CSSProperties => ({
+        top: `${item.top}%`,
+        left: `${item.left}%`,
+        width: `${item.width}%`,
+        height: `${item.height}%`,
+    });
+
+    const isSelected = (key: LayoutKey) => selected === key;
+
+    return (
+        <div
+            ref={cardRef}
+            className="relative w-full overflow-hidden rounded-2xl border shadow-sm select-none"
+            style={{
+                aspectRatio: '1096 / 686',
+                containerType: 'inline-size',
+            }}
+            dir="ltr"
+            onPointerDown={(e) => {
+                if (e.target === e.currentTarget) {
+                    onSelect(null);
+                }
+            }}
+        >
+            <img
+                src="/images/card/front-empty.jpeg"
+                alt=""
+                draggable={false}
+                className="pointer-events-none absolute inset-0 h-full w-full object-cover"
+            />
+
+            <DraggableText
+                onPointerDown={(e) => startDrag(e, 'first_name')}
+                selected={isSelected('first_name')}
+                style={{
+                    ...textStyle(layout.first_name),
+                    color: '#0d5b58',
+                    fontWeight: 700,
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.01em',
+                }}
+            >
+                {firstName || '—'}
+            </DraggableText>
+
+            <DraggableText
+                onPointerDown={(e) => startDrag(e, 'full_name')}
+                selected={isSelected('full_name')}
+                style={{
+                    ...textStyle(layout.full_name),
+                    color: '#0c1f24',
+                    fontWeight: 700,
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.01em',
+                }}
+            >
+                {fullName || ''}
+            </DraggableText>
+
+            <DraggableText
+                onPointerDown={(e) => startDrag(e, 'work_place')}
+                selected={isSelected('work_place')}
+                style={{
+                    ...textStyle(layout.work_place),
+                    color: '#0c1f24',
+                    fontWeight: 700,
+                    textTransform: 'uppercase',
+                }}
+            >
+                {workPlace || ''}
+            </DraggableText>
+
+            <DraggableText
+                onPointerDown={(e) => startDrag(e, 'company')}
+                selected={isSelected('company')}
+                style={{
+                    ...textStyle(layout.company),
+                    color: '#0c1f24',
+                    fontWeight: 700,
+                }}
+            >
+                {companyName || ''}
+            </DraggableText>
+
+            <DraggableText
+                onPointerDown={(e) => startDrag(e, 'date')}
+                selected={isSelected('date')}
+                style={{
+                    ...textStyle(layout.date),
+                    color: '#0c1f24',
+                    fontWeight: 600,
+                }}
+            >
+                {formattedDate}
+            </DraggableText>
+
+            <DraggableBox
+                onPointerDown={(e) => startDrag(e, 'photo')}
+                selected={isSelected('photo')}
+                style={imageStyle(layout.photo)}
+            >
+                {photoUrl ? (
+                    <img
+                        src={photoUrl}
+                        alt=""
+                        draggable={false}
+                        className="pointer-events-none h-full w-full object-cover"
+                    />
+                ) : null}
+            </DraggableBox>
+
+            <DraggableBox
+                onPointerDown={(e) => startDrag(e, 'qr')}
+                selected={isSelected('qr')}
+                className="flex items-center justify-center bg-white"
+                style={{ ...imageStyle(layout.qr), padding: '0.6%' }}
+            >
+                <QRCodeSVG
+                    value={qrValue}
+                    level="M"
+                    marginSize={0}
+                    style={{
+                        width: '100%',
+                        height: '100%',
+                        pointerEvents: 'none',
+                    }}
+                />
+            </DraggableBox>
+        </div>
+    );
+}
+
+function DraggableText({
+    children,
+    style,
+    onPointerDown,
+    selected,
+}: {
+    children: ReactNode;
+    style: CSSProperties;
+    onPointerDown: (e: ReactPointerEvent<HTMLDivElement>) => void;
+    selected: boolean;
+}) {
+    return (
+        <div
+            onPointerDown={onPointerDown}
+            className={cn(
+                'absolute cursor-move whitespace-nowrap touch-none',
+                selected && 'outline outline-2 outline-blue-500/70',
+            )}
+            style={style}
+        >
+            {children}
+        </div>
+    );
+}
+
+function DraggableBox({
+    children,
+    style,
+    onPointerDown,
+    selected,
+    className,
+}: {
+    children: ReactNode;
+    style: CSSProperties;
+    onPointerDown: (e: ReactPointerEvent<HTMLDivElement>) => void;
+    selected: boolean;
+    className?: string;
+}) {
+    return (
+        <div
+            onPointerDown={onPointerDown}
+            className={cn(
+                'absolute cursor-move overflow-hidden touch-none',
+                selected && 'outline outline-2 outline-blue-500/70',
+                className,
+            )}
+            style={style}
+        >
+            {children}
+        </div>
+    );
+}
+
+function TextLayoutControls({
+    label,
+    value,
+    onChange,
+    active,
+    onActivate,
+}: {
+    label: string;
+    value: TextLayout;
+    onChange: (patch: Partial<TextLayout>) => void;
+    active: boolean;
+    onActivate: () => void;
+}) {
+    return (
+        <div
+            onClick={onActivate}
+            className={cn(
+                'cursor-pointer space-y-2 rounded-2xl border bg-muted/20 p-3',
+                active && 'border-blue-500 bg-blue-50/40',
+            )}
+        >
+            <p className="text-xs font-semibold">{label}</p>
+            <div className="grid grid-cols-3 gap-2">
+                <NumberField
+                    label="أعلى"
+                    value={value.top}
+                    onChange={(v) => onChange({ top: v })}
+                />
+                <NumberField
+                    label="يسار"
+                    value={value.left}
+                    onChange={(v) => onChange({ left: v })}
+                />
+                <NumberField
+                    label="الحجم"
+                    value={value.fontSize}
+                    step={0.1}
+                    onChange={(v) => onChange({ fontSize: v })}
+                />
+            </div>
+        </div>
+    );
+}
+
+function ImageLayoutControls({
+    label,
+    value,
+    onChange,
+    active,
+    onActivate,
+}: {
+    label: string;
+    value: ImageLayout;
+    onChange: (patch: Partial<ImageLayout>) => void;
+    active: boolean;
+    onActivate: () => void;
+}) {
+    return (
+        <div
+            onClick={onActivate}
+            className={cn(
+                'cursor-pointer space-y-2 rounded-2xl border bg-muted/20 p-3',
+                active && 'border-blue-500 bg-blue-50/40',
+            )}
+        >
+            <p className="text-xs font-semibold">{label}</p>
+            <div className="grid grid-cols-2 gap-2">
+                <NumberField
+                    label="أعلى"
+                    value={value.top}
+                    onChange={(v) => onChange({ top: v })}
+                />
+                <NumberField
+                    label="يسار"
+                    value={value.left}
+                    onChange={(v) => onChange({ left: v })}
+                />
+                <NumberField
+                    label="العرض"
+                    value={value.width}
+                    onChange={(v) => onChange({ width: v })}
+                />
+                <NumberField
+                    label="الارتفاع"
+                    value={value.height}
+                    onChange={(v) => onChange({ height: v })}
+                />
+            </div>
+        </div>
+    );
+}
+
+function NumberField({
+    label,
+    value,
+    onChange,
+    step = 0.5,
+}: {
+    label: string;
+    value: number;
+    onChange: (value: number) => void;
+    step?: number;
+}) {
+    return (
+        <label className="block text-[10px] text-muted-foreground">
+            {label}
+            <Input
+                type="number"
+                step={step}
+                value={Number.isFinite(value) ? value : 0}
+                onChange={(e) => {
+                    const next = parseFloat(e.target.value);
+                    onChange(Number.isFinite(next) ? next : 0);
+                }}
+                onClick={(e) => e.stopPropagation()}
+                className="mt-1 h-8 px-2 text-xs"
+                dir="ltr"
+            />
+        </label>
+    );
+}
+
+function clamp(value: number, min: number, max: number): number {
+    return Math.min(max, Math.max(min, value));
+}
+
+function formatDate(value: string): string {
+    if (!value) {
+        return '00/00/0000';
+    }
+    const [year, month, day] = value.split('-');
+    if (!year || !month || !day) {
+        return value;
+    }
+    return `${day}/${month}/${year}`;
+}
+
+MembershipCard.layout = {
+    breadcrumbs: [
+        { title: 'لوحة التحكم', href: dashboard() },
+        { title: 'العضويات', href: '/dashboard/memberships' },
+        { title: 'البطاقة', href: '#' },
+    ],
+};

@@ -2,6 +2,8 @@
 
 namespace App\Http\Middleware;
 
+use App\Http\Resources\Guest\SiteSettingResource;
+use App\Models\SiteSetting;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -49,6 +51,7 @@ class HandleInertiaRequests extends Middleware
             'flash' => [
                 'contact_submitted' => fn () => $request->session()->get('contact_submitted'),
             ],
+            'siteSettings' => fn () => SiteSettingResource::make(SiteSetting::current())->resolve($request),
         ];
     }
 }

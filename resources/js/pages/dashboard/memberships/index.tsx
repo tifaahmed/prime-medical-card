@@ -3,6 +3,7 @@ import {
     CheckCircle2Icon,
     CreditCardIcon,
     EyeOffIcon,
+    IdCardIcon,
     PlusIcon,
 } from 'lucide-react';
 import Heading from '@/components/heading';
@@ -19,6 +20,7 @@ interface Membership {
     id: number;
     slug: string;
     membership_number: string;
+    holder_name: string | null;
     registration_date: string | null;
     expiration_date: string | null;
     is_active: boolean;
@@ -54,34 +56,33 @@ export default function MembershipsIndex({
             ),
         },
         {
-            key: 'number',
-            label: 'رقم العضوية',
+            key: 'name',
+            label: 'الاسم',
             render: (r) => (
-                <span dir="ltr" className="font-mono text-xs">
-                    {r.membership_number}
-                </span>
-            ),
-        },
-        {
-            key: 'job_title',
-            label: 'المسمى الوظيفي',
-            render: (r) =>
-                r.job_title.ar || r.job_title.en ? (
-                    <span dir="rtl">
-                        {r.job_title.ar || r.job_title.en}
-                    </span>
-                ) : (
-                    '—'
-                ),
-        },
-        {
-            key: 'dates',
-            label: 'الفترة',
-            render: (r) => (
-                <div className="text-xs" dir="ltr">
-                    <p>{r.registration_date ?? '—'}</p>
-                    <p className="text-muted-foreground">
-                        → {r.expiration_date ?? '—'}
+                <div className="space-y-0.5">
+                    <p dir="rtl" className="font-medium">
+                        {r.holder_name ?? '—'}
+                    </p>
+                    <p
+                        dir="ltr"
+                        className="text-start font-mono text-[11px] text-muted-foreground"
+                    >
+                        {r.membership_number}
+                    </p>
+                    {(r.job_title.ar || r.job_title.en) && (
+                        <p
+                            dir="rtl"
+                            className="text-xs text-muted-foreground"
+                        >
+                            {r.job_title.ar || r.job_title.en}
+                        </p>
+                    )}
+                    <p
+                        dir="ltr"
+                        className="text-start text-[11px] text-muted-foreground"
+                    >
+                        {r.registration_date ?? '—'} →{' '}
+                        {r.expiration_date ?? '—'}
                     </p>
                 </div>
             ),
@@ -142,6 +143,19 @@ export default function MembershipsIndex({
                     showUrl={(r) => `/dashboard/memberships/${r.id}`}
                     editUrl={(r) => `/dashboard/memberships/${r.id}/edit`}
                     destroyUrl={(r) => `/dashboard/memberships/${r.id}`}
+                    extraActions={(r) => (
+                        <Button
+                            asChild
+                            size="sm"
+                            variant="outline"
+                            className="gap-1.5"
+                        >
+                            <Link href={`/dashboard/memberships/${r.id}/card`}>
+                                <IdCardIcon className="size-3.5" />
+                                البطاقة
+                            </Link>
+                        </Button>
+                    )}
                     searchUrl="/dashboard/memberships"
                     initialSearch={filters.search}
                     searchPlaceholder="ابحث برقم العضوية…"

@@ -23,11 +23,16 @@ interface Membership {
     id: number;
     slug: string;
     membership_number: string;
+    first_name: string | null;
+    second_name: string | null;
+    third_name: string | null;
+    fourth_name: string | null;
     registration_date: string;
     expiration_date: string;
     is_active: boolean;
     is_visible: boolean;
     job_title: { en: string; ar: string };
+    company_name: string | null;
     photo_url: string | null;
     family: FamilyMemberPayload[];
 }
@@ -41,11 +46,16 @@ export default function MembershipEdit({
 }) {
     const { data, setData, processing, errors, setError, clearErrors } = useForm({
         membership_number: membership.membership_number,
+        first_name: membership.first_name ?? '',
+        second_name: membership.second_name ?? '',
+        third_name: membership.third_name ?? '',
+        fourth_name: membership.fourth_name ?? '',
         registration_date: membership.registration_date,
         expiration_date: membership.expiration_date,
         is_active: membership.is_active,
         is_visible: membership.is_visible,
         job_title: membership.job_title,
+        company_name: membership.company_name ?? '',
         photo: null as File | null,
         photo_url: membership.photo_url,
         photo_remove: false,

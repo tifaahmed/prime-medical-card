@@ -1,8 +1,6 @@
 import { useEffect, useState } from 'react';
 import type { FormEvent } from 'react';
-
-const WHATSAPP = '201156385251';
-const WHATSAPP_HREF = `https://wa.me/${WHATSAPP}`;
+import { useSiteSettings } from '@/hooks/use-site-settings';
 
 const floatingStyles = `
   @keyframes fa-pulse-glow {
@@ -22,12 +20,17 @@ const floatingStyles = `
 
 export default function FloatingActions() {
     const [open, setOpen] = useState(false);
+    const { contact_whatsapp } = useSiteSettings();
 
     return (
         <>
             <style dangerouslySetInnerHTML={{ __html: floatingStyles }} />
             <a
-                href={WHATSAPP_HREF}
+                href={
+                    contact_whatsapp
+                        ? `https://wa.me/${contact_whatsapp}`
+                        : '#'
+                }
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="تواصل عبر واتساب"

@@ -44,6 +44,10 @@ class Membership extends Model implements HasMedia
         'is_active',
         'is_visible',
         'job_title',
+        'company_name',
+        'card_first_name',
+        'card_full_name',
+        'card_layout',
     ];
 
     /**
@@ -68,6 +72,7 @@ class Membership extends Model implements HasMedia
             'expiration_date' => 'datetime',
             'is_active' => 'boolean',
             'is_visible' => 'boolean',
+            'card_layout' => 'array',
         ];
     }
 

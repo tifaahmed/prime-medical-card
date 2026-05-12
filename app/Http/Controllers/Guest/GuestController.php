@@ -5,10 +5,20 @@ namespace App\Http\Controllers\Guest;
 use App\Enums\MembershipFamily\RelationshipEnum;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Guest\PageSeoResource;
+use App\Models\AboutStat;
+use App\Models\AboutTimelineEntry;
+use App\Models\AboutValue;
 use App\Models\ContactMessage;
 use App\Models\Facility;
+use App\Models\Faq;
+use App\Models\HomeFeaturedOffer;
+use App\Models\HomeService;
+use App\Models\HomeStep;
 use App\Models\Membership;
+use App\Models\PageContent;
 use App\Models\PageSeo;
+use App\Models\PricingPlan;
+use App\Models\Testimonial;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -18,15 +28,114 @@ class GuestController extends Controller
 {
     public function welcome(Request $request): Response
     {
+        $publishedOrdered = fn ($query) => $query
+            ->where('is_published', true)
+            ->orderBy('position')
+            ->orderBy('id');
+
+        $faqs = $publishedOrdered(Faq::query())
+            ->get(['id', 'question', 'answer'])
+            ->map(fn (Faq $faq) => [
+                'id' => $faq->id,
+                'question' => $faq->question,
+                'answer' => $faq->answer,
+            ])
+            ->all();
+
+        $testimonials = $publishedOrdered(Testimonial::query())
+            ->get(['id', 'name', 'role', 'quote', 'avatar', 'is_featured'])
+            ->map(fn (Testimonial $t) => [
+                'id' => $t->id,
+                'name' => $t->name,
+                'role' => $t->role,
+                'quote' => $t->quote,
+                'avatar' => $t->avatar,
+                'is_featured' => $t->is_featured,
+            ])
+            ->all();
+
+        $pricingPlans = $publishedOrdered(PricingPlan::query())
+            ->get()
+            ->map(fn (PricingPlan $p) => [
+                'id' => $p->id,
+                'name' => $p->name,
+                'description' => $p->description,
+                'price' => $p->price,
+                'period' => $p->period,
+                'features' => $p->features ?? [],
+                'badge' => $p->badge,
+                'is_featured' => $p->is_featured,
+                'cta_label' => $p->cta_label,
+                'cta_variant' => $p->cta_variant,
+            ])
+            ->all();
+
+        $homeServices = $publishedOrdered(HomeService::query())
+            ->get(['id', 'title', 'description', 'discount', 'icon_key'])
+            ->map(fn (HomeService $s) => [
+                'id' => $s->id,
+                'title' => $s->title,
+                'description' => $s->description,
+                'discount' => $s->discount,
+                'icon_key' => $s->icon_key,
+            ])
+            ->all();
+
+        $homeSteps = $publishedOrdered(HomeStep::query())
+            ->get(['id', 'title', 'description', 'icon_key'])
+            ->map(fn (HomeStep $s) => [
+                'id' => $s->id,
+                'title' => $s->title,
+                'description' => $s->description,
+                'icon_key' => $s->icon_key,
+            ])
+            ->all();
+
+        $featuredOffers = $publishedOrdered(HomeFeaturedOffer::query())
+            ->get()
+            ->map(fn (HomeFeaturedOffer $o) => [
+                'id' => $o->id,
+                'title' => $o->title,
+                'partner' => $o->partner,
+                'description' => $o->description,
+                'discount' => $o->discount,
+                'expires_text' => $o->expires_text,
+                'tag' => $o->tag,
+                'accent_color' => $o->accent_color,
+            ])
+            ->all();
+
         return Inertia::render('guest/welcome', [
             'seo' => $this->seoFor('home', $request),
+            'faqs' => $faqs,
+            'testimonials' => $testimonials,
+            'pricingPlans' => $pricingPlans,
+            'homeServices' => $homeServices,
+            'homeSteps' => $homeSteps,
+            'featuredOffers' => $featuredOffers,
+            'pageContents' => PageContent::mapFor('home'),
         ]);
     }
 
     public function about(Request $request): Response
     {
+        $published = fn ($query) => $query
+            ->where('is_published', true)
+            ->orderBy('position')
+            ->orderBy('id');
+
         return Inertia::render('guest/about', [
             'seo' => $this->seoFor('about', $request),
+            'aboutStats' => $published(AboutStat::query())
+                ->get(['id', 'value', 'label'])
+                ->all(),
+            'aboutValues' => $published(AboutValue::query())
+                ->get(['id', 'title', 'description', 'icon_key'])
+                ->all(),
+            'aboutTimeline' => $published(AboutTimelineEntry::query())
+                ->get(['id', 'year', 'title', 'description'])
+                ->all(),
+            'pageContents' => PageContent::mapFor('about'),
         ]);
     }
 
@@ -56,6 +165,7 @@ class GuestController extends Controller
         return Inertia::render('guest/partners', [
             'seo' => $this->seoFor('partners', $request),
             'facilities' => $facilities,
+            'pageContents' => PageContent::mapFor('partners'),
         ]);
     }
 
@@ -120,6 +230,7 @@ class GuestController extends Controller
     {
         return Inertia::render('guest/contact', [
             'seo' => $this->seoFor('contact', $request),
+            'pageContents' => PageContent::mapFor('contact'),
         ]);
     }
 

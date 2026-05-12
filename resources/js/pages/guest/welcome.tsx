@@ -36,7 +36,68 @@ const FALLBACK_KEYWORDS = [
     'مستشفيات',
 ];
 
-export default function Welcome({ seo }: { seo?: PageSeoProp | null }) {
+type FaqItem = { id: number; question: string; answer: string };
+type TestimonialItem = {
+    id: number;
+    name: string;
+    role: string | null;
+    quote: string;
+    avatar: string | null;
+    is_featured: boolean;
+};
+type PricingPlanItem = {
+    id: number;
+    name: string;
+    description: string | null;
+    price: string;
+    period: string | null;
+    features: string[];
+    badge: string | null;
+    is_featured: boolean;
+    cta_label: string;
+    cta_variant: 'ghost' | 'amber' | 'primary';
+};
+type HomeServiceItem = {
+    id: number;
+    title: string;
+    description: string | null;
+    discount: string | null;
+    icon_key: string;
+};
+type HomeStepItem = {
+    id: number;
+    title: string;
+    description: string | null;
+    icon_key: string;
+};
+type FeaturedOfferItem = {
+    id: number;
+    title: string;
+    partner: string;
+    description: string | null;
+    discount: string | null;
+    expires_text: string | null;
+    tag: string | null;
+    accent_color: string | null;
+};
+
+export default function Welcome({
+    seo,
+    faqs = [],
+    testimonials = [],
+    pricingPlans = [],
+    homeServices = [],
+    homeSteps = [],
+    featuredOffers = [],
+}: {
+    seo?: PageSeoProp | null;
+    faqs?: FaqItem[];
+    testimonials?: TestimonialItem[];
+    pricingPlans?: PricingPlanItem[];
+    homeServices?: HomeServiceItem[];
+    homeSteps?: HomeStepItem[];
+    featuredOffers?: FeaturedOfferItem[];
+}) {
     const { auth, appUrl } = usePage<{
         auth: { user: { name: string } | null };
         appUrl: string;
@@ -71,16 +132,6 @@ export default function Welcome({ seo }: { seo?: PageSeoProp | null }) {
                     },
                 ]}
             >
-                <link rel="preconnect" href="https://fonts.googleapis.com" />
-                <link
-                    rel="preconnect"
-                    href="https://fonts.gstatic.com"
-                    crossOrigin=""
-                />
-                <link
-                    href="https://fonts.googleapis.com/css2?family=Reem+Kufi:wght@400;500;600;700&family=Tajawal:wght@300;400;500;700;800&family=Amiri:ital,wght@0,400;0,700;1,400&display=swap"
-                    rel="stylesheet"
-                />
             </SeoHead>
             <style dangerouslySetInnerHTML={{ __html: homeStyles }} />
 
@@ -89,13 +140,13 @@ export default function Welcome({ seo }: { seo?: PageSeoProp | null }) {
                 <AnnounceBar />
                 <SiteNav authUser={authUser} />
                 <Hero />
-                <SpecialOffers />
+                <SpecialOffers items={featuredOffers} />
                 <PartnersMarquee />
-                <HowItWorks />
-                <Services />
-                <Pricing />
-                <Testimonials />
-                <Faq />
+                <HowItWorks items={homeSteps} />
+                <Services items={homeServices} />
+                <Pricing items={pricingPlans} />
+                <Testimonials items={testimonials} />
+                <Faq items={faqs} />
                 <CtaBanner />
                 <SiteFooter />
                 <MobileBottomNav />

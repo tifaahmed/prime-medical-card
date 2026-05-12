@@ -1,7 +1,7 @@
 import { Link } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
 import { useSubscribeModal } from '@/components/subscribe-modal';
-import { dashboard, login } from '@/routes';
+import { dashboard } from '@/routes';
 import BrandLogo from './brand-logo';
 import CardLookupModal from './card-lookup-modal';
 import { ArrowLeftIcon, CardIcon } from './icons';
@@ -90,16 +90,12 @@ export default function SiteNav({ authUser }: { authUser: AuthUser }) {
                         </button>
 
                         <div className="nav-cta">
-                            {authUser ? (
+                            {authUser && (
                                 <Link
                                     href={dashboard()}
                                     className="btn btn-ghost"
                                 >
                                     لوحة التحكم
-                                </Link>
-                            ) : (
-                                <Link href={login()} className="btn btn-ghost">
-                                    تسجيل الدخول
                                 </Link>
                             )}
                             <button

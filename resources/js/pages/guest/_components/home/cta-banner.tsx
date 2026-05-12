@@ -1,8 +1,31 @@
 import { useSubscribeModal } from '@/components/subscribe-modal';
+import { usePageContent } from '@/hooks/use-page-content';
+import { useSiteSettings } from '@/hooks/use-site-settings';
 import { ArrowLeftIcon } from './icons';
 
 export default function CtaBanner() {
     const { open } = useSubscribeModal();
+    const { hotline_number, hotline_caption } = useSiteSettings();
+    const paragraph = usePageContent(
+        'cta_banner',
+        'paragraph',
+        'انضم إلى أكثر من ١٢٠ ألف عائلة مصرية تثق بنا في رحلتهم الصحية — اشتراك سريع ومباشر وبدون تعقيدات',
+    );
+    const ctaPrimary = usePageContent(
+        'cta_banner',
+        'cta_primary',
+        'احصل على بطاقتك الآن',
+    );
+    const ctaSecondary = usePageContent(
+        'cta_banner',
+        'cta_secondary',
+        'اعرف المزيد',
+    );
+    const phoneLabel = usePageContent(
+        'cta_banner',
+        'phone_label',
+        'أو اتصل بنا مباشرة',
+    );
 
     return (
         <section className="cta-banner">
@@ -14,17 +37,14 @@ export default function CtaBanner() {
                             <br />
                             <em>من بطاقة واحدة</em>
                         </h2>
-                        <p>
-                            انضم إلى أكثر من ١٢٠ ألف عائلة مصرية تثق بنا في
-                            رحلتهم الصحية — اشتراك سريع ومباشر وبدون تعقيدات
-                        </p>
+                        <p>{paragraph}</p>
                         <div className="cta-actions">
                             <button
                                 type="button"
                                 onClick={open}
                                 className="btn btn-amber"
                             >
-                                احصل على بطاقتك الآن
+                                {ctaPrimary}
                                 <ArrowLeftIcon />
                             </button>
                             <a
@@ -35,19 +55,23 @@ export default function CtaBanner() {
                                     borderColor: 'var(--cream)',
                                 }}
                             >
-                                اعرف المزيد
+                                {ctaSecondary}
                             </a>
                         </div>
                     </div>
-                    <div className="cta-phone">
-                        <div className="cta-phone-label">
-                            أو اتصل بنا مباشرة
+                    {hotline_number && (
+                        <div className="cta-phone">
+                            <div className="cta-phone-label">{phoneLabel}</div>
+                            <div className="cta-phone-num">
+                                {hotline_number}
+                            </div>
+                            {hotline_caption && (
+                                <div className="cta-phone-label">
+                                    {hotline_caption}
+                                </div>
+                            )}
                         </div>
-                        <div className="cta-phone-num">16 777</div>
-                        <div className="cta-phone-label">
-                            ٢٤ ساعة يومياً — مكالمة مجانية
-                        </div>
-                    </div>
+                    )}
                 </div>
             </div>
         </section>

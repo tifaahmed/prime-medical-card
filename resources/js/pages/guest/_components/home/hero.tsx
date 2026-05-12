@@ -1,4 +1,6 @@
 import { useSubscribeModal } from '@/components/subscribe-modal';
+import { usePageContent } from '@/hooks/use-page-content';
+import { useSiteSettings } from '@/hooks/use-site-settings';
 import {
     ArrowLeftIcon,
     CheckShieldIcon,
@@ -80,6 +82,30 @@ function Floater({
 
 export default function Hero() {
     const { open } = useSubscribeModal();
+    const { hero_stats } = useSiteSettings();
+    const stats = hero_stats.filter(
+        (s) => s.value && s.label && s.value.trim() && s.label.trim(),
+    );
+    const eyebrow = usePageContent(
+        'hero',
+        'eyebrow',
+        'أكثر من ٣٠٠٠ جهة طبية في الشبكة',
+    );
+    const paragraph = usePageContent(
+        'hero',
+        'paragraph',
+        'بطاقة واحدة تفتح لك أبواب أفضل المستشفيات والعيادات والصيدليات ومعامل التحاليل في الجمهورية — بخصومات تصل إلى ٧٠٪ لك ولعائلتك طوال العام.',
+    );
+    const ctaPrimary = usePageContent(
+        'hero',
+        'cta_primary',
+        'احصل على بطاقتك الآن',
+    );
+    const ctaSecondary = usePageContent(
+        'hero',
+        'cta_secondary',
+        'شاهد كيف تعمل',
+    );
 
     return (
         <section className="hero">
@@ -88,7 +114,7 @@ export default function Hero() {
                 <div className="hero-text">
                     <span className="hero-eyebrow">
                         <span className="pulse"></span>
-                        أكثر من ٣٠٠٠ جهة طبية في الشبكة
+                        {eyebrow}
                     </span>
 
                     <h1>
@@ -99,11 +125,7 @@ export default function Hero() {
                         الخصومات
                     </h1>
 
-                    <p>
-                        بطاقة واحدة تفتح لك أبواب أفضل المستشفيات والعيادات
-                        والصيدليات ومعامل التحاليل في الجمهورية — بخصومات تصل
-                        إلى ٧٠٪ لك ولعائلتك طوال العام.
-                    </p>
+                    <p>{paragraph}</p>
 
                     <div className="hero-actions">
                         <button
@@ -111,29 +133,25 @@ export default function Hero() {
                             onClick={open}
                             className="btn btn-amber"
                         >
-                            احصل على بطاقتك الآن
+                            {ctaPrimary}
                             <ArrowLeftIcon />
                         </button>
                         <a href="#how" className="btn btn-ghost">
                             <PlayIcon />
-                            شاهد كيف تعمل
+                            {ctaSecondary}
                         </a>
                     </div>
 
-                    <div className="hero-stats">
-                        <div>
-                            <strong>+١٢٠ ألف</strong>
-                            <span>عضو نشط</span>
+                    {stats.length > 0 && (
+                        <div className="hero-stats">
+                            {stats.map((s, i) => (
+                                <div key={i}>
+                                    <strong>{s.value}</strong>
+                                    <span>{s.label}</span>
+                                </div>
+                            ))}
                         </div>
-                        <div>
-                            <strong>+٣٠٠٠</strong>
-                            <span>جهة طبية معتمدة</span>
-                        </div>
-                        <div>
-                            <strong>٤.٩/٥</strong>
-                            <span>تقييم الأعضاء</span>
-                        </div>
-                    </div>
+                    )}
                 </div>
 
                 <div className="hero-visual">

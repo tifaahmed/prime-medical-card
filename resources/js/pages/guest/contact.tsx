@@ -1,6 +1,8 @@
 import { useForm, usePage } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
 import type { FormEvent } from 'react';
+import { usePageContent } from '@/hooks/use-page-content';
+import { useSiteSettings } from '@/hooks/use-site-settings';
 import FloatingActions from '@/pages/guest/_components/floating-actions';
 import FloatingLogos from '@/pages/guest/_components/floating-logos';
 import SeoHead, { breadcrumbSchema } from '@/pages/guest/_components/seo-head';
@@ -19,14 +21,6 @@ import SiteFooter from '@/pages/guest/_components/home/site-footer';
 import SiteNav from '@/pages/guest/_components/home/site-nav';
 import { homeStyles } from '@/pages/guest/_components/home/styles';
 
-const PHONE = '+201156385251';
-const PHONE_DISPLAY = '+20 115 638 5251';
-const WHATSAPP = '201156385251';
-const EMAIL = 'info@primemedicalcard.com';
-const ADDRESS = 'القاهرة، جمهورية مصر العربية';
-const MAP_LAT = '30.0444';
-const MAP_LNG = '31.2357';
-
 const FALLBACK_TITLE = 'تواصل معنا — برايم ميديكال كارد';
 const FALLBACK_DESCRIPTION =
     'تواصل مع فريق برايم ميديكال كارد عبر الهاتف أو الواتساب أو البريد الإلكتروني. نحن هنا للإجابة على أسئلتك ومساعدتك في الاشتراك.';
@@ -38,6 +32,33 @@ export default function Contact({ seo }: { seo?: PageSeoProp | null }) {
         flash?: { contact_submitted?: boolean };
     }>().props;
     const authUser = auth?.user ?? null;
+    const settings = useSiteSettings();
+    const PHONE = settings.contact_phone ?? '';
+    const PHONE_DISPLAY = settings.contact_phone_display ?? PHONE;
+    const WHATSAPP = settings.contact_whatsapp ?? '';
+    const EMAIL = settings.contact_email ?? '';
+    const ADDRESS = settings.contact_address ?? '';
+    const MAP_LAT = settings.map_latitude ?? '30.0444';
+    const MAP_LNG = settings.map_longitude ?? '31.2357';
+    const BUSINESS_HOURS =
+        settings.business_hours ?? 'السبت – الخميس، ٩ صباحاً – ٦ مساءً';
+    const SUPPORT_NOTE =
+        settings.support_hours_note ??
+        'خط ساخن للأعضاء على مدار الأسبوع';
+    const heroEyebrow = usePageContent('hero', 'eyebrow', 'نسعد بتواصلك معنا');
+    const heroTitle = usePageContent('hero', 'title', 'تواصل معنا');
+    const heroParagraph = usePageContent(
+        'hero',
+        'paragraph',
+        'لديك سؤال عن البطاقة، الاشتراك، أو الشركاء الطبيين؟ فريقنا جاهز للرد عليك خلال ساعات العمل. اختر وسيلة التواصل الأنسب لك أو أرسل لنا رسالة مباشرة.',
+    );
+    const formTitle = usePageContent('form_header', 'title', 'أرسل لنا رسالة');
+    const formParagraph = usePageContent(
+        'form_header',
+        'paragraph',
+        'املأ النموذج وسيقوم فريقنا بالتواصل معك في أقرب وقت. نحرص على الرد خلال ٢٤ ساعة عمل.',
+    );
+    const mapTitle = usePageContent('map_header', 'title', 'موقعنا على الخريطة');
     const [submitted, setSubmitted] = useState(false);
 
     const { data, setData, post, processing, errors, reset } = useForm({
@@ -93,16 +114,6 @@ export default function Contact({ seo }: { seo?: PageSeoProp | null }) {
                     ]),
                 ]}
             >
-                <link rel="preconnect" href="https://fonts.googleapis.com" />
-                <link
-                    rel="preconnect"
-                    href="https://fonts.gstatic.com"
-                    crossOrigin=""
-                />
-                <link
-                    href="https://fonts.googleapis.com/css2?family=Reem+Kufi:wght@400;500;600;700&family=Tajawal:wght@300;400;500;700;800&family=Amiri:ital,wght@0,400;0,700;1,400&display=swap"
-                    rel="stylesheet"
-                />
             </SeoHead>
             <style dangerouslySetInnerHTML={{ __html: homeStyles }} />
 
@@ -115,16 +126,13 @@ export default function Contact({ seo }: { seo?: PageSeoProp | null }) {
                     <div className="container">
                         <div className="mx-auto max-w-3xl text-center">
                             <span className="inline-flex items-center rounded-full bg-[#d7e8e5] px-4 py-1.5 text-xs font-semibold text-[#0b2e2c]">
-                                نسعد بتواصلك معنا
+                                {heroEyebrow}
                             </span>
                             <h1 className="mt-4 text-4xl font-bold text-[#0b2e2c] sm:text-5xl">
-                                تواصل معنا
+                                {heroTitle}
                             </h1>
                             <p className="mt-4 text-base leading-relaxed text-[#3d4948] sm:text-lg">
-                                لديك سؤال عن البطاقة، الاشتراك، أو الشركاء
-                                الطبيين؟ فريقنا جاهز للرد عليك خلال ساعات العمل.
-                                اختر وسيلة التواصل الأنسب لك أو أرسل لنا رسالة
-                                مباشرة.
+                                {heroParagraph}
                             </p>
                         </div>
 
@@ -162,11 +170,10 @@ export default function Contact({ seo }: { seo?: PageSeoProp | null }) {
                         <div className="mt-16 grid gap-10 lg:grid-cols-5">
                             <div className="lg:col-span-2">
                                 <h2 className="text-2xl font-bold text-[#0b2e2c] sm:text-3xl">
-                                    أرسل لنا رسالة
+                                    {formTitle}
                                 </h2>
                                 <p className="mt-3 text-sm leading-relaxed text-[#3d4948]">
-                                    املأ النموذج وسيقوم فريقنا بالتواصل معك في
-                                    أقرب وقت. نحرص على الرد خلال ٢٤ ساعة عمل.
+                                    {formParagraph}
                                 </p>
 
                                 <ul className="mt-8 space-y-4 text-sm text-[#0b2e2c]">
@@ -177,8 +184,7 @@ export default function Contact({ seo }: { seo?: PageSeoProp | null }) {
                                                 ساعات العمل
                                             </div>
                                             <div className="text-[#3d4948]">
-                                                السبت – الخميس، ٩ صباحاً – ٦
-                                                مساءً
+                                                {BUSINESS_HOURS}
                                             </div>
                                         </div>
                                     </li>
@@ -189,7 +195,7 @@ export default function Contact({ seo }: { seo?: PageSeoProp | null }) {
                                                 دعم الأعضاء
                                             </div>
                                             <div className="text-[#3d4948]">
-                                                خط ساخن للأعضاء على مدار الأسبوع
+                                                {SUPPORT_NOTE}
                                             </div>
                                         </div>
                                     </li>
@@ -294,7 +300,7 @@ export default function Contact({ seo }: { seo?: PageSeoProp | null }) {
                             <div className="mb-6 flex flex-col gap-2 text-center sm:flex-row sm:items-end sm:justify-between sm:text-start">
                                 <div>
                                     <h2 className="text-2xl font-bold text-[#0b2e2c] sm:text-3xl">
-                                        موقعنا على الخريطة
+                                        {mapTitle}
                                     </h2>
                                     <p className="mt-2 text-sm text-[#3d4948]">
                                         {ADDRESS}
@@ -445,20 +451,24 @@ function Field({
 }
 
 function SocialLinks() {
+    const s = useSiteSettings();
     const items: {
         Icon: typeof FacebookIcon;
         label: string;
+        url: string | null;
         className: string;
         style?: React.CSSProperties;
     }[] = [
         {
             Icon: FacebookIcon,
             label: 'Facebook',
+            url: s.facebook_url,
             className: 'bg-[#1877F2] hover:bg-[#1466d6]',
         },
         {
             Icon: InstagramIcon,
             label: 'Instagram',
+            url: s.instagram_url,
             className: 'hover:brightness-110',
             style: {
                 background:
@@ -468,21 +478,31 @@ function SocialLinks() {
         {
             Icon: TwitterIcon,
             label: 'Twitter',
+            url: s.twitter_url,
             className: 'bg-black hover:bg-[#222]',
         },
         {
             Icon: YoutubeIcon,
             label: 'YouTube',
+            url: s.youtube_url,
             className: 'bg-[#FF0000] hover:bg-[#d90000]',
         },
-    ];
+    ].filter(
+        (it) => it.url && it.url.trim().length > 0,
+    ) as typeof items;
+
+    if (items.length === 0) {
+        return null;
+    }
 
     return (
         <div className="flex items-center gap-2">
-            {items.map(({ Icon, label, className, style }) => (
+            {items.map(({ Icon, label, url, className, style }) => (
                 <a
                     key={label}
-                    href="#"
+                    href={url!}
+                    target="_blank"
+                    rel="noopener noreferrer"
                     aria-label={label}
                     style={style}
                     className={`flex h-9 w-9 items-center justify-center rounded-full text-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md ${className}`}

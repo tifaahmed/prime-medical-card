@@ -16,11 +16,16 @@ import type {
 
 export interface MembershipFormData {
     membership_number: string;
+    first_name: string;
+    second_name: string;
+    third_name: string;
+    fourth_name: string;
     registration_date: string;
     expiration_date: string;
     is_active: boolean;
     is_visible: boolean;
     job_title: { en: string; ar: string };
+    company_name: string;
     photo: File | null;
     photo_url: string | null;
     photo_remove: boolean;
@@ -181,6 +186,78 @@ export default function MembershipForm({
                                 <div className="grid gap-3 sm:grid-cols-2">
                                     <div className="grid gap-2">
                                         <Label>
+                                            الاسم الأول{' '}
+                                            <span className="text-red-600">
+                                                *
+                                            </span>
+                                        </Label>
+                                        <Input
+                                            value={data.first_name}
+                                            onChange={(e) =>
+                                                setData(
+                                                    'first_name',
+                                                    e.target.value,
+                                                )
+                                            }
+                                            placeholder="الاسم الأول"
+                                        />
+                                        <InputError
+                                            message={errors.first_name}
+                                        />
+                                    </div>
+                                    <div className="grid gap-2">
+                                        <Label>الاسم الثاني</Label>
+                                        <Input
+                                            value={data.second_name}
+                                            onChange={(e) =>
+                                                setData(
+                                                    'second_name',
+                                                    e.target.value,
+                                                )
+                                            }
+                                            placeholder="الاسم الثاني"
+                                        />
+                                        <InputError
+                                            message={errors.second_name}
+                                        />
+                                    </div>
+                                    <div className="grid gap-2">
+                                        <Label>الاسم الثالث</Label>
+                                        <Input
+                                            value={data.third_name}
+                                            onChange={(e) =>
+                                                setData(
+                                                    'third_name',
+                                                    e.target.value,
+                                                )
+                                            }
+                                            placeholder="الاسم الثالث"
+                                        />
+                                        <InputError
+                                            message={errors.third_name}
+                                        />
+                                    </div>
+                                    <div className="grid gap-2">
+                                        <Label>الاسم الرابع</Label>
+                                        <Input
+                                            value={data.fourth_name}
+                                            onChange={(e) =>
+                                                setData(
+                                                    'fourth_name',
+                                                    e.target.value,
+                                                )
+                                            }
+                                            placeholder="الاسم الرابع"
+                                        />
+                                        <InputError
+                                            message={errors.fourth_name}
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="grid gap-3 sm:grid-cols-2">
+                                    <div className="grid gap-2">
+                                        <Label>
                                             تاريخ التسجيل{' '}
                                             <span className="text-red-600">
                                                 *
@@ -237,6 +314,18 @@ export default function MembershipForm({
                             }
                             errors={errors}
                         />
+
+                        <div className="grid gap-2">
+                            <Label>اسم الشركة</Label>
+                            <Input
+                                value={data.company_name}
+                                onChange={(e) =>
+                                    setData('company_name', e.target.value)
+                                }
+                                placeholder="اسم الشركة"
+                            />
+                            <InputError message={errors.company_name} />
+                        </div>
 
                         <div className="grid gap-3 md:grid-cols-2">
                             <label className="flex cursor-pointer items-start gap-3 rounded-xl border bg-muted/20 px-4 py-3">

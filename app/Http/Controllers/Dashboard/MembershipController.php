@@ -24,7 +24,7 @@ class MembershipController extends Controller
         $search = $request->string('search')->toString();
 
         $memberships = Membership::query()
-            ->with('media')
+            ->with(['media', 'user'])
             ->withCount('family')
             ->when($search, fn ($q) => $q->where('membership_number', 'like', "%{$search}%")
                 ->orWhere('slug', 'like', "%{$search}%"))
@@ -56,6 +56,7 @@ class MembershipController extends Controller
     {
         return Inertia::render('dashboard/memberships/create', [
             'relationships' => RelationshipEnum::getOptions(),
+            'next_membership_number' => $this->generateMembershipNumber(),
         ]);
     }
 
@@ -65,10 +66,14 @@ class MembershipController extends Controller
         $family = $data['family'] ?? [];
         $photo = $request->file('photo');
         $photoRemove = (bool) ($data['photo_remove'] ?? false);
-        unset($data['family'], $data['photo'], $data['photo_remove']);
+        $nameParts = $this->extractNameParts($data);
+        unset(
+            $data['family'], $data['photo'], $data['photo_remove'],
+            $data['first_name'], $data['second_name'], $data['third_name'], $data['fourth_name'],
+        );
 
-        $membership = DB::transaction(function () use ($request, $data, $family, $photo, $photoRemove) {
-            $user = $this->createPlaceholderUser($data['membership_number']);
+        $membership = DB::transaction(function () use ($request, $data, $family, $photo, $photoRemove, $nameParts) {
+            $user = $this->createPlaceholderUser($data['membership_number'], $nameParts);
             $data['user_id'] = $user->id;
 
             $membership = Membership::create($data);
@@ -89,13 +94,20 @@ class MembershipController extends Controller
     public function edit(Request $request, Membership $membership): Response
     {
         $membership->load([
+            'user',
             'family' => fn ($q) => $q->orderBy('id'),
             'family.media',
             'media',
         ]);
 
+        $resolved = MembershipResource::make($membership)->resolve($request);
+        $resolved['first_name'] = $membership->user?->first_name;
+        $resolved['second_name'] = $membership->user?->second_name;
+        $resolved['third_name'] = $membership->user?->third_name;
+        $resolved['fourth_name'] = $membership->user?->fourth_name;
+
         return Inertia::render('dashboard/memberships/edit', [
-            'membership' => MembershipResource::make($membership)->resolve($request),
+            'membership' => $resolved,
             'relationships' => RelationshipEnum::getOptions(),
         ]);
     }
@@ -106,10 +118,15 @@ class MembershipController extends Controller
         $family = $data['family'] ?? [];
         $photo = $request->file('photo');
         $photoRemove = (bool) ($data['photo_remove'] ?? false);
-        unset($data['family'], $data['photo'], $data['photo_remove']);
+        $nameParts = $this->extractNameParts($data);
+        unset(
+            $data['family'], $data['photo'], $data['photo_remove'],
+            $data['first_name'], $data['second_name'], $data['third_name'], $data['fourth_name'],
+        );
 
-        DB::transaction(function () use ($request, $membership, $data, $family, $photo, $photoRemove) {
+        DB::transaction(function () use ($request, $membership, $data, $family, $photo, $photoRemove, $nameParts) {
             $membership->update($data);
+            $this->syncMembershipUser($membership, $nameParts);
             $this->syncMembershipPhoto($membership, $photo, $photoRemove);
             $this->syncFamily($membership, $family, $request);
         });
@@ -127,6 +144,93 @@ class MembershipController extends Controller
         $membership->delete();
 
         return to_route('dashboard.memberships.index');
+    }
+
+    public function card(Membership $membership): Response
+    {
+        $membership->load(['media', 'user']);
+
+        return Inertia::render('dashboard/memberships/card', [
+            'membership' => [
+                'id' => $membership->id,
+                'membership_number' => $membership->membership_number,
+                'expiration_date' => $membership->expiration_date?->toDateString(),
+                'job_title_en' => $membership->getTranslation('job_title', 'en', false),
+                'job_title_ar' => $membership->getTranslation('job_title', 'ar', false),
+                'company_name' => $membership->company_name,
+                'card_first_name' => $membership->card_first_name,
+                'card_full_name' => $membership->card_full_name,
+                'photo_url' => $membership->photo ?: null,
+                'holder_name' => $membership->user?->name,
+                'first_name' => $membership->user?->first_name,
+                'second_name' => $membership->user?->second_name,
+                'third_name' => $membership->user?->third_name,
+                'fourth_name' => $membership->user?->fourth_name,
+                'card_layout' => array_merge(
+                    $this->defaultCardLayout(),
+                    $membership->card_layout ?? [],
+                ),
+            ],
+            'default_card_layout' => $this->defaultCardLayout(),
+        ]);
+    }
+
+    private function defaultCardLayout(): array
+    {
+        return [
+            'first_name' => ['top' => 32, 'left' => 8, 'fontSize' => 4.5],
+            'full_name' => ['top' => 41, 'left' => 8, 'fontSize' => 2.6],
+            'work_place' => ['top' => 50.17, 'left' => 24.07, 'fontSize' => 2.2],
+            'company' => ['top' => 60, 'left' => 8, 'fontSize' => 2.4],
+            'date' => ['top' => 77, 'left' => 11, 'fontSize' => 2.8],
+            'photo' => ['top' => 22, 'left' => 74.2, 'width' => 18.4, 'height' => 36.5],
+            'qr' => ['top' => 70.74, 'left' => 76.68, 'width' => 13.22, 'height' => 19.58],
+        ];
+    }
+
+    public function updateCard(Request $request, Membership $membership): RedirectResponse
+    {
+        $data = $request->validate([
+            'card_first_name' => ['nullable', 'string', 'max:255'],
+            'card_full_name' => ['nullable', 'string', 'max:255'],
+            'job_title_en' => ['nullable', 'string', 'max:255'],
+            'company_name' => ['nullable', 'string', 'max:255'],
+            'expiration_date' => ['nullable', 'date'],
+            'photo' => ['nullable', 'image', 'max:4096'],
+            'photo_remove' => ['nullable', 'boolean'],
+            'card_layout' => ['nullable', 'array'],
+            'card_layout.*' => ['array'],
+            'card_layout.*.top' => ['nullable', 'numeric'],
+            'card_layout.*.left' => ['nullable', 'numeric'],
+            'card_layout.*.width' => ['nullable', 'numeric'],
+            'card_layout.*.height' => ['nullable', 'numeric'],
+            'card_layout.*.fontSize' => ['nullable', 'numeric'],
+        ]);
+
+        $membership->card_first_name = $data['card_first_name'] ?? null;
+        $membership->card_full_name = $data['card_full_name'] ?? null;
+        if (array_key_exists('expiration_date', $data) && $data['expiration_date']) {
+            $membership->expiration_date = $data['expiration_date'];
+        }
+        $jobTitle = $membership->job_title ?? [];
+        if (! is_array($jobTitle)) {
+            $jobTitle = [];
+        }
+        $jobTitle['en'] = $data['job_title_en'] ?? null;
+        $membership->job_title = $jobTitle;
+        $membership->company_name = $data['company_name'] ?? null;
+        if (array_key_exists('card_layout', $data)) {
+            $membership->card_layout = $data['card_layout'];
+        }
+        $membership->save();
+
+        $this->syncMembershipPhoto(
+            $membership,
+            $request->file('photo'),
+            (bool) ($data['photo_remove'] ?? false),
+        );
+
+        return to_route('dashboard.memberships.card', $membership);
     }
 
     private function syncMembershipPhoto(Membership $membership, $photo, bool $remove): void
@@ -215,7 +319,30 @@ class MembershipController extends Controller
         }
     }
 
-    private function createPlaceholderUser(string $membershipNumber): User
+    private function generateMembershipNumber(): string
+    {
+        $year = now()->format('Y');
+        $prefix = "MC-{$year}-";
+
+        $lastNumber = Membership::withTrashed()
+            ->where('membership_number', 'like', $prefix.'%')
+            ->orderByDesc('membership_number')
+            ->value('membership_number');
+
+        $sequence = 1;
+        if ($lastNumber) {
+            $sequence = ((int) Str::afterLast($lastNumber, '-')) + 1;
+        }
+
+        do {
+            $candidate = $prefix.str_pad((string) $sequence, 4, '0', STR_PAD_LEFT);
+            $sequence++;
+        } while (Membership::withTrashed()->where('membership_number', $candidate)->exists());
+
+        return $candidate;
+    }
+
+    private function createPlaceholderUser(string $membershipNumber, array $nameParts = []): User
     {
         $slug = Str::slug($membershipNumber) ?: 'member-'.Str::random(8);
         $email = "{$slug}@placeholder.invalid";
@@ -225,10 +352,50 @@ class MembershipController extends Controller
         }
 
         return User::create([
-            'name' => 'Member '.$membershipNumber,
+            'name' => $this->buildFullName($nameParts) ?: 'Member '.$membershipNumber,
+            'first_name' => $nameParts['first_name'] ?? null,
+            'second_name' => $nameParts['second_name'] ?? null,
+            'third_name' => $nameParts['third_name'] ?? null,
+            'fourth_name' => $nameParts['fourth_name'] ?? null,
             'email' => $email,
             'password' => Hash::make(Str::random(40)),
             'email_verified_at' => now(),
         ]);
+    }
+
+    private function extractNameParts(array $data): array
+    {
+        return [
+            'first_name' => $data['first_name'] ?? null,
+            'second_name' => $data['second_name'] ?? null,
+            'third_name' => $data['third_name'] ?? null,
+            'fourth_name' => $data['fourth_name'] ?? null,
+        ];
+    }
+
+    private function buildFullName(array $nameParts): string
+    {
+        return trim(implode(' ', array_filter([
+            $nameParts['first_name'] ?? null,
+            $nameParts['second_name'] ?? null,
+            $nameParts['third_name'] ?? null,
+            $nameParts['fourth_name'] ?? null,
+        ])));
+    }
+
+    private function syncMembershipUser(Membership $membership, array $nameParts): void
+    {
+        $user = $membership->user;
+        if (! $user) {
+            return;
+        }
+
+        $user->forceFill([
+            'first_name' => $nameParts['first_name'] ?? null,
+            'second_name' => $nameParts['second_name'] ?? null,
+            'third_name' => $nameParts['third_name'] ?? null,
+            'fourth_name' => $nameParts['fourth_name'] ?? null,
+            'name' => $this->buildFullName($nameParts) ?: $user->name,
+        ])->save();
     }
 }

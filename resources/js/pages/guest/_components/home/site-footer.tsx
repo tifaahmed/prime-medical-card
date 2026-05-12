@@ -1,3 +1,4 @@
+import { useSiteSettings } from '@/hooks/use-site-settings';
 import BrandLogo from './brand-logo';
 import {
     EnvelopeIcon,
@@ -14,58 +15,38 @@ const NAV_LINKS = [
     { label: 'تواصل معنا', href: '/contact' },
 ];
 
-const PHONE = '+201156385251';
-const PHONE_DISPLAY = '+20 115 638 5251';
-const WHATSAPP = '201156385251';
-const EMAIL = 'info@primemedicalcard.com';
-const ADDRESS = 'القاهرة، جمهورية مصر العربية';
-
 export default function SiteFooter() {
+    const s = useSiteSettings();
+
+    const socials = [
+        { url: s.facebook_url, label: 'Facebook', Icon: FacebookIcon },
+        { url: s.instagram_url, label: 'Instagram', Icon: InstagramIcon },
+        { url: s.twitter_url, label: 'Twitter', Icon: TwitterIcon },
+        { url: s.youtube_url, label: 'YouTube', Icon: YoutubeIcon },
+    ].filter((item) => item.url && item.url.trim().length > 0);
+
     return (
         <footer className="site-footer">
             <div className="container">
                 <div className="footer-grid">
                     <div className="footer-brand">
                         <BrandLogo />
-                        <p>
-                            بطاقة الخصومات الطبية الأولى في مصر. نعمل منذ ٢٠٢٠
-                            على جعل الرعاية الصحية في متناول كل أسرة مصرية من
-                            خلال شبكة تضم أكبر الجهات الطبية المعتمدة.
-                        </p>
-                        <div className="footer-social">
-                            <a
-                                href="#"
-                                aria-label="Facebook"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                            >
-                                <FacebookIcon />
-                            </a>
-                            <a
-                                href="#"
-                                aria-label="Instagram"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                            >
-                                <InstagramIcon />
-                            </a>
-                            <a
-                                href="#"
-                                aria-label="Twitter"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                            >
-                                <TwitterIcon />
-                            </a>
-                            <a
-                                href="#"
-                                aria-label="YouTube"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                            >
-                                <YoutubeIcon />
-                            </a>
-                        </div>
+                        {s.footer_description && <p>{s.footer_description}</p>}
+                        {socials.length > 0 && (
+                            <div className="footer-social">
+                                {socials.map(({ url, label, Icon }) => (
+                                    <a
+                                        key={label}
+                                        href={url!}
+                                        aria-label={label}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                    >
+                                        <Icon />
+                                    </a>
+                                ))}
+                            </div>
+                        )}
                     </div>
 
                     <div className="footer-col">
@@ -82,50 +63,59 @@ export default function SiteFooter() {
                     <div className="footer-col">
                         <h4>تواصل معنا</h4>
                         <ul>
-                            <li>
-                                <a
-                                    href={`tel:${PHONE}`}
-                                    className="inline-flex items-center gap-2"
-                                >
-                                    <ContactInline icon={<PhoneIcon />}>
-                                        {PHONE_DISPLAY}
-                                    </ContactInline>
-                                </a>
-                            </li>
-                            <li>
-                                <a
-                                    href={`https://wa.me/${WHATSAPP}`}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                >
-                                    <ContactInline icon={<WhatsappIcon />}>
-                                        واتساب – رد فوري
-                                    </ContactInline>
-                                </a>
-                            </li>
-                            <li>
-                                <a href={`mailto:${EMAIL}`}>
-                                    <ContactInline
-                                        icon={
-                                            <EnvelopeIcon className="h-4 w-4" />
-                                        }
+                            {s.contact_phone && (
+                                <li>
+                                    <a
+                                        href={`tel:${s.contact_phone}`}
+                                        className="inline-flex items-center gap-2"
                                     >
-                                        {EMAIL}
+                                        <ContactInline icon={<PhoneIcon />}>
+                                            {s.contact_phone_display ||
+                                                s.contact_phone}
+                                        </ContactInline>
+                                    </a>
+                                </li>
+                            )}
+                            {s.contact_whatsapp && (
+                                <li>
+                                    <a
+                                        href={`https://wa.me/${s.contact_whatsapp}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                    >
+                                        <ContactInline icon={<WhatsappIcon />}>
+                                            واتساب – رد فوري
+                                        </ContactInline>
+                                    </a>
+                                </li>
+                            )}
+                            {s.contact_email && (
+                                <li>
+                                    <a href={`mailto:${s.contact_email}`}>
+                                        <ContactInline
+                                            icon={
+                                                <EnvelopeIcon className="h-4 w-4" />
+                                            }
+                                        >
+                                            {s.contact_email}
+                                        </ContactInline>
+                                    </a>
+                                </li>
+                            )}
+                            {s.contact_address && (
+                                <li>
+                                    <ContactInline icon={<PinIcon />}>
+                                        {s.contact_address}
                                     </ContactInline>
-                                </a>
-                            </li>
-                            <li>
-                                <ContactInline icon={<PinIcon />}>
-                                    {ADDRESS}
-                                </ContactInline>
-                            </li>
+                                </li>
+                            )}
                         </ul>
                     </div>
                 </div>
 
                 <div className="footer-bottom">
-                    <div>© ٢٠٢٦ برايم ميديكال كارد. جميع الحقوق محفوظة.</div>
-                    <div>صُنع بـ ♥ في مصر</div>
+                    {s.copyright_text && <div>{s.copyright_text}</div>}
+                    {s.made_in_text && <div>{s.made_in_text}</div>}
                 </div>
             </div>
         </footer>

@@ -1,46 +1,53 @@
+import type { ReactNode } from 'react';
+import { usePageContent } from '@/hooks/use-page-content';
 import { CardIcon, HeartBigIcon, UserIcon } from './icons';
 
-const STEPS = [
-    {
-        icon: <UserIcon />,
-        title: 'اختر باقتك',
-        desc: 'فردية أو عائلية أو مميزة — اختر ما يناسب احتياجك واشترك في دقائق من موقعنا',
-    },
-    {
-        icon: <CardIcon />,
-        title: 'استلم بطاقتك',
-        desc: 'بطاقة رقمية فوراً على هاتفك، وبطاقة فعلية تصلك خلال ٤٨ ساعة أينما كنت',
-    },
-    {
-        icon: <HeartBigIcon />,
-        title: 'استمتع بالخصم',
-        desc: 'اعرض بطاقتك في أي جهة من شبكتنا واحصل على خصم فوري يصل إلى ٧٠٪ على كل الخدمات',
-    },
-];
+type Step = {
+    id: number;
+    title: string;
+    description: string | null;
+    icon_key: string;
+};
 
-export default function HowItWorks() {
+const STEP_ICONS: Record<string, ReactNode> = {
+    user: <UserIcon />,
+    card: <CardIcon />,
+    heart: <HeartBigIcon />,
+};
+
+export default function HowItWorks({ items = [] }: { items?: Step[] }) {
+    const eyebrow = usePageContent('how_header', 'eyebrow', 'كيف تعمل');
+    const paragraph = usePageContent(
+        'how_header',
+        'paragraph',
+        'من الاشتراك حتى استخدام البطاقة في أقرب عيادة — لا أوراق ولا انتظار ولا تعقيدات',
+    );
+
+    if (items.length === 0) {
+        return null;
+    }
+
     return (
         <section id="how">
             <div className="container">
                 <div className="section-header">
-                    <span className="section-eyebrow">كيف تعمل</span>
+                    <span className="section-eyebrow">{eyebrow}</span>
                     <h2>
                         ثلاث خطوات بسيطة
                         <br />
                         تفصلك عن <em>التوفير</em>
                     </h2>
-                    <p>
-                        من الاشتراك حتى استخدام البطاقة في أقرب عيادة — لا أوراق
-                        ولا انتظار ولا تعقيدات
-                    </p>
+                    <p>{paragraph}</p>
                 </div>
 
                 <div className="steps">
-                    {STEPS.map((step) => (
-                        <div className="step" key={step.title}>
-                            <div className="step-num">{step.icon}</div>
+                    {items.map((step) => (
+                        <div className="step" key={step.id}>
+                            <div className="step-num">
+                                {STEP_ICONS[step.icon_key] ?? <UserIcon />}
+                            </div>
                             <h3>{step.title}</h3>
-                            <p>{step.desc}</p>
+                            {step.description && <p>{step.description}</p>}
                         </div>
                     ))}
                 </div>

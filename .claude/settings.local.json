@@ -58,7 +58,8 @@
       "Bash(touch /tmp/pmc-can-write-php-ini-test)",
       "Bash(rm /tmp/pmc-can-write-php-ini-test)",
       "Bash(sudo -n true)",
-      "Bash(PHP_INI_SCAN_DIR=:./.php-overrides.d php *)"
+      "Bash(PHP_INI_SCAN_DIR=:./.php-overrides.d php *)",
+      "Bash(npx --no -- lighthouse --version)"
     ]
   }
 }

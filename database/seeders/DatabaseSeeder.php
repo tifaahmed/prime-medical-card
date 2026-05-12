@@ -20,6 +20,15 @@ class DatabaseSeeder extends Seeder
             EgyptianFacilitySeeder::class,
             OfferSeeder::class,
             PageSeoSeeder::class,
+            FaqSeeder::class,
+            SiteSettingSeeder::class,
+            TestimonialSeeder::class,
+            PricingPlanSeeder::class,
+            HomeServiceSeeder::class,
+            HomeStepSeeder::class,
+            HomeFeaturedOfferSeeder::class,
+            AboutContentSeeder::class,
+            PageContentSeeder::class,
         ]);
     }
 }

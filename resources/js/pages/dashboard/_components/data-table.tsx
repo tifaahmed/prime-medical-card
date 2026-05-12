@@ -34,10 +34,33 @@ interface Props<T extends { id: number }> {
     editUrl: (row: T) => string;
     destroyUrl: (row: T) => string;
     showUrl?: (row: T) => string;
+    extraActions?: (row: T) => ReactNode;
     searchUrl: string;
     initialSearch?: string;
     emptyMessage?: string;
     searchPlaceholder?: string;
+}
+
+function getCreatedAt(row: unknown): string | null {
+    if (typeof row === 'object' && row !== null && 'created_at' in row) {
+        const v = (row as { created_at?: unknown }).created_at;
+        return typeof v === 'string' ? v : null;
+    }
+    return null;
+}
+
+function formatCreatedAt(value: string | null): string {
+    if (!value) {
+        return '—';
+    }
+    const d = new Date(value);
+    if (Number.isNaN(d.getTime())) {
+        return value;
+    }
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const dd = String(d.getDate()).padStart(2, '0');
+    return `${yyyy}-${mm}-${dd}`;
 }
 
 export default function DataTable<T extends { id: number }>({
@@ -46,6 +69,7 @@ export default function DataTable<T extends { id: number }>({
     editUrl,
     destroyUrl,
     showUrl,
+    extraActions,
     searchUrl,
     initialSearch = '',
     emptyMessage = 'لا توجد سجلات.',
@@ -72,6 +96,45 @@ export default function DataTable<T extends { id: number }>({
             onFinish: () => setPendingDelete(null),
         });
     };
+
+    const renderActions = (row: T) => (
+        <>
+            {extraActions?.(row)}
+            {showUrl && (
+                <Button
+                    asChild
+                    size="sm"
+                    variant="outline"
+                    className="btn-view gap-1.5"
+                >
+                    <Link href={showUrl(row)}>
+                        <EyeIcon className="size-3.5" />
+                        عرض
+                    </Link>
+                </Button>
+            )}
+            <Button
+                asChild
+                size="sm"
+                variant="outline"
+                className="btn-edit gap-1.5"
+            >
+                <Link href={editUrl(row)}>
+                    <PencilIcon className="size-3.5" />
+                    تعديل
+                </Link>
+            </Button>
+            <Button
+                size="sm"
+                variant="outline"
+                onClick={() => setPendingDelete(row)}
+                className="btn-delete gap-1.5"
+            >
+                <TrashIcon className="size-3.5" />
+                حذف
+            </Button>
+        </>
+    );
 
     return (
         <div dir="rtl">
@@ -110,89 +173,114 @@ export default function DataTable<T extends { id: number }>({
             </form>
 
             <div className="overflow-hidden rounded-3xl border bg-card shadow-sm">
-                <table className="w-full text-sm">
-                    <thead>
-                        <tr className="border-b bg-muted/50">
-                            {columns.map((c) => (
-                                <th
-                                    key={c.key}
-                                    className="px-4 py-3 text-right font-medium text-muted-foreground"
-                                >
-                                    {c.label}
-                                </th>
-                            ))}
-                            <th className="px-4 py-3 text-left font-medium text-muted-foreground">
-                                إجراءات
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {data.data.length === 0 && (
-                            <tr>
-                                <td
-                                    className="px-4 py-12 text-center text-muted-foreground"
-                                    colSpan={columns.length + 1}
-                                >
-                                    {emptyMessage}
-                                </td>
-                            </tr>
-                        )}
-                        {data.data.map((row) => (
-                            <tr
-                                key={row.id}
-                                className="border-b transition-colors last:border-b-0 hover:bg-muted/40"
-                            >
+                <div className="hidden overflow-x-auto md:block">
+                    <table className="w-full min-w-max text-sm">
+                        <thead>
+                            <tr className="border-b bg-muted/50">
                                 {columns.map((c) => (
-                                    <td
+                                    <th
                                         key={c.key}
-                                        className="px-4 py-3 align-top"
+                                        className="px-4 py-3 text-right font-medium whitespace-nowrap text-muted-foreground"
                                     >
-                                        {c.render(row)}
-                                    </td>
+                                        {c.label}
+                                    </th>
                                 ))}
-                                <td className="px-4 py-3">
-                                    <div className="flex items-center justify-start gap-2">
-                                        {showUrl && (
-                                            <Button
-                                                asChild
-                                                size="sm"
-                                                variant="outline"
-                                                className="btn-view gap-1.5"
-                                            >
-                                                <Link href={showUrl(row)}>
-                                                    <EyeIcon className="size-3.5" />
-                                                    عرض
-                                                </Link>
-                                            </Button>
-                                        )}
-                                        <Button
-                                            asChild
-                                            size="sm"
-                                            variant="outline"
-                                            className="btn-edit gap-1.5"
-                                        >
-                                            <Link href={editUrl(row)}>
-                                                <PencilIcon className="size-3.5" />
-                                                تعديل
-                                            </Link>
-                                        </Button>
-                                        <Button
-                                            size="sm"
-                                            variant="outline"
-                                            onClick={() =>
-                                                setPendingDelete(row)
-                                            }
-                                            className="btn-delete gap-1.5"
-                                        >
-                                            <TrashIcon className="size-3.5" />
-                                            حذف
-                                        </Button>
-                                    </div>
-                                </td>
+                                <th className="px-4 py-3 text-right font-medium whitespace-nowrap text-muted-foreground">
+                                    تاريخ الإنشاء
+                                </th>
+                                <th className="px-4 py-3 text-left font-medium whitespace-nowrap text-muted-foreground">
+                                    إجراءات
+                                </th>
                             </tr>
+                        </thead>
+                        <tbody>
+                            {data.data.length === 0 && (
+                                <tr>
+                                    <td
+                                        className="px-4 py-12 text-center text-muted-foreground"
+                                        colSpan={columns.length + 2}
+                                    >
+                                        {emptyMessage}
+                                    </td>
+                                </tr>
+                            )}
+                            {data.data.map((row) => (
+                                <tr
+                                    key={row.id}
+                                    className="border-b transition-colors last:border-b-0 hover:bg-muted/40"
+                                >
+                                    {columns.map((c) => (
+                                        <td
+                                            key={c.key}
+                                            className="px-4 py-3 align-top"
+                                        >
+                                            {c.render(row)}
+                                        </td>
+                                    ))}
+                                    <td
+                                        className="px-4 py-3 align-top text-xs whitespace-nowrap text-muted-foreground"
+                                        dir="ltr"
+                                    >
+                                        {formatCreatedAt(getCreatedAt(row))}
+                                    </td>
+                                    <td className="px-4 py-3">
+                                        <div className="flex items-center justify-start gap-2 whitespace-nowrap">
+                                            {renderActions(row)}
+                                        </div>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+
+                {data.data.length === 0 ? (
+                    <div className="px-4 py-12 text-center text-muted-foreground md:hidden">
+                        {emptyMessage}
+                    </div>
+                ) : (
+                    <ul className="divide-y md:hidden">
+                        {data.data.map((row) => (
+                            <li key={row.id} className="space-y-3 p-4">
+                                <dl className="space-y-2">
+                                    {columns.map((c) =>
+                                        c.label ? (
+                                            <div
+                                                key={c.key}
+                                                className="flex items-start justify-between gap-3"
+                                            >
+                                                <dt className="shrink-0 text-xs font-medium text-muted-foreground">
+                                                    {c.label}
+                                                </dt>
+                                                <dd className="min-w-0 text-end">
+                                                    {c.render(row)}
+                                                </dd>
+                                            </div>
+                                        ) : (
+                                            <div key={c.key}>
+                                                {c.render(row)}
+                                            </div>
+                                        ),
+                                    )}
+                                    <div className="flex items-start justify-between gap-3">
+                                        <dt className="shrink-0 text-xs font-medium text-muted-foreground">
+                                            تاريخ الإنشاء
+                                        </dt>
+                                        <dd
+                                            className="min-w-0 text-end text-xs text-muted-foreground"
+                                            dir="ltr"
+                                        >
+                                            {formatCreatedAt(getCreatedAt(row))}
+                                        </dd>
+                                    </div>
+                                </dl>
+                                <div className="flex flex-wrap items-center gap-2 border-t pt-3">
+                                    {renderActions(row)}
+                                </div>
+                            </li>
                         ))}
-                    </tbody>
-                </table>
+                    </ul>
+                )}
 
                 {data.total > 0 && (
                     <div className="flex flex-wrap items-center justify-between gap-2 border-t bg-muted/30 px-4 py-3 text-sm">

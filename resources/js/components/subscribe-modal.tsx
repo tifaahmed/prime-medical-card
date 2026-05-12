@@ -1,3 +1,4 @@
+import { useForm } from '@inertiajs/react';
 import {
     createContext,
     useCallback,
@@ -35,6 +36,11 @@ export function SubscribeModalProvider({ children }: { children: ReactNode }) {
 function SubscribeModal({ onClose }: { onClose: () => void }) {
     const [submitted, setSubmitted] = useState(false);
     const nameRef = useRef<HTMLInputElement>(null);
+    const { data, setData, post, processing, errors, reset } = useForm({
+        name: '',
+        phone: '',
+        subject: '',
+    });
 
     useEffect(() => {
         const onKey = (e: KeyboardEvent) => {
@@ -55,7 +61,13 @@ function SubscribeModal({ onClose }: { onClose: () => void }) {
 
     const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        setSubmitted(true);
+        post('/contact', {
+            preserveScroll: true,
+            onSuccess: () => {
+                setSubmitted(true);
+                reset();
+            },
+        });
     };
 
     return (
@@ -162,6 +174,10 @@ function SubscribeModal({ onClose }: { onClose: () => void }) {
                                 placeholder="الاسم الكامل"
                                 inputRef={nameRef}
                                 required
+                                value={data.name}
+                                onChange={(v) => setData('name', v)}
+                                error={errors.name}
+                                disabled={processing}
                             />
                             <ModalField
                                 label="رقم الهاتف"
@@ -170,6 +186,10 @@ function SubscribeModal({ onClose }: { onClose: () => void }) {
                                 placeholder="01xxxxxxxxx"
                                 dir="ltr"
                                 required
+                                value={data.phone}
+                                onChange={(v) => setData('phone', v)}
+                                error={errors.phone}
+                                disabled={processing}
                             />
                             <ModalField
                                 label="الموضوع"
@@ -177,13 +197,18 @@ function SubscribeModal({ onClose }: { onClose: () => void }) {
                                 type="text"
                                 placeholder="مثال: استفسار عن الباقة العائلية"
                                 required
+                                value={data.subject}
+                                onChange={(v) => setData('subject', v)}
+                                error={errors.subject}
+                                disabled={processing}
                             />
 
                             <button
                                 type="submit"
-                                className="mt-2 inline-flex h-12 w-full items-center justify-center gap-2 rounded-full bg-[#0b2e2c] text-sm font-semibold text-white transition hover:bg-[#12403d]"
+                                disabled={processing}
+                                className="mt-2 inline-flex h-12 w-full items-center justify-center gap-2 rounded-full bg-[#0b2e2c] text-sm font-semibold text-white transition hover:bg-[#12403d] disabled:opacity-60"
                             >
-                                إرسال الطلب
+                                {processing ? 'جارٍ الإرسال...' : 'إرسال الطلب'}
                                 <svg
                                     viewBox="0 0 24 24"
                                     fill="none"
@@ -212,6 +237,10 @@ function ModalField({
     required,
     dir,
     inputRef,
+    value,
+    onChange,
+    error,
+    disabled,
 }: {
     label: string;
     name: string;
@@ -220,7 +249,17 @@ function ModalField({
     required?: boolean;
     dir?: 'ltr' | 'rtl';
     inputRef?: React.RefObject<HTMLInputElement | null>;
+    value?: string;
+    onChange?: (v: string) => void;
+    error?: string;
+    disabled?: boolean;
 }) {
+    const base =
+        'h-12 w-full rounded-full border bg-[#f7f2ea] px-5 text-sm text-[#0a1a19] transition outline-none placeholder:text-[#3d4948]/60 focus:bg-white focus:ring-2 disabled:opacity-60';
+    const borderClasses = error
+        ? 'border-red-500 focus:border-red-600 focus:ring-red-200'
+        : 'border-[rgba(11,46,44,0.15)] focus:border-[#236b64] focus:ring-[#7fb3ad]';
+
     return (
         <div>
             <label
@@ -237,8 +276,16 @@ function ModalField({
                 placeholder={placeholder}
                 required={required}
                 dir={dir}
-                className="h-12 w-full rounded-full border border-[rgba(11,46,44,0.15)] bg-[#f7f2ea] px-5 text-sm text-[#0a1a19] transition outline-none placeholder:text-[#3d4948]/60 focus:border-[#236b64] focus:bg-white focus:ring-2 focus:ring-[#7fb3ad]"
+                value={value ?? ''}
+                onChange={(e) => onChange?.(e.target.value)}
+                disabled={disabled}
+                className={`${base} ${borderClasses}`}
             />
+            {error && (
+                <p className="mt-1 text-xs font-semibold text-red-600">
+                    {error}
+                </p>
+            )}
         </div>
     );
 }

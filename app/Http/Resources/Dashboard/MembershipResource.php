@@ -21,7 +21,9 @@ class MembershipResource extends JsonResource
                 'en' => $this->getTranslation('job_title', 'en', false),
                 'ar' => $this->getTranslation('job_title', 'ar', false),
             ],
+            'company_name' => $this->company_name,
             'photo_url' => $this->photo ?: null,
+            'holder_name' => $this->whenLoaded('user', fn () => $this->user?->name),
             'family_count' => $this->whenCounted('family'),
             'family' => $this->whenLoaded(
                 'family',

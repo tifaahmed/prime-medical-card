@@ -1,13 +1,15 @@
 import { useEffect, useRef, useState } from 'react';
+import { useSubscribeModal } from '@/components/subscribe-modal';
+import { useSiteSettings } from '@/hooks/use-site-settings';
 
-const WHATSAPP_NUMBER = '201156385251';
-const PHONE_NUMBER = '+201156385251';
 const LAST_SEEN_KEY = 'pmc:floatingMenuLastSeen';
 const REOPEN_AFTER_MS = 200 * 60 * 1000;
 
 export default function FloatingMenu() {
     const [open, setOpen] = useState(false);
     const rootRef = useRef<HTMLDivElement | null>(null);
+    const { open: openSubscribe } = useSubscribeModal();
+    const { contact_whatsapp, contact_phone } = useSiteSettings();
 
     useEffect(() => {
         try {
@@ -63,14 +65,14 @@ export default function FloatingMenu() {
         >
             <div
                 className={
-                    'pointer-events-none absolute bottom-full left-0 mb-2 flex min-w-[9rem] flex-col gap-1.5 transition-all duration-300 sm:right-0 sm:left-auto ' +
+                    'absolute bottom-full left-0 mb-2 flex min-w-[9rem] flex-col gap-1.5 transition-all duration-300 sm:right-0 sm:left-auto ' +
                     (open
                         ? 'pointer-events-auto translate-y-0 opacity-100'
-                        : 'translate-y-2 opacity-0')
+                        : 'pointer-events-none translate-y-2 opacity-0')
                 }
             >
                 <a
-                    href={`https://wa.me/${WHATSAPP_NUMBER}`}
+                    href={`https://wa.me/${contact_whatsapp ?? ''}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex w-full items-center gap-1.5 rounded-md bg-[#25D366] px-2.5 py-1.5 text-start whitespace-nowrap shadow-md transition-all duration-300 hover:scale-105 hover:bg-[#128C7E] hover:shadow-xl"
@@ -81,18 +83,22 @@ export default function FloatingMenu() {
                     </span>
                 </a>
 
-                <a
-                    href="/"
+                <button
+                    type="button"
+                    onClick={() => {
+                        setOpen(false);
+                        openSubscribe();
+                    }}
                     className="flex w-full items-center gap-1.5 rounded-md bg-[#0b2e2c] px-2.5 py-1.5 text-start whitespace-nowrap shadow-md transition-all duration-300 hover:scale-105 hover:bg-[#12403d] hover:shadow-xl"
                 >
                     <IconIdCard />
                     <span className="text-xs font-medium text-white">
                         كارت العضوية
                     </span>
-                </a>
+                </button>
 
                 <a
-                    href="#contact"
+                    href="/contact"
                     className="flex w-full items-center gap-1.5 rounded-md bg-[#FF6B6B] px-2.5 py-1.5 text-start whitespace-nowrap shadow-md transition-all duration-300 hover:scale-105 hover:bg-[#FF4F4F] hover:shadow-xl"
                 >
                     <IconEnvelope />
@@ -102,7 +108,7 @@ export default function FloatingMenu() {
                 </a>
 
                 <a
-                    href={`tel:${PHONE_NUMBER}`}
+                    href={`tel:${contact_phone ?? ''}`}
                     className="flex w-full items-center gap-1.5 rounded-md bg-[#FFA500] px-2.5 py-1.5 text-start whitespace-nowrap shadow-md transition-all duration-300 hover:scale-105 hover:bg-[#FF9000] hover:shadow-xl"
                 >
                     <IconPhone />

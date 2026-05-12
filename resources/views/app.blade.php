@@ -45,8 +45,13 @@
         <link rel="apple-touch-icon" sizes="180x180" href="/images/logos/favicons/apple-touch-icon.png">
         <link rel="manifest" href="/images/logos/favicons/site.webmanifest">
 
-        <link rel="preconnect" href="https://fonts.bunny.net">
-        <link href="https://fonts.bunny.net/css?family=inter:400,500,600,700|plus-jakarta-sans:500,600,700,800|instrument-sans:400,500,600" rel="stylesheet" />
+        <link rel="preconnect" href="https://fonts.bunny.net" crossorigin>
+        @php
+            $fontsHref = 'https://fonts.bunny.net/css?family=inter:400,500,600,700|plus-jakarta-sans:500,600,700,800|instrument-sans:400,500,600|reem-kufi:400,500,600,700|tajawal:400,500,700,800|amiri:400,400i,700&display=swap';
+        @endphp
+        <link rel="preload" as="style" href="{{ $fontsHref }}">
+        <link rel="stylesheet" href="{{ $fontsHref }}" media="print" onload="this.media='all'">
+        <noscript><link rel="stylesheet" href="{{ $fontsHref }}"></noscript>
 
         @viteReactRefresh
         @vite(['resources/css/app.css', 'resources/js/app.tsx', "resources/js/pages/{$page['component']}.tsx"])

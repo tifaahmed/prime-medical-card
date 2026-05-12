@@ -101,7 +101,7 @@ export function organizationSchema(appUrl: string): JsonLd {
         contactPoint: [
             {
                 '@type': 'ContactPoint',
-                telephone: '+201156385251',
+                telephone: '+201234567890',
                 contactType: 'customer service',
                 areaServed: 'EG',
                 availableLanguage: ['Arabic', 'English'],

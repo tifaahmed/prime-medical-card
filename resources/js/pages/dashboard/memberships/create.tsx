@@ -11,8 +11,10 @@ import { dashboard } from '@/routes';
 
 export default function MembershipCreate({
     relationships,
+    next_membership_number,
 }: {
     relationships: RelationshipOption[];
+    next_membership_number: string;
 }) {
     const { today, nextYear } = useMemo(() => {
         // eslint-disable-next-line react-hooks/purity
@@ -27,12 +29,17 @@ export default function MembershipCreate({
     }, []);
 
     const { data, setData, post, processing, errors } = useForm({
-        membership_number: '',
+        membership_number: next_membership_number,
+        first_name: '',
+        second_name: '',
+        third_name: '',
+        fourth_name: '',
         registration_date: today,
         expiration_date: nextYear,
         is_active: true,
         is_visible: true,
         job_title: { en: '', ar: '' },
+        company_name: '',
         photo: null as File | null,
         photo_url: null as string | null,
         photo_remove: false,

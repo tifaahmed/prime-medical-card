@@ -1,15 +1,25 @@
 import { Link } from '@inertiajs/react';
 import {
+    BarChart3,
     Building2,
+    Clock,
     CreditCard,
+    HeartHandshake,
+    HelpCircle,
     Landmark,
     Layers,
     LayoutGrid,
+    ListChecks,
     Mail,
     MapPin,
+    MessageSquareQuote,
     Search,
+    Settings,
+    Sparkles,
+    Stethoscope,
     Store,
     Tag,
+    Wallet,
 } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import { NavMain } from '@/components/nav-main';
@@ -95,6 +105,78 @@ const seoNav: NavItem[] = [
     },
 ];
 
+const contentNav: NavItem[] = [
+    {
+        title: 'الأسئلة الشائعة',
+        href: '/dashboard/faqs',
+        icon: HelpCircle,
+        iconClassName: 'bg-teal-500/15 text-teal-300',
+    },
+    {
+        title: 'آراء الأعضاء',
+        href: '/dashboard/testimonials',
+        icon: MessageSquareQuote,
+        iconClassName: 'bg-violet-500/15 text-violet-300',
+    },
+    {
+        title: 'الباقات',
+        href: '/dashboard/pricing-plans',
+        icon: Wallet,
+        iconClassName: 'bg-emerald-500/15 text-emerald-300',
+    },
+    {
+        title: 'خدمات الصفحة الرئيسية',
+        href: '/dashboard/home-services',
+        icon: Stethoscope,
+        iconClassName: 'bg-cyan-500/15 text-cyan-300',
+    },
+    {
+        title: 'كيف نعمل',
+        href: '/dashboard/home-steps',
+        icon: ListChecks,
+        iconClassName: 'bg-amber-500/15 text-amber-300',
+    },
+    {
+        title: 'العروض المميزة',
+        href: '/dashboard/home-featured-offers',
+        icon: Sparkles,
+        iconClassName: 'bg-pink-500/15 text-pink-300',
+    },
+    {
+        title: 'إحصائيات عن الشركة',
+        href: '/dashboard/about-stats',
+        icon: BarChart3,
+        iconClassName: 'bg-orange-500/15 text-orange-300',
+    },
+    {
+        title: 'قيمنا',
+        href: '/dashboard/about-values',
+        icon: HeartHandshake,
+        iconClassName: 'bg-lime-500/15 text-lime-300',
+    },
+    {
+        title: 'الخط الزمني',
+        href: '/dashboard/about-timeline',
+        icon: Clock,
+        iconClassName: 'bg-blue-500/15 text-blue-300',
+    },
+    {
+        title: 'محتوى الصفحات (عام)',
+        href: '/dashboard/page-contents',
+        icon: Layers,
+        iconClassName: 'bg-fuchsia-500/15 text-fuchsia-300',
+    },
+];
+
+const settingsNav: NavItem[] = [
+    {
+        title: 'إعدادات الموقع',
+        href: '/dashboard/site-settings',
+        icon: Settings,
+        iconClassName: 'bg-slate-500/15 text-slate-300',
+    },
+];
+
 const messagesNav: NavItem[] = [
     {
         title: 'رسائل التواصل',
@@ -125,7 +207,9 @@ export function AppSidebar() {
                 <NavMain items={networkNav} label="الشبكة" />
                 <NavMain items={membersNav} label="الأعضاء" />
                 <NavMain items={seoNav} label="تحسين البحث" />
+                <NavMain items={contentNav} label="محتوى الصفحات" />
                 <NavMain items={messagesNav} label="الرسائل" />
+                <NavMain items={settingsNav} label="الإعدادات" />
             </SidebarContent>
 
             <SidebarFooter>

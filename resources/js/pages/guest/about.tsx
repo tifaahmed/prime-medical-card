@@ -1,4 +1,6 @@
 import { usePage } from '@inertiajs/react';
+import type { ReactNode } from 'react';
+import { usePageContent } from '@/hooks/use-page-content';
 import FloatingActions from '@/pages/guest/_components/floating-actions';
 import FloatingLogos from '@/pages/guest/_components/floating-logos';
 import SeoHead, { breadcrumbSchema } from '@/pages/guest/_components/seo-head';
@@ -11,89 +13,106 @@ import SiteNav from '@/pages/guest/_components/home/site-nav';
 import { homeStyles } from '@/pages/guest/_components/home/styles';
 import { useSubscribeModal } from '@/components/subscribe-modal';
 
-const STATS = [
-    { value: '٢٠٢٠', label: 'تأسست الشركة' },
-    { value: '+٣٠٠٠', label: 'شريك طبي معتمد' },
-    { value: '+٢٥٠ ألف', label: 'عضو مسجّل' },
-    { value: '+٢٧', label: 'محافظة مغطاة' },
-];
+type StatItem = { id: number; value: string; label: string };
+type ValueItem = {
+    id: number;
+    title: string;
+    description: string | null;
+    icon_key: string;
+};
+type TimelineItem = {
+    id: number;
+    year: string;
+    title: string;
+    description: string | null;
+};
 
-const VALUES = [
-    {
-        title: 'الجودة الطبية',
-        desc: 'نتعامل فقط مع جهات طبية معتمدة وذات سمعة موثوقة لضمان أفضل تجربة لأعضائنا.',
-        icon: (
-            <>
-                <path d="M9 11l3 3L22 4" />
-                <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
-            </>
-        ),
-    },
-    {
-        title: 'الشفافية',
-        desc: 'نعرض الخصومات والشروط بوضوح، بدون رسوم خفية أو مفاجآت في الفاتورة.',
-        icon: (
-            <>
-                <circle cx="12" cy="12" r="10" />
-                <path d="M12 6v6l4 2" />
-            </>
-        ),
-    },
-    {
-        title: 'في خدمتك دائماً',
-        desc: 'فريق دعم متاح طوال الأسبوع للرد على استفساراتك ومساعدتك في الحجوزات.',
-        icon: (
-            <>
-                <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" />
-            </>
-        ),
-    },
-    {
-        title: 'سعر يناسب الجميع',
-        desc: 'باقات بأسعار اقتصادية تتيح لكل أسرة مصرية الوصول إلى رعاية صحية أفضل.',
-        icon: (
-            <>
-                <line x1="12" y1="1" x2="12" y2="23" />
-                <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
-            </>
-        ),
-    },
-];
-
-const TIMELINE = [
-    {
-        year: '٢٠٢٠',
-        title: 'انطلاق الفكرة',
-        desc: 'بدأ المؤسسون رحلتهم برؤية لتقديم رعاية صحية ميسّرة لكل أسرة.',
-    },
-    {
-        year: '٢٠٢١',
-        title: 'أول ١٠٠ شريك',
-        desc: 'وصلنا لأول ١٠٠ شريك طبي وبدأنا تقديم الخدمة في القاهرة الكبرى.',
-    },
-    {
-        year: '٢٠٢٣',
-        title: 'توسع وطني',
-        desc: 'تغطية كاملة لجميع المحافظات المصرية وتجاوز ١٠٠٠ شريك معتمد.',
-    },
-    {
-        year: '٢٠٢٦',
-        title: 'منصة متكاملة',
-        desc: 'إطلاق المنصة الرقمية ونسخة جديدة من البطاقة وعروض حصرية للأعضاء.',
-    },
-];
+const VALUE_ICONS: Record<string, ReactNode> = {
+    shield: (
+        <>
+            <path d="M9 11l3 3L22 4" />
+            <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
+        </>
+    ),
+    clock: (
+        <>
+            <circle cx="12" cy="12" r="10" />
+            <path d="M12 6v6l4 2" />
+        </>
+    ),
+    chat: (
+        <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" />
+    ),
+    wallet: (
+        <>
+            <line x1="12" y1="1" x2="12" y2="23" />
+            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+        </>
+    ),
+};
 
 const FALLBACK_TITLE = 'عن الشركة — برايم ميديكال كارد';
 const FALLBACK_DESCRIPTION =
     'تعرّف على قصة برايم ميديكال كارد، رؤيتنا، قيمنا، ورحلتنا في تقديم رعاية صحية ميسّرة لأكثر من ربع مليون عضو في مصر.';
 
-export default function About({ seo }: { seo?: PageSeoProp | null }) {
+export default function About({
+    seo,
+    aboutStats = [],
+    aboutValues = [],
+    aboutTimeline = [],
+}: {
+    seo?: PageSeoProp | null;
+    aboutStats?: StatItem[];
+    aboutValues?: ValueItem[];
+    aboutTimeline?: TimelineItem[];
+}) {
     const { auth, appUrl } = usePage<{
         auth: { user: { name: string } | null };
         appUrl: string;
     }>().props;
     const authUser = auth?.user ?? null;
     const { open: openSubscribe } = useSubscribeModal();
+
+    const heroEyebrow = usePageContent('hero', 'eyebrow', 'من نحن');
+    const heroParagraph = usePageContent(
+        'hero',
+        'paragraph',
+        'برايم ميديكال كارد هي بطاقة الخصومات الطبية الأولى في مصر، تأسست عام ٢٠٢٠ بهدف جعل الرعاية الصحية الجيدة في متناول كل أسرة مصرية من خلال شبكة تضم أكبر الجهات الطبية المعتمدة في الدولة.',
+    );
+    const storyEyebrow = usePageContent('story', 'eyebrow', 'قصتنا');
+    const storyParagraph1 = usePageContent(
+        'story',
+        'paragraph1',
+        'بدأت برايم ميديكال كارد من ملاحظة بسيطة: أسعار الرعاية الصحية ترتفع، والكثير من الأسر تؤجل الكشف الطبي خوفاً من التكلفة. أردنا أن نكون الجسر بين الجهات الطبية المتميزة والأسر التي تستحق رعاية أفضل.',
+    );
+    const storyParagraph2 = usePageContent(
+        'story',
+        'paragraph2',
+        'بدأنا بشراكات محدودة في القاهرة، واليوم نخدم أكثر من ربع مليون عضو في كل محافظات مصر، بشبكة تضم مستشفيات، صيدليات، معامل تحاليل، مراكز أشعة، عيادات أسنان، بصريات، وأكثر.',
+    );
+    const storyParagraph3 = usePageContent(
+        'story',
+        'paragraph3',
+        'التزامنا واضح: خصومات حقيقية، شركاء معتمدون، وتجربة بسيطة من البداية للنهاية.',
+    );
+    const visionTitle = usePageContent('vision', 'title', 'رؤيتنا');
+    const visionBody = usePageContent(
+        'vision',
+        'body',
+        'أن نكون الخيار الأول لكل أسرة مصرية تبحث عن رعاية صحية موثوقة بأسعار في متناول الجميع، من خلال أكبر شبكة شركاء طبيين في الجمهورية.',
+    );
+    const missionTitle = usePageContent('mission', 'title', 'رسالتنا');
+    const missionBody = usePageContent(
+        'mission',
+        'body',
+        'تمكين كل عضو من اتخاذ قرارات صحية أفضل من خلال خصومات حقيقية، شفافية كاملة، وتجربة رقمية بسيطة تربطه بأفضل المقدمين الطبيين.',
+    );
+    const valuesEyebrow = usePageContent('values_header', 'eyebrow', 'قيمنا');
+    const timelineEyebrow = usePageContent(
+        'timeline_header',
+        'eyebrow',
+        'الرحلة',
+    );
 
     useRevealOnScroll();
 
@@ -119,16 +138,6 @@ export default function About({ seo }: { seo?: PageSeoProp | null }) {
                     ]),
                 ]}
             >
-                <link rel="preconnect" href="https://fonts.googleapis.com" />
-                <link
-                    rel="preconnect"
-                    href="https://fonts.gstatic.com"
-                    crossOrigin=""
-                />
-                <link
-                    href="https://fonts.googleapis.com/css2?family=Reem+Kufi:wght@400;500;600;700&family=Tajawal:wght@300;400;500;700;800&family=Amiri:ital,wght@0,400;0,700;1,400&display=swap"
-                    rel="stylesheet"
-                />
             </SeoHead>
             <style dangerouslySetInnerHTML={{ __html: homeStyles }} />
 
@@ -141,7 +150,7 @@ export default function About({ seo }: { seo?: PageSeoProp | null }) {
                     <div className="container">
                         <div className="mx-auto max-w-3xl text-center">
                             <span className="inline-flex items-center rounded-full bg-[var(--amber-100)] px-4 py-1.5 text-xs font-semibold tracking-[0.18em] text-[var(--amber-600)] uppercase">
-                                من نحن
+                                {heroEyebrow}
                             </span>
                             <h1 className="mt-4 text-4xl leading-tight font-bold text-[var(--teal-900)] sm:text-5xl lg:text-6xl">
                                 نُعيد تعريف{' '}
@@ -151,17 +160,14 @@ export default function About({ seo }: { seo?: PageSeoProp | null }) {
                                 في مصر
                             </h1>
                             <p className="mt-5 text-base leading-relaxed text-[var(--ink-soft)] sm:text-lg">
-                                برايم ميديكال كارد هي بطاقة الخصومات الطبية
-                                الأولى في مصر، تأسست عام ٢٠٢٠ بهدف جعل الرعاية
-                                الصحية الجيدة في متناول كل أسرة مصرية من خلال
-                                شبكة تضم أكبر الجهات الطبية المعتمدة في الدولة.
+                                {heroParagraph}
                             </p>
                         </div>
 
                         <div className="mt-12 grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-4">
-                            {STATS.map((s) => (
+                            {aboutStats.map((s) => (
                                 <div
-                                    key={s.label}
+                                    key={s.id}
                                     className="rounded-3xl border border-[rgba(11,46,44,0.08)] bg-white p-6 text-center shadow-[0_18px_40px_-30px_rgba(11,46,44,0.5)]"
                                 >
                                     <div className="text-3xl font-extrabold text-[var(--amber-600)] sm:text-4xl">
@@ -180,7 +186,7 @@ export default function About({ seo }: { seo?: PageSeoProp | null }) {
                     <div className="container grid gap-10 lg:grid-cols-2 lg:items-center">
                         <div>
                             <span className="text-xs font-semibold tracking-[0.18em] text-[var(--teal-600)] uppercase">
-                                قصتنا
+                                {storyEyebrow}
                             </span>
                             <h2 className="mt-3 text-3xl font-bold text-[var(--teal-900)] sm:text-4xl">
                                 من فكرة بسيطة{' '}
@@ -189,23 +195,9 @@ export default function About({ seo }: { seo?: PageSeoProp | null }) {
                                 </em>
                             </h2>
                             <div className="mt-6 space-y-4 text-base leading-relaxed text-[var(--ink-soft)]">
-                                <p>
-                                    بدأت برايم ميديكال كارد من ملاحظة بسيطة:
-                                    أسعار الرعاية الصحية ترتفع، والكثير من الأسر
-                                    تؤجل الكشف الطبي خوفاً من التكلفة. أردنا أن
-                                    نكون الجسر بين الجهات الطبية المتميزة والأسر
-                                    التي تستحق رعاية أفضل.
-                                </p>
-                                <p>
-                                    بدأنا بشراكات محدودة في القاهرة، واليوم نخدم
-                                    أكثر من ربع مليون عضو في كل محافظات مصر،
-                                    بشبكة تضم مستشفيات، صيدليات، معامل تحاليل،
-                                    مراكز أشعة، عيادات أسنان، بصريات، وأكثر.
-                                </p>
-                                <p>
-                                    التزامنا واضح: خصومات حقيقية، شركاء معتمدون،
-                                    وتجربة بسيطة من البداية للنهاية.
-                                </p>
+                                <p>{storyParagraph1}</p>
+                                <p>{storyParagraph2}</p>
+                                <p>{storyParagraph3}</p>
                             </div>
                         </div>
 
@@ -227,13 +219,11 @@ export default function About({ seo }: { seo?: PageSeoProp | null }) {
                                         </svg>
                                     </div>
                                     <h3 className="text-xl font-bold text-[var(--teal-900)]">
-                                        رؤيتنا
+                                        {visionTitle}
                                     </h3>
                                 </div>
                                 <p className="text-sm leading-relaxed text-[var(--ink-soft)]">
-                                    أن نكون الخيار الأول لكل أسرة مصرية تبحث عن
-                                    رعاية صحية موثوقة بأسعار في متناول الجميع،
-                                    من خلال أكبر شبكة شركاء طبيين في الجمهورية.
+                                    {visionBody}
                                 </p>
 
                                 <div className="mt-8 mb-6 flex items-center gap-3">
@@ -253,13 +243,11 @@ export default function About({ seo }: { seo?: PageSeoProp | null }) {
                                         </svg>
                                     </div>
                                     <h3 className="text-xl font-bold text-[var(--teal-900)]">
-                                        رسالتنا
+                                        {missionTitle}
                                     </h3>
                                 </div>
                                 <p className="text-sm leading-relaxed text-[var(--ink-soft)]">
-                                    تمكين كل عضو من اتخاذ قرارات صحية أفضل من
-                                    خلال خصومات حقيقية، شفافية كاملة، وتجربة
-                                    رقمية بسيطة تربطه بأفضل المقدمين الطبيين.
+                                    {missionBody}
                                 </p>
                             </div>
                         </div>
@@ -270,7 +258,7 @@ export default function About({ seo }: { seo?: PageSeoProp | null }) {
                     <div className="container">
                         <div className="mx-auto max-w-2xl text-center">
                             <span className="text-xs font-semibold tracking-[0.18em] text-[var(--teal-600)] uppercase">
-                                قيمنا
+                                {valuesEyebrow}
                             </span>
                             <h2 className="mt-3 text-3xl font-bold text-[var(--teal-900)] sm:text-4xl">
                                 ما الذي يميز{' '}
@@ -281,9 +269,9 @@ export default function About({ seo }: { seo?: PageSeoProp | null }) {
                         </div>
 
                         <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-                            {VALUES.map((v) => (
+                            {aboutValues.map((v) => (
                                 <article
-                                    key={v.title}
+                                    key={v.id}
                                     className="rounded-3xl border border-[rgba(11,46,44,0.08)] bg-white p-6 transition hover:-translate-y-1 hover:shadow-[0_24px_55px_-30px_rgba(11,46,44,0.5)]"
                                 >
                                     <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[var(--teal-100)] text-[var(--teal-700)]">
@@ -296,15 +284,18 @@ export default function About({ seo }: { seo?: PageSeoProp | null }) {
                                             strokeLinejoin="round"
                                             className="h-6 w-6"
                                         >
-                                            {v.icon}
+                                            {VALUE_ICONS[v.icon_key] ??
+                                                VALUE_ICONS.shield}
                                         </svg>
                                     </div>
                                     <h3 className="mt-4 text-lg font-bold text-[var(--teal-900)]">
                                         {v.title}
                                     </h3>
-                                    <p className="mt-2 text-sm leading-relaxed text-[var(--ink-soft)]">
-                                        {v.desc}
-                                    </p>
+                                    {v.description && (
+                                        <p className="mt-2 text-sm leading-relaxed text-[var(--ink-soft)]">
+                                            {v.description}
+                                        </p>
+                                    )}
                                 </article>
                             ))}
                         </div>
@@ -315,7 +306,7 @@ export default function About({ seo }: { seo?: PageSeoProp | null }) {
                     <div className="container">
                         <div className="mx-auto max-w-2xl text-center">
                             <span className="text-xs font-semibold tracking-[0.18em] text-[var(--amber-400)] uppercase">
-                                الرحلة
+                                {timelineEyebrow}
                             </span>
                             <h2 className="mt-3 text-3xl font-bold text-[var(--cream)] sm:text-4xl">
                                 محطات{' '}
@@ -326,9 +317,9 @@ export default function About({ seo }: { seo?: PageSeoProp | null }) {
                         </div>
 
                         <ol className="relative mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-                            {TIMELINE.map((t) => (
+                            {aboutTimeline.map((t) => (
                                 <li
-                                    key={t.year}
+                                    key={t.id}
                                     className="relative rounded-3xl bg-[rgba(247,242,234,0.06)] p-6 backdrop-blur"
                                 >
                                     <span className="inline-flex items-center rounded-full bg-[var(--amber-500)] px-3 py-1 text-xs font-bold text-[var(--teal-900)]">
@@ -337,9 +328,11 @@ export default function About({ seo }: { seo?: PageSeoProp | null }) {
                                     <h3 className="mt-3 text-lg font-bold text-[var(--cream)]">
                                         {t.title}
                                     </h3>
-                                    <p className="mt-2 text-sm leading-relaxed text-[rgba(247,242,234,0.7)]">
-                                        {t.desc}
-                                    </p>
+                                    {t.description && (
+                                        <p className="mt-2 text-sm leading-relaxed text-[rgba(247,242,234,0.7)]">
+                                            {t.description}
+                                        </p>
+                                    )}
                                 </li>
                             ))}
                         </ol>
