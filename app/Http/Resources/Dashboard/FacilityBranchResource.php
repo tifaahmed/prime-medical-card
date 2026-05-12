@@ -11,6 +11,7 @@ class FacilityBranchResource extends JsonResource
     {
         return [
             'id' => $this->id,
+            'created_at' => $this->created_at?->toDateTimeString(),
             'slug' => $this->slug,
             'facility_id' => $this->facility_id,
             'governorate_id' => $this->governorate_id,

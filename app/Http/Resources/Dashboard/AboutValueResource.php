@@ -11,6 +11,7 @@ class AboutValueResource extends JsonResource
     {
         return [
             'id' => $this->id,
+            'created_at' => $this->created_at?->toDateTimeString(),
             'title' => $this->title,
             'description' => $this->description,
             'icon_key' => $this->icon_key,

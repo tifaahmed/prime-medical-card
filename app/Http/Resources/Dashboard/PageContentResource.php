@@ -11,6 +11,7 @@ class PageContentResource extends JsonResource
     {
         return [
             'id' => $this->id,
+            'created_at' => $this->created_at?->toDateTimeString(),
             'page' => $this->page,
             'section' => $this->section,
             'key' => $this->key,

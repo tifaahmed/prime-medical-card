@@ -11,6 +11,7 @@ class HomeServiceResource extends JsonResource
     {
         return [
             'id' => $this->id,
+            'created_at' => $this->created_at?->toDateTimeString(),
             'title' => $this->title,
             'description' => $this->description,
             'discount' => $this->discount,

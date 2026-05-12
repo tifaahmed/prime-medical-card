@@ -11,6 +11,7 @@ class PricingPlanResource extends JsonResource
     {
         return [
             'id' => $this->id,
+            'created_at' => $this->created_at?->toDateTimeString(),
             'name' => $this->name,
             'description' => $this->description,
             'price' => $this->price,

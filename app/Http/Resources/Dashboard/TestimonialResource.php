@@ -11,6 +11,7 @@ class TestimonialResource extends JsonResource
     {
         return [
             'id' => $this->id,
+            'created_at' => $this->created_at?->toDateTimeString(),
             'name' => $this->name,
             'role' => $this->role,
             'quote' => $this->quote,

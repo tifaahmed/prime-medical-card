@@ -11,6 +11,7 @@ class HomeFeaturedOfferResource extends JsonResource
     {
         return [
             'id' => $this->id,
+            'created_at' => $this->created_at?->toDateTimeString(),
             'title' => $this->title,
             'partner' => $this->partner,
             'description' => $this->description,

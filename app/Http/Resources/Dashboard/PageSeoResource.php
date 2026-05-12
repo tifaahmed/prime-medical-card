@@ -11,6 +11,7 @@ class PageSeoResource extends JsonResource
     {
         return [
             'id' => $this->id,
+            'created_at' => $this->created_at?->toDateTimeString(),
             'page_key' => $this->page_key,
             'title' => [
                 'en' => $this->getTranslation('title', 'en', false),

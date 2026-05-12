@@ -11,6 +11,7 @@ class AboutStatResource extends JsonResource
     {
         return [
             'id' => $this->id,
+            'created_at' => $this->created_at?->toDateTimeString(),
             'value' => $this->value,
             'label' => $this->label,
             'is_published' => $this->is_published,

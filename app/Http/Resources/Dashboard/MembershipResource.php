@@ -11,6 +11,7 @@ class MembershipResource extends JsonResource
     {
         return [
             'id' => $this->id,
+            'created_at' => $this->created_at?->toDateTimeString(),
             'slug' => $this->slug,
             'membership_number' => $this->membership_number,
             'registration_date' => $this->registration_date?->toDateString(),
