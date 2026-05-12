@@ -1,6 +1,11 @@
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
+import { toPng } from 'html-to-image';
+import jsPDF from 'jspdf';
 import {
     ArrowRightIcon,
+    FileDownIcon,
+    ImageDownIcon,
+    Loader2Icon,
     MoveIcon,
     RotateCcwIcon,
     SaveIcon,
@@ -117,6 +122,87 @@ export default function MembershipCard({
     });
 
     const [selected, setSelected] = useState<LayoutKey | null>(null);
+    const [downloading, setDownloading] = useState<
+        'front-png' | 'back-png' | 'pdf' | null
+    >(null);
+
+    const frontWrapRef = useRef<HTMLDivElement | null>(null);
+    const backWrapRef = useRef<HTMLDivElement | null>(null);
+
+    const captureNode = async (
+        node: HTMLElement | null,
+    ): Promise<string | null> => {
+        if (!node) return null;
+        setSelected(null);
+        await new Promise((resolve) => requestAnimationFrame(resolve));
+        return toPng(node, {
+            cacheBust: true,
+            pixelRatio: 2,
+            backgroundColor: '#ffffff',
+        });
+    };
+
+    const triggerDownload = (dataUrl: string, filename: string) => {
+        const a = document.createElement('a');
+        a.href = dataUrl;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+    };
+
+    const downloadFrontPng = async () => {
+        try {
+            setDownloading('front-png');
+            const url = await captureNode(frontWrapRef.current);
+            if (url) {
+                triggerDownload(
+                    url,
+                    `card-${membership.membership_number}-front.png`,
+                );
+            }
+        } finally {
+            setDownloading(null);
+        }
+    };
+
+    const downloadBackPng = async () => {
+        try {
+            setDownloading('back-png');
+            const url = await captureNode(backWrapRef.current);
+            if (url) {
+                triggerDownload(
+                    url,
+                    `card-${membership.membership_number}-back.png`,
+                );
+            }
+        } finally {
+            setDownloading(null);
+        }
+    };
+
+    const downloadPdf = async () => {
+        try {
+            setDownloading('pdf');
+            const front = await captureNode(frontWrapRef.current);
+            const back = await captureNode(backWrapRef.current);
+            if (!front || !back) return;
+
+            const widthMm = 85.6;
+            const heightMm = 53.98;
+            const pdf = new jsPDF({
+                orientation: 'landscape',
+                unit: 'mm',
+                format: [widthMm, heightMm],
+            });
+            pdf.addImage(front, 'PNG', 0, 0, widthMm, heightMm);
+            pdf.addPage([widthMm, heightMm], 'landscape');
+            pdf.addImage(back, 'PNG', 0, 0, widthMm, heightMm);
+            pdf.save(`card-${membership.membership_number}.pdf`);
+        } finally {
+            setDownloading(null);
+        }
+    };
 
     const photoPreview = useMemo(
         () => (data.photo ? URL.createObjectURL(data.photo) : null),
@@ -306,25 +392,74 @@ export default function MembershipCard({
                                     اسحب العناصر لتغيير مكانها
                                 </div>
                             </header>
-                            <CardFrontPreview
-                                firstName={data.card_first_name}
-                                fullName={data.card_full_name}
-                                workPlace={data.job_title_en}
-                                companyName={data.company_name}
-                                expirationDate={data.expiration_date}
-                                photoUrl={displayedPhoto}
-                                qrValue={cardUrl}
-                                layout={data.card_layout}
-                                onLayoutChange={updateLayout}
-                                selected={selected}
-                                onSelect={setSelected}
-                            />
+                            <div ref={frontWrapRef}>
+                                <CardFrontPreview
+                                    firstName={data.card_first_name}
+                                    fullName={data.card_full_name}
+                                    workPlace={data.job_title_en}
+                                    companyName={data.company_name}
+                                    expirationDate={data.expiration_date}
+                                    photoUrl={displayedPhoto}
+                                    qrValue={cardUrl}
+                                    layout={data.card_layout}
+                                    onLayoutChange={updateLayout}
+                                    selected={selected}
+                                    onSelect={setSelected}
+                                />
+                            </div>
                             <p
                                 className="break-all text-center text-xs text-muted-foreground"
                                 dir="ltr"
                             >
                                 QR → {cardUrl}
                             </p>
+
+                            <div className="flex flex-wrap gap-2 border-t pt-4">
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    size="sm"
+                                    className="gap-1.5"
+                                    disabled={downloading !== null}
+                                    onClick={downloadFrontPng}
+                                >
+                                    {downloading === 'front-png' ? (
+                                        <Loader2Icon className="size-3.5 animate-spin" />
+                                    ) : (
+                                        <ImageDownIcon className="size-3.5" />
+                                    )}
+                                    تنزيل الوجه الأمامي (PNG)
+                                </Button>
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    size="sm"
+                                    className="gap-1.5"
+                                    disabled={downloading !== null}
+                                    onClick={downloadBackPng}
+                                >
+                                    {downloading === 'back-png' ? (
+                                        <Loader2Icon className="size-3.5 animate-spin" />
+                                    ) : (
+                                        <ImageDownIcon className="size-3.5" />
+                                    )}
+                                    تنزيل الوجه الخلفي (PNG)
+                                </Button>
+                                <Button
+                                    type="button"
+                                    size="sm"
+                                    className="gap-1.5"
+                                    disabled={downloading !== null}
+                                    onClick={downloadPdf}
+                                >
+                                    {downloading === 'pdf' ? (
+                                        <Loader2Icon className="size-3.5 animate-spin" />
+                                    ) : (
+                                        <FileDownIcon className="size-3.5" />
+                                    )}
+                                    تنزيل البطاقة (PDF)
+                                </Button>
+                            </div>
                         </section>
 
                         <section className="space-y-4 rounded-3xl border bg-card p-6 shadow-sm">
@@ -379,12 +514,14 @@ export default function MembershipCard({
                                 </h3>
                             </header>
                             <div
+                                ref={backWrapRef}
                                 className="relative w-full overflow-hidden rounded-2xl border shadow-sm"
                                 style={{ aspectRatio: '1096 / 686' }}
                             >
                                 <img
                                     src="/images/card/back.jpeg"
                                     alt=""
+                                    crossOrigin="anonymous"
                                     className="absolute inset-0 h-full w-full object-cover"
                                 />
                             </div>
