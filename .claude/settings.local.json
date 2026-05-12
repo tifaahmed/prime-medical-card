@@ -59,7 +59,10 @@
       "Bash(rm /tmp/pmc-can-write-php-ini-test)",
       "Bash(sudo -n true)",
       "Bash(PHP_INI_SCAN_DIR=:./.php-overrides.d php *)",
-      "Bash(npx --no -- lighthouse --version)"
+      "Bash(npx --no -- lighthouse --version)",
+      "Bash(xargs cat)",
+      "Bash(systemctl restart *)",
+      "Bash(service php8.3-fpm restart)"
     ]
   }
 }
