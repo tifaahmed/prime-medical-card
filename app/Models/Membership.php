@@ -30,6 +30,32 @@ class Membership extends Model implements HasMedia
      */
     public $translatable = ['job_title'];
 
+    public const DEFAULT_CARD_LAYOUT = [
+        'first_name' => ['top' => 32, 'left' => 8, 'fontSize' => 4.5],
+        'full_name' => ['top' => 41, 'left' => 8, 'fontSize' => 2.6],
+        'work_place' => ['top' => 50.17, 'left' => 24.07, 'fontSize' => 2.2],
+        'company' => ['top' => 60, 'left' => 8, 'fontSize' => 2.4],
+        'date' => ['top' => 77, 'left' => 11, 'fontSize' => 2.8],
+        'photo' => ['top' => 22, 'left' => 74.2, 'width' => 18.4, 'height' => 36.5],
+        'qr' => ['top' => 70.74, 'left' => 76.68, 'width' => 13.22, 'height' => 19.58],
+    ];
+
+    /**
+     * Merge stored layout with defaults and coerce all values to floats.
+     * Values stored from form-encoded posts arrive as strings — cast here so React receives numbers.
+     */
+    public function resolvedCardLayout(): array
+    {
+        $stored = is_array($this->card_layout) ? $this->card_layout : [];
+        $merged = array_replace_recursive(self::DEFAULT_CARD_LAYOUT, $stored);
+
+        return collect($merged)
+            ->map(fn ($section) => collect((array) $section)
+                ->map(fn ($v) => is_numeric($v) ? (float) $v : $v)
+                ->all())
+            ->all();
+    }
+
     /**
      * The attributes that are mass assignable.
      *

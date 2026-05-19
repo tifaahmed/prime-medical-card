@@ -42,6 +42,7 @@ class MembershipController extends Controller
     public function show(Request $request, Membership $membership): Response
     {
         $membership->load([
+            'user',
             'family' => fn ($q) => $q->orderBy('id'),
             'family.media',
             'media',
@@ -166,26 +167,10 @@ class MembershipController extends Controller
                 'second_name' => $membership->user?->second_name,
                 'third_name' => $membership->user?->third_name,
                 'fourth_name' => $membership->user?->fourth_name,
-                'card_layout' => array_merge(
-                    $this->defaultCardLayout(),
-                    $membership->card_layout ?? [],
-                ),
+                'card_layout' => $membership->resolvedCardLayout(),
             ],
-            'default_card_layout' => $this->defaultCardLayout(),
+            'default_card_layout' => Membership::DEFAULT_CARD_LAYOUT,
         ]);
-    }
-
-    private function defaultCardLayout(): array
-    {
-        return [
-            'first_name' => ['top' => 32, 'left' => 8, 'fontSize' => 4.5],
-            'full_name' => ['top' => 41, 'left' => 8, 'fontSize' => 2.6],
-            'work_place' => ['top' => 50.17, 'left' => 24.07, 'fontSize' => 2.2],
-            'company' => ['top' => 60, 'left' => 8, 'fontSize' => 2.4],
-            'date' => ['top' => 77, 'left' => 11, 'fontSize' => 2.8],
-            'photo' => ['top' => 22, 'left' => 74.2, 'width' => 18.4, 'height' => 36.5],
-            'qr' => ['top' => 70.74, 'left' => 76.68, 'width' => 13.22, 'height' => 19.58],
-        ];
     }
 
     public function updateCard(Request $request, Membership $membership): RedirectResponse
@@ -231,6 +216,20 @@ class MembershipController extends Controller
         );
 
         return to_route('dashboard.memberships.card', $membership);
+    }
+
+    public function saveCardSnapshot(Request $request, Membership $membership): RedirectResponse
+    {
+        $request->validate([
+            'front' => ['required', 'image', 'mimes:png', 'max:10240'],
+        ]);
+
+        $membership->clearMediaCollection('card_front');
+        $membership->addMedia($request->file('front')->getRealPath())
+            ->usingFileName('card-'.$membership->membership_number.'-front.png')
+            ->toMediaCollection('card_front');
+
+        return back();
     }
 
     private function syncMembershipPhoto(Membership $membership, $photo, bool $remove): void

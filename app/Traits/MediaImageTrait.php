@@ -46,6 +46,13 @@ trait MediaImageTrait
         return $media ? $media->getUrl() : '';
     }
 
+    public function getCardFrontAttribute(): string
+    {
+        $media = $this->getFirstMedia('card_front');
+
+        return $media ? $media->getUrl() : '';
+    }
+
     public function getGalleryAttribute(): array
     {
         return $this->getMedia('gallery')

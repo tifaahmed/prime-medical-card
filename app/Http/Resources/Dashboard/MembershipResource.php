@@ -24,6 +24,7 @@ class MembershipResource extends JsonResource
             ],
             'company_name' => $this->company_name,
             'photo_url' => $this->photo ?: null,
+            'card_front_url' => $this->card_front ?: null,
             'holder_name' => $this->whenLoaded('user', fn () => $this->user?->name),
             'family_count' => $this->whenCounted('family'),
             'family' => $this->whenLoaded(

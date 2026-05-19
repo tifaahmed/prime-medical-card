@@ -1,4 +1,5 @@
-import { Head, Link, useForm, usePage } from '@inertiajs/react';
+import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
+import { toast } from 'sonner';
 import { toPng } from 'html-to-image';
 import jsPDF from 'jspdf';
 import {
@@ -10,7 +11,7 @@ import {
     RotateCcwIcon,
     SaveIcon,
 } from 'lucide-react';
-import { QRCodeSVG } from 'qrcode.react';
+import { QRCodeCanvas, QRCodeSVG } from 'qrcode.react';
 import {
     useCallback,
     useEffect,
@@ -123,11 +124,12 @@ export default function MembershipCard({
 
     const [selected, setSelected] = useState<LayoutKey | null>(null);
     const [downloading, setDownloading] = useState<
-        'front-png' | 'back-png' | 'pdf' | null
+        'front-png' | 'back-png' | 'pdf' | 'qr-png' | 'save' | null
     >(null);
 
     const frontWrapRef = useRef<HTMLDivElement | null>(null);
     const backWrapRef = useRef<HTMLDivElement | null>(null);
+    const qrCanvasRef = useRef<HTMLCanvasElement | null>(null);
 
     const captureNode = async (
         node: HTMLElement | null,
@@ -181,6 +183,61 @@ export default function MembershipCard({
         }
     };
 
+    const downloadQrPng = () => {
+        const canvas = qrCanvasRef.current;
+        if (!canvas) return;
+        try {
+            setDownloading('qr-png');
+            triggerDownload(
+                canvas.toDataURL('image/png'),
+                `card-${membership.membership_number}-qr.png`,
+            );
+        } finally {
+            setDownloading(null);
+        }
+    };
+
+    const saveCardSnapshot = async () => {
+        setDownloading('save');
+        let dataUrl: string | null = null;
+        try {
+            dataUrl = await captureNode(frontWrapRef.current);
+        } catch (err) {
+            console.error('Card capture failed', err);
+            toast.error('تعذر إنشاء صورة البطاقة');
+            setDownloading(null);
+            return;
+        }
+        if (!dataUrl) {
+            setDownloading(null);
+            toast.error('تعذر إنشاء صورة البطاقة');
+            return;
+        }
+        const file = new File([dataUrlToBlob(dataUrl)], 'card-front.png', {
+            type: 'image/png',
+        });
+        router.post(
+            `/dashboard/memberships/${membership.id}/card/snapshot`,
+            { front: file },
+            {
+                forceFormData: true,
+                preserveScroll: true,
+                preserveState: true,
+                onSuccess: () => {
+                    toast.success(
+                        'تم حفظ البطاقة، يمكنك تنزيلها من صفحة العضوية',
+                    );
+                },
+                onError: (errors) => {
+                    const message =
+                        Object.values(errors)[0] ?? 'تعذر حفظ البطاقة';
+                    toast.error(String(message));
+                },
+                onFinish: () => setDownloading(null),
+            },
+        );
+    };
+
     const downloadPdf = async () => {
         try {
             setDownloading('pdf');
@@ -220,7 +277,7 @@ export default function MembershipCard({
 
     const displayedPhoto = data.photo_remove
         ? null
-        : photoPreview ?? membership.photo_url;
+        : photoPreview ?? sameOrigin(membership.photo_url);
 
     const updateLayout = useCallback(
         <K extends LayoutKey>(key: K, patch: Partial<CardLayout[K]>) => {
@@ -241,6 +298,12 @@ export default function MembershipCard({
         post(`/dashboard/memberships/${membership.id}/card`, {
             forceFormData: true,
             preserveScroll: true,
+            onSuccess: () => toast.success('تم حفظ بيانات البطاقة'),
+            onError: (errors) => {
+                const message =
+                    Object.values(errors)[0] ?? 'تعذر حفظ بيانات البطاقة';
+                toast.error(String(message));
+            },
         });
     };
 
@@ -413,8 +476,34 @@ export default function MembershipCard({
                             >
                                 QR → {cardUrl}
                             </p>
+                            <div
+                                aria-hidden
+                                className="pointer-events-none fixed -left-[9999px] top-0"
+                            >
+                                <QRCodeCanvas
+                                    ref={qrCanvasRef}
+                                    value={cardUrl}
+                                    level="M"
+                                    marginSize={0}
+                                    size={1024}
+                                />
+                            </div>
 
-                            <div className="flex flex-wrap gap-2 border-t pt-4">
+                            <div className="flex flex-wrap items-center gap-2 border-t pt-4">
+                                <Button
+                                    type="button"
+                                    size="sm"
+                                    className="gap-1.5"
+                                    disabled={downloading !== null}
+                                    onClick={saveCardSnapshot}
+                                >
+                                    {downloading === 'save' ? (
+                                        <Loader2Icon className="size-3.5 animate-spin" />
+                                    ) : (
+                                        <SaveIcon className="size-3.5" />
+                                    )}
+                                    حفظ البطاقة كصورة
+                                </Button>
                                 <Button
                                     type="button"
                                     variant="outline"
@@ -444,6 +533,21 @@ export default function MembershipCard({
                                         <ImageDownIcon className="size-3.5" />
                                     )}
                                     تنزيل الوجه الخلفي (PNG)
+                                </Button>
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    size="sm"
+                                    className="gap-1.5"
+                                    disabled={downloading !== null}
+                                    onClick={downloadQrPng}
+                                >
+                                    {downloading === 'qr-png' ? (
+                                        <Loader2Icon className="size-3.5 animate-spin" />
+                                    ) : (
+                                        <ImageDownIcon className="size-3.5" />
+                                    )}
+                                    تنزيل رمز QR (PNG)
                                 </Button>
                                 <Button
                                     type="button"
@@ -1087,6 +1191,29 @@ function NumberField({
 
 function clamp(value: number, min: number, max: number): number {
     return Math.min(max, Math.max(min, value));
+}
+
+function sameOrigin(url: string | null | undefined): string | null {
+    if (!url) return null;
+    if (typeof window === 'undefined') return url;
+    try {
+        const u = new URL(url, window.location.origin);
+        if (u.host === window.location.host) return url;
+        return `${window.location.origin}${u.pathname}${u.search}${u.hash}`;
+    } catch {
+        return url;
+    }
+}
+
+function dataUrlToBlob(dataUrl: string): Blob {
+    const [meta, b64] = dataUrl.split(',');
+    const mime = /data:(.+);base64/.exec(meta ?? '')?.[1] ?? 'image/png';
+    const binary = atob(b64 ?? '');
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) {
+        bytes[i] = binary.charCodeAt(i);
+    }
+    return new Blob([bytes], { type: mime });
 }
 
 function formatDate(value: string): string {

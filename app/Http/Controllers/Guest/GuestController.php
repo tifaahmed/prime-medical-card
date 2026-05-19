@@ -278,8 +278,20 @@ class GuestController extends Controller
                 'is_active' => (bool) $membership->is_active,
                 'is_visible' => (bool) $membership->is_visible,
                 'job_title_ar' => $membership->getTranslation('job_title', 'ar', false),
+                'job_title_en' => $membership->getTranslation('job_title', 'en', false),
+                'company_name' => $membership->company_name,
+                'card_first_name' => $membership->card_first_name,
+                'card_full_name' => $membership->card_full_name,
+                'card_layout' => $membership->resolvedCardLayout(),
+                'card_front_url' => $membership->card_front ?: null,
                 'photo_url' => $membership->photo ?: null,
                 'holder_name' => $membership->user?->name,
+                'first_name' => $membership->user?->first_name,
+                'last_name' => trim(implode(' ', array_filter([
+                    $membership->user?->second_name,
+                    $membership->user?->third_name,
+                    $membership->user?->fourth_name,
+                ]))) ?: null,
                 'family' => $membership->family
                     ->map(function ($m) {
                         $rel = $m->relationship instanceof RelationshipEnum ? $m->relationship : null;

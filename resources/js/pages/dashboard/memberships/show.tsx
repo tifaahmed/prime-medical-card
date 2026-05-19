@@ -3,13 +3,16 @@ import {
     CalendarIcon,
     CheckCircle2Icon,
     CreditCardIcon,
+    DownloadIcon,
     EyeOffIcon,
     MailIcon,
     PencilIcon,
     PhoneIcon,
+    RotateCwIcon,
     UserIcon,
     UsersIcon,
 } from 'lucide-react';
+import { useState } from 'react';
 import Heading from '@/components/heading';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -37,6 +40,8 @@ interface Membership {
     is_visible: boolean;
     job_title: { en: string | null; ar: string | null };
     photo_url: string | null;
+    card_front_url: string | null;
+    holder_name: string | null;
     family: FamilyEntry[];
 }
 
@@ -71,6 +76,7 @@ export default function MembershipShow({
 }: {
     membership: Membership;
 }) {
+    const [flipped, setFlipped] = useState(false);
     return (
         <>
             <Head title={membership.membership_number} />
@@ -89,11 +95,23 @@ export default function MembershipShow({
                             </div>
                         )}
                         <Heading
-                            title={membership.membership_number}
+                            title={
+                                membership.holder_name ||
+                                membership.membership_number
+                            }
                             description={
-                                membership.job_title.ar ||
-                                membership.job_title.en ||
-                                undefined
+                                membership.holder_name
+                                    ? `${membership.membership_number}${
+                                          membership.job_title.ar ||
+                                          membership.job_title.en
+                                              ? ' • ' +
+                                                (membership.job_title.ar ||
+                                                    membership.job_title.en)
+                                              : ''
+                                      }`
+                                    : membership.job_title.ar ||
+                                      membership.job_title.en ||
+                                      undefined
                             }
                         />
                     </div>
@@ -118,6 +136,17 @@ export default function MembershipShow({
                         <Button asChild variant="outline">
                             <Link href="/dashboard/memberships">عودة</Link>
                         </Button>
+                        {membership.card_front_url && (
+                            <Button asChild variant="outline" className="gap-1.5">
+                                <a
+                                    href={membership.card_front_url}
+                                    download={`card-${membership.membership_number}.png`}
+                                >
+                                    <DownloadIcon className="size-4" />
+                                    تنزيل البطاقة
+                                </a>
+                            </Button>
+                        )}
                         <Button asChild className="gap-1.5">
                             <Link
                                 href={`/dashboard/memberships/${membership.id}/edit`}
@@ -149,6 +178,94 @@ export default function MembershipShow({
                         value={membership.expiration_date}
                     />
                 </div>
+
+                {membership.card_front_url && (
+                    <section className="space-y-3 rounded-3xl border bg-card p-6 shadow-sm">
+                        <header className="flex flex-wrap items-center justify-between gap-2">
+                            <div className="flex items-center gap-2">
+                                <span className="flex size-8 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-600">
+                                    <CreditCardIcon className="size-4" />
+                                </span>
+                                <h3 className="font-heading text-lg font-semibold">
+                                    البطاقة المحفوظة
+                                </h3>
+                            </div>
+                            <div className="flex flex-wrap gap-2">
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    size="sm"
+                                    className="gap-1.5"
+                                    onClick={() => setFlipped((f) => !f)}
+                                >
+                                    <RotateCwIcon className="size-3.5" />
+                                    {flipped
+                                        ? 'عرض الأمام'
+                                        : 'عرض الخلف'}
+                                </Button>
+                                <Button
+                                    asChild
+                                    variant="outline"
+                                    size="sm"
+                                    className="gap-1.5"
+                                >
+                                    <a
+                                        href={membership.card_front_url}
+                                        download={`card-${membership.membership_number}.png`}
+                                    >
+                                        <DownloadIcon className="size-3.5" />
+                                        تنزيل
+                                    </a>
+                                </Button>
+                            </div>
+                        </header>
+                        <div
+                            className="mx-auto w-full max-w-sm"
+                            style={{ perspective: '1500px' }}
+                        >
+                            <div
+                                onClick={() => setFlipped((f) => !f)}
+                                className="relative w-full cursor-pointer transition-transform duration-700"
+                                style={{
+                                    aspectRatio: '1096 / 686',
+                                    transformStyle: 'preserve-3d',
+                                    transform: flipped
+                                        ? 'rotateY(180deg)'
+                                        : 'rotateY(0deg)',
+                                }}
+                                title="اضغط لقلب البطاقة"
+                            >
+                                <div
+                                    className="absolute inset-0 overflow-hidden rounded-2xl border bg-muted/20"
+                                    style={{
+                                        backfaceVisibility: 'hidden',
+                                        WebkitBackfaceVisibility: 'hidden',
+                                    }}
+                                >
+                                    <img
+                                        src={membership.card_front_url}
+                                        alt={`بطاقة ${membership.membership_number}`}
+                                        className="h-full w-full object-cover"
+                                    />
+                                </div>
+                                <div
+                                    className="absolute inset-0 overflow-hidden rounded-2xl border"
+                                    style={{
+                                        backfaceVisibility: 'hidden',
+                                        WebkitBackfaceVisibility: 'hidden',
+                                        transform: 'rotateY(180deg)',
+                                    }}
+                                >
+                                    <img
+                                        src="/images/card/back.jpeg"
+                                        alt=""
+                                        className="h-full w-full object-cover"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                )}
 
                 <section className="rounded-3xl border bg-card shadow-sm">
                     <header className="flex flex-wrap items-center justify-between gap-2 border-b px-5 py-4">

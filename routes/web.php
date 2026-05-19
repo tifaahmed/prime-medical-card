@@ -97,6 +97,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::resource('offers', OfferController::class)->except('show');
         Route::get('memberships/{membership}/card', [MembershipController::class, 'card'])->name('memberships.card');
         Route::post('memberships/{membership}/card', [MembershipController::class, 'updateCard'])->name('memberships.card.update');
+        Route::post('memberships/{membership}/card/snapshot', [MembershipController::class, 'saveCardSnapshot'])->name('memberships.card.snapshot');
         Route::resource('memberships', MembershipController::class);
         Route::resource('page-seos', PageSeoController::class)->only(['index', 'edit', 'update']);
         Route::resource('faqs', FaqController::class)->except('show');
