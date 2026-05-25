@@ -40,22 +40,15 @@ class HandleInertiaRequests extends Middleware
     {
         $appUrl = rtrim(config('app.url', $request->getSchemeAndHttpHost()), '/');
 
-        $parentShare = parent::share($request);
-
         Log::info('[HandleInertiaRequests] Sharing errors', [
             'url' => $request->path(),
             'method' => $request->method(),
             'inertia' => $request->header('X-Inertia'),
-            'inertia_version' => $request->header('X-Inertia-Version'),
-            'inertia_partial_component' => $request->header('X-Inertia-Partial-Component'),
-            'inertia_partial_data' => $request->header('X-Inertia-Partial-Data'),
-            'referer' => $request->header('referer'),
-            'errors' => $parentShare['errors'] ?? 'no-errors-key',
             'session_errors_exist' => $request->session()->has('errors'),
         ]);
 
         return [
-            ...$parentShare,
+            'errors' => Inertia::always(fn () => $this->resolveValidationErrors($request)),
             'name' => config('app.name'),
             'auth' => [
                 'user' => $request->user(),
