@@ -48,6 +48,13 @@ class FortifyServiceProvider extends ServiceProvider
     private function configureViews(): void
     {
         Fortify::loginView(function (Request $request) {
+            \Illuminate\Support\Facades\Log::info('[loginView] Rendering login page', [
+                'has_errors' => $request->session()->has('errors'),
+                'errors' => $request->session()->has('errors')
+                    ? $request->session()->get('errors')->getBags()
+                    : 'none',
+            ]);
+
             $request->session()->forget('errors');
 
             return Inertia::render('auth/login', [

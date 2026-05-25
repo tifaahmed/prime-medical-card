@@ -5,6 +5,7 @@ namespace App\Http\Middleware;
 use App\Http\Resources\Guest\SiteSettingResource;
 use App\Models\SiteSetting;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Inertia\Middleware;
 
 class HandleInertiaRequests extends Middleware
@@ -39,8 +40,15 @@ class HandleInertiaRequests extends Middleware
     {
         $appUrl = rtrim(config('app.url', $request->getSchemeAndHttpHost()), '/');
 
+        $parentShare = parent::share($request);
+
+        Log::info('[HandleInertiaRequests] Sharing errors', [
+            'url' => $request->path(),
+            'errors' => $parentShare['errors'] ?? 'no-errors-key',
+        ]);
+
         return [
-            ...parent::share($request),
+            ...$parentShare,
             'name' => config('app.name'),
             'auth' => [
                 'user' => $request->user(),

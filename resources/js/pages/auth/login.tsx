@@ -1,4 +1,4 @@
-import { Form, Head } from '@inertiajs/react';
+import { Form, Head, usePage } from '@inertiajs/react';
 import InputError from '@/components/input-error';
 import PasswordInput from '@/components/password-input';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -12,6 +12,16 @@ type Props = {
 };
 
 export default function Login({ status }: Props) {
+    const { errors } = usePage().props;
+
+    console.log('[Login Page] Mounted', {
+        errors,
+        status,
+        hasUsernameError: errors?.username,
+        hasEmailError: errors?.email,
+        errorsKeys: errors ? Object.keys(errors) : [],
+    });
+
     return (
         <>
             <Head title="تسجيل الدخول" />
