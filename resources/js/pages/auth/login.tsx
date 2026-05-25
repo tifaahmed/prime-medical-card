@@ -25,24 +25,24 @@ export default function Login({ status }: Props) {
                     <>
                         <div className="grid gap-2">
                             <Label
-                                htmlFor="email"
+                                htmlFor="username"
                                 className="text-sm font-semibold text-[#0b2e2c]"
                             >
-                                البريد الإلكتروني
+                                اسم المستخدم
                             </Label>
                             <Input
-                                id="email"
-                                type="email"
-                                name="email"
+                                id="username"
+                                type="text"
+                                name="username"
                                 required
                                 autoFocus
                                 tabIndex={1}
-                                autoComplete="email"
-                                placeholder="you@example.com"
+                                autoComplete="username"
+                                placeholder="admin"
                                 dir="ltr"
                                 className="h-12 rounded-full border-[rgba(11,46,44,0.15)] bg-[#f7f2ea] px-5 text-sm text-[#0a1a19] placeholder:text-[#3d4948]/60 focus-visible:border-[#236b64] focus-visible:ring-[#7fb3ad]"
                             />
-                            <InputError message={errors.email} />
+                            <InputError message={errors.username} />
                         </div>
 
                         <div className="grid gap-2">
@@ -105,5 +105,5 @@ export default function Login({ status }: Props) {
 
 Login.layout = {
     title: 'تسجيل الدخول إلى حسابك',
-    description: 'أدخل بريدك الإلكتروني وكلمة المرور للوصول إلى حسابك',
+    description: 'أدخل اسم المستخدم وكلمة المرور للوصول إلى حسابك',
 };

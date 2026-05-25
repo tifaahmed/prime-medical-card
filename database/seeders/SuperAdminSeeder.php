@@ -14,7 +14,8 @@ class SuperAdminSeeder extends Seeder
             ['email' => 'admin@prime-medical-card.test'],
             [
                 'name' => 'Super Admin',
-                'password' => Hash::make('password'),
+                'username' => 'admin',
+                'password' => Hash::make('PrimeCard@#195858'),
                 'email_verified_at' => now(),
             ],
         );
