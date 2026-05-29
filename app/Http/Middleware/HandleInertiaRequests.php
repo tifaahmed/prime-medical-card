@@ -48,7 +48,7 @@ class HandleInertiaRequests extends Middleware
         ]);
 
         return [
-            'errors' => Inertia::always(fn () => $this->resolveValidationErrors($request)),
+            'errors' => \Inertia\Inertia::always(fn () => $this->resolveValidationErrors($request)),
             'name' => config('app.name'),
             'auth' => [
                 'user' => $request->user(),
