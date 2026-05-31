@@ -166,6 +166,7 @@ export default function CardTemplateForm({
                         workPlace="Medical Center"
                         companyName="Prime Medical"
                         expirationDate="2026-01-01"
+                        membershipNumber="PMC-123456"
                         photoUrl={null}
                         qrValue="https://example.com/card/123"
                         layout={data.layout}
@@ -231,13 +232,26 @@ export default function CardTemplateForm({
                                             errors[`layout.${key}.fontSize`]
                                         }
                                     />
-                                </div>
                             </div>
-                        );
-                    })}
+                            <label className="mt-2 flex items-center gap-1.5 cursor-pointer">
+                                <input
+                                    type="checkbox"
+                                    checked={item.hidden ?? false}
+                                    onChange={(e) =>
+                                        setLayoutField(key, 'hidden', e.target.checked)
+                                    }
+                                    className="size-3.5"
+                                />
+                                <span className="text-[10px] text-muted-foreground">
+                                    مخفي
+                                </span>
+                            </label>
+                        </div>
+                    );
+                })}
 
-                    {/* Image items */}
-                    {IMAGE_KEYS.map((key) => {
+                {/* Image items */}
+                {IMAGE_KEYS.map((key) => {
                         const item = data.layout[key] as ImageLayout;
                         return (
                             <div key={key} className="rounded-xl border bg-background p-3">
@@ -302,6 +316,19 @@ export default function CardTemplateForm({
                                         </span>
                                     </label>
                                 )}
+                                <label className="mt-2 flex items-center gap-1.5 cursor-pointer">
+                                    <input
+                                        type="checkbox"
+                                        checked={item.hidden ?? false}
+                                        onChange={(e) =>
+                                            setLayoutField(key, 'hidden', e.target.checked)
+                                        }
+                                        className="size-3.5"
+                                    />
+                                    <span className="text-[10px] text-muted-foreground">
+                                        مخفي
+                                    </span>
+                                </label>
                             </div>
                         );
                     })}

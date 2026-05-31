@@ -56,6 +56,7 @@ interface CardMembership {
     company_name: string | null;
     card_first_name: string | null;
     card_full_name: string | null;
+    card_membership_number: string | null;
     photo_url: string | null;
     holder_name: string | null;
     first_name: string | null;
@@ -87,7 +88,7 @@ function mergeLayout(
     const result = { ...base };
     for (const key of Object.keys(result) as LayoutKey[]) {
         if (override[key]) {
-            result[key] = { ...result[key], ...override[key] };
+            result[key] = { ...result[key], ...override[key] } as any;
         }
     }
     return result;
@@ -113,20 +114,31 @@ export default function MembershipCard({
         .filter(Boolean)
         .join(' ');
 
+    const defaultTemplate = cardTemplates.find((t) => t.is_default);
+    const initialTemplateId =
+        membership.card_template_id ?? defaultTemplate?.id ?? '';
+
+    const initialTemplate = cardTemplates.find(
+        (t) => t.id === Number(initialTemplateId),
+    );
+
     const { data, setData, post, processing, errors } = useForm({
         card_first_name:
             membership.card_first_name ?? membership.first_name ?? '',
         card_full_name: membership.card_full_name ?? restOfName,
+        card_membership_number:
+            membership.card_membership_number ?? membership.membership_number ?? '',
         job_title_en: membership.job_title_en ?? '',
         company_name: membership.company_name ?? '',
         expiration_date: membership.expiration_date ?? '',
         photo: null as File | null,
         photo_remove: false,
-        card_layout: membership.card_layout,
-        card_template_id:
-            membership.card_template_id ??
-            cardTemplates.find((t) => t.is_default)?.id ??
-            '',
+        card_layout:
+            membership.card_layout ??
+            (initialTemplate?.layout
+                ? mergeLayout(default_card_layout, initialTemplate.layout)
+                : default_card_layout),
+        card_template_id: initialTemplateId,
         _method: 'POST',
     });
 
@@ -323,7 +335,16 @@ export default function MembershipCard({
         [data.card_layout, setData],
     );
 
-    const resetLayout = () => {
+    const resetToCardDefault = () => {
+        setData(
+            'card_layout',
+            selectedTemplate?.layout
+                ? mergeLayout(default_card_layout, selectedTemplate.layout)
+                : default_card_layout,
+        );
+    };
+
+    const resetToMemberDefault = () => {
         setData('card_layout', default_card_layout);
     };
 
@@ -448,6 +469,23 @@ export default function MembershipCard({
                         </div>
 
                         <div className="grid gap-2">
+                            <Label>رقم العضوية</Label>
+                            <Input
+                                dir="ltr"
+                                value={data.card_membership_number}
+                                onChange={(e) =>
+                                    setData(
+                                        'card_membership_number',
+                                        e.target.value,
+                                    )
+                                }
+                            />
+                            <InputError
+                                message={errors.card_membership_number}
+                            />
+                        </div>
+
+                        <div className="grid gap-2">
                             <Label>جهة العمل (Work Place)</Label>
                             <Input
                                 dir="ltr"
@@ -527,6 +565,9 @@ export default function MembershipCard({
                                     workPlace={data.job_title_en}
                                     companyName={data.company_name}
                                     expirationDate={data.expiration_date}
+                                    membershipNumber={
+                                        data.card_membership_number
+                                    }
                                     photoUrl={displayedPhoto}
                                     qrValue={cardUrl}
                                     layout={data.card_layout}
@@ -636,16 +677,28 @@ export default function MembershipCard({
                                 <h3 className="font-heading text-lg font-semibold">
                                     التخطيط (الموقع والحجم)
                                 </h3>
-                                <Button
-                                    type="button"
-                                    variant="outline"
-                                    size="sm"
-                                    className="gap-1.5"
-                                    onClick={resetLayout}
-                                >
-                                    <RotateCcwIcon className="size-3.5" />
-                                    إعادة تعيين
-                                </Button>
+                                <div className="flex gap-2">
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        size="sm"
+                                        className="gap-1.5"
+                                        onClick={resetToMemberDefault}
+                                    >
+                                        <RotateCcwIcon className="size-3.5" />
+                                        إعادة تعيين
+                                    </Button>
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        size="sm"
+                                        className="gap-1.5"
+                                        onClick={resetToCardDefault}
+                                    >
+                                        <RotateCcwIcon className="size-3.5" />
+                                        القيم الافتراضية للقالب
+                                    </Button>
+                                </div>
                             </header>
 
                             <div className="grid gap-4 md:grid-cols-2">
@@ -783,6 +836,22 @@ function TextLayoutControls({
                     onChange={(v) => onChange({ fontSize: v })}
                 />
             </div>
+            <label
+                className="mt-1 flex items-center gap-1.5 cursor-pointer"
+                onClick={(e) => e.stopPropagation()}
+            >
+                <input
+                    type="checkbox"
+                    checked={value.hidden ?? false}
+                    onChange={(e) =>
+                        onChange({ hidden: e.target.checked })
+                    }
+                    className="size-3.5"
+                />
+                <span className="text-[10px] text-muted-foreground">
+                    مخفي
+                </span>
+            </label>
         </div>
     );
 }
@@ -831,6 +900,22 @@ function ImageLayoutControls({
                     onChange={(v) => onChange({ height: v })}
                 />
             </div>
+            <label
+                className="mt-1 flex items-center gap-1.5 cursor-pointer"
+                onClick={(e) => e.stopPropagation()}
+            >
+                <input
+                    type="checkbox"
+                    checked={value.hidden ?? false}
+                    onChange={(e) =>
+                        onChange({ hidden: e.target.checked })
+                    }
+                    className="size-3.5"
+                />
+                <span className="text-[10px] text-muted-foreground">
+                    مخفي
+                </span>
+            </label>
         </div>
     );
 }

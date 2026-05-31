@@ -23,6 +23,7 @@ class CardTemplateRequest extends FormRequest
             'layout.*.width' => ['nullable', 'numeric'],
             'layout.*.height' => ['nullable', 'numeric'],
             'layout.*.rounded' => ['nullable', 'boolean'],
+            'layout.*.hidden' => ['nullable', 'boolean'],
             'front_empty' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:5120'],
             'front_example' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:5120'],
             'back' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:5120'],

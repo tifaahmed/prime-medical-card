@@ -12,6 +12,7 @@ const DEFAULT_LAYOUT = {
     work_place: { top: 50.17, left: 24.07, fontSize: 2.2 },
     company: { top: 60, left: 8, fontSize: 2.4 },
     date: { top: 77, left: 11, fontSize: 2.8 },
+    membership_number: { top: 85, left: 11, fontSize: 2.0 },
     photo: { top: 22, left: 74.2, width: 18.4, height: 36.5 },
     qr: { top: 70.74, left: 76.68, width: 13.22, height: 19.58 },
 } satisfies CardTemplateFormData['layout'];

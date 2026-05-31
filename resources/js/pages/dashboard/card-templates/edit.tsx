@@ -221,10 +221,23 @@ export default function CardTemplateEdit({
                                                     onChange={(v) => setLayoutField(key, 'fontSize', v)}
                                                 />
                                             </div>
+                                            <label className="mt-2 flex items-center gap-1.5 cursor-pointer">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={item.hidden ?? false}
+                                                    onChange={(e) =>
+                                                        setLayoutField(key, 'hidden', e.target.checked)
+                                                    }
+                                                    className="size-3.5"
+                                                />
+                                                <span className="text-[10px] text-muted-foreground">
+                                                    مخفي
+                                                </span>
+                                            </label>
                                         </div>
                                     );
                                 })}
-
+ 
                                 {IMAGE_KEYS.map((key) => {
                                     const item = data.layout[key] as ImageLayout;
                                     return (
@@ -266,6 +279,19 @@ export default function CardTemplateEdit({
                                                     </span>
                                                 </label>
                                             )}
+                                            <label className="mt-2 flex items-center gap-1.5 cursor-pointer">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={item.hidden ?? false}
+                                                    onChange={(e) =>
+                                                        setLayoutField(key, 'hidden', e.target.checked)
+                                                    }
+                                                    className="size-3.5"
+                                                />
+                                                <span className="text-[10px] text-muted-foreground">
+                                                    مخفي
+                                                </span>
+                                            </label>
                                         </div>
                                     );
                                 })}
@@ -296,6 +322,7 @@ export default function CardTemplateEdit({
                                 workPlace="Medical Center"
                                 companyName="Prime Medical"
                                 expirationDate="2026-01-01"
+                                membershipNumber="PMC-123456"
                                 photoUrl={null}
                                 qrValue="https://example.com/card/123"
                                 layout={data.layout}

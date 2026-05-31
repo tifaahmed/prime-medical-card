@@ -10,13 +10,14 @@ import {
 } from 'react';
 import { cn } from '@/lib/utils';
 
-export type TextLayout = { top: number; left: number; fontSize: number };
+export type TextLayout = { top: number; left: number; fontSize: number; hidden?: boolean };
 export type ImageLayout = {
     top: number;
     left: number;
     width: number;
     height: number;
     rounded?: boolean;
+    hidden?: boolean;
 };
 
 export interface CardLayout {
@@ -25,12 +26,13 @@ export interface CardLayout {
     work_place: TextLayout;
     company: TextLayout;
     date: TextLayout;
+    membership_number: TextLayout;
     photo: ImageLayout;
     qr: ImageLayout;
 }
 
 export type LayoutKey = keyof CardLayout;
-export type TextKey = 'first_name' | 'full_name' | 'work_place' | 'company' | 'date';
+export type TextKey = 'first_name' | 'full_name' | 'work_place' | 'company' | 'date' | 'membership_number';
 export type ImageKey = 'photo' | 'qr';
 
 export const TEXT_KEYS: TextKey[] = [
@@ -39,6 +41,7 @@ export const TEXT_KEYS: TextKey[] = [
     'work_place',
     'company',
     'date',
+    'membership_number',
 ];
 export const IMAGE_KEYS: ImageKey[] = ['photo', 'qr'];
 
@@ -48,6 +51,7 @@ export const LABELS: Record<LayoutKey, string> = {
     work_place: 'جهة العمل',
     company: 'اسم الشركة',
     date: 'تاريخ الانتهاء',
+    membership_number: 'رقم العضوية',
     photo: 'الصورة',
     qr: 'رمز QR',
 };
@@ -140,6 +144,7 @@ export function CardFrontPreview({
     workPlace,
     companyName,
     expirationDate,
+    membershipNumber,
     photoUrl,
     qrValue,
     layout,
@@ -153,6 +158,7 @@ export function CardFrontPreview({
     workPlace: string;
     companyName: string;
     expirationDate: string;
+    membershipNumber: string;
     photoUrl: string | null;
     qrValue: string;
     layout: CardLayout;
@@ -386,102 +392,130 @@ export function CardFrontPreview({
                 className="pointer-events-none h-full w-full"
             />
 
-            <DraggableText
-                onPointerDown={(e) => startDrag(e, 'first_name')}
-                selected={isSelected('first_name')}
-                style={{
-                    ...textStyle(layout.first_name),
-                    color: '#0d5b58',
-                    fontWeight: 700,
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.01em',
-                }}
-            >
-                {firstName || '—'}
-            </DraggableText>
-
-            <DraggableText
-                onPointerDown={(e) => startDrag(e, 'full_name')}
-                selected={isSelected('full_name')}
-                style={{
-                    ...textStyle(layout.full_name),
-                    color: '#0c1f24',
-                    fontWeight: 700,
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.01em',
-                }}
-            >
-                {fullName || ''}
-            </DraggableText>
-
-            <DraggableText
-                onPointerDown={(e) => startDrag(e, 'work_place')}
-                selected={isSelected('work_place')}
-                style={{
-                    ...textStyle(layout.work_place),
-                    color: '#0c1f24',
-                    fontWeight: 700,
-                }}
-            >
-                {workPlace || ''}
-            </DraggableText>
-
-            <DraggableText
-                onPointerDown={(e) => startDrag(e, 'company')}
-                selected={isSelected('company')}
-                style={{
-                    ...textStyle(layout.company),
-                    color: '#0c1f24',
-                    fontWeight: 700,
-                }}
-            >
-                {companyName || ''}
-            </DraggableText>
-
-            <DraggableText
-                onPointerDown={(e) => startDrag(e, 'date')}
-                selected={isSelected('date')}
-                style={{
-                    ...textStyle(layout.date),
-                    color: '#0c1f24',
-                    fontWeight: 600,
-                }}
-            >
-                {formattedDate}
-            </DraggableText>
-
-            <DraggableBox
-                onPointerDown={(e) => startDrag(e, 'photo')}
-                selected={isSelected('photo')}
-                style={imageStyle(layout.photo)}
-            >
-                {photoUrl ? (
-                    <img
-                        src={photoUrl}
-                        alt=""
-                        draggable={false}
-                        className="pointer-events-none h-full w-full object-cover"
-                    />
-                ) : null}
-            </DraggableBox>
-
-            <DraggableBox
-                onPointerDown={(e) => startDrag(e, 'qr')}
-                selected={isSelected('qr')}
-                className="flex items-center justify-center bg-white"
-                style={{ ...imageStyle(layout.qr), padding: '0.6%' }}
-            >
-                <QRCodeSVG
-                    value={qrValue}
-                    level="M"
-                    marginSize={0}
+            {!layout.first_name.hidden && (
+                <DraggableText
+                    onPointerDown={(e) => startDrag(e, 'first_name')}
+                    selected={isSelected('first_name')}
                     style={{
-                        width: '100%',
-                        height: '100%',
-                        pointerEvents: 'none',
+                        ...textStyle(layout.first_name),
+                        color: '#0d5b58',
+                        fontWeight: 700,
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.01em',
                     }}
-                />
-            </DraggableBox>
+                >
+                    {firstName || '—'}
+                </DraggableText>
+            )}
+
+            {!layout.full_name.hidden && (
+                <DraggableText
+                    onPointerDown={(e) => startDrag(e, 'full_name')}
+                    selected={isSelected('full_name')}
+                    style={{
+                        ...textStyle(layout.full_name),
+                        color: '#0c1f24',
+                        fontWeight: 700,
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.01em',
+                    }}
+                >
+                    {fullName || ''}
+                </DraggableText>
+            )}
+
+            {!layout.work_place.hidden && (
+                <DraggableText
+                    onPointerDown={(e) => startDrag(e, 'work_place')}
+                    selected={isSelected('work_place')}
+                    style={{
+                        ...textStyle(layout.work_place),
+                        color: '#0c1f24',
+                        fontWeight: 700,
+                    }}
+                >
+                    {workPlace || ''}
+                </DraggableText>
+            )}
+
+            {!layout.company.hidden && (
+                <DraggableText
+                    onPointerDown={(e) => startDrag(e, 'company')}
+                    selected={isSelected('company')}
+                    style={{
+                        ...textStyle(layout.company),
+                        color: '#0c1f24',
+                        fontWeight: 700,
+                    }}
+                >
+                    {companyName || ''}
+                </DraggableText>
+            )}
+
+            {!layout.date.hidden && (
+                <DraggableText
+                    onPointerDown={(e) => startDrag(e, 'date')}
+                    selected={isSelected('date')}
+                    style={{
+                        ...textStyle(layout.date),
+                        color: '#0c1f24',
+                        fontWeight: 600,
+                    }}
+                >
+                    {formattedDate}
+                </DraggableText>
+            )}
+
+            {!layout.membership_number.hidden && (
+                <DraggableText
+                    onPointerDown={(e) => startDrag(e, 'membership_number')}
+                    selected={isSelected('membership_number')}
+                    style={{
+                        ...textStyle(layout.membership_number),
+                        color: '#0c1f24',
+                        fontWeight: 600,
+                    }}
+                >
+                    {membershipNumber}
+                </DraggableText>
+            )}
+
+            {!layout.photo.hidden && (
+                <DraggableBox
+                    onPointerDown={(e) => startDrag(e, 'photo')}
+                    selected={isSelected('photo')}
+                    style={imageStyle(layout.photo)}
+                >
+                    {photoUrl ? (
+                        <img
+                            src={photoUrl}
+                            alt=""
+                            draggable={false}
+                            className="pointer-events-none h-full w-full object-cover"
+                        />
+                    ) : null}
+                </DraggableBox>
+            )}
+
+            {!layout.qr.hidden && (
+                <DraggableBox
+                    onPointerDown={(e) => startDrag(e, 'qr')}
+                    selected={isSelected('qr')}
+                    className="flex items-center justify-center bg-white"
+                    style={{ ...imageStyle(layout.qr), padding: '0.6%' }}
+                >
+                    <QRCodeSVG
+                        value={qrValue}
+                        level="M"
+                        marginSize={0}
+                        style={{
+                            width: '100%',
+                            height: '100%',
+                            pointerEvents: 'none',
+                        }}
+                    />
+                </DraggableBox>
+            )}
         </div>
     );
 }

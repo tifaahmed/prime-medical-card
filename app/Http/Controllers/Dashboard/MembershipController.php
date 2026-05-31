@@ -177,6 +177,7 @@ class MembershipController extends Controller
                 'company_name' => $membership->company_name,
                 'card_first_name' => $membership->card_first_name,
                 'card_full_name' => $membership->card_full_name,
+                'card_membership_number' => $membership->card_membership_number,
                 'photo_url' => $membership->photo ?: null,
                 'holder_name' => $membership->user?->name,
                 'first_name' => $membership->user?->first_name,
@@ -196,6 +197,7 @@ class MembershipController extends Controller
         $data = $request->validate([
             'card_first_name' => ['nullable', 'string', 'max:255'],
             'card_full_name' => ['nullable', 'string', 'max:255'],
+            'card_membership_number' => ['nullable', 'string', 'max:255'],
             'job_title_en' => ['nullable', 'string', 'max:255'],
             'company_name' => ['nullable', 'string', 'max:255'],
             'expiration_date' => ['nullable', 'date'],
@@ -209,10 +211,13 @@ class MembershipController extends Controller
             'card_layout.*.width' => ['nullable', 'numeric'],
             'card_layout.*.height' => ['nullable', 'numeric'],
             'card_layout.*.fontSize' => ['nullable', 'numeric'],
+            'card_layout.*.rounded' => ['nullable', 'boolean'],
+            'card_layout.*.hidden' => ['nullable', 'boolean'],
         ]);
 
         $membership->card_first_name = $data['card_first_name'] ?? null;
         $membership->card_full_name = $data['card_full_name'] ?? null;
+        $membership->card_membership_number = $data['card_membership_number'] ?? null;
         if (array_key_exists('expiration_date', $data) && $data['expiration_date']) {
             $membership->expiration_date = $data['expiration_date'];
         }
@@ -227,7 +232,13 @@ class MembershipController extends Controller
             $membership->card_template_id = $data['card_template_id'];
         }
         if (array_key_exists('card_layout', $data)) {
-            $membership->card_layout = $data['card_layout'];
+            $layout = $data['card_layout'];
+            array_walk_recursive($layout, function (&$v, $k) {
+                if ($k === 'hidden') {
+                    $v = filter_var($v, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE) ?? false;
+                }
+            });
+            $membership->card_layout = $layout;
         }
         $membership->save();
 

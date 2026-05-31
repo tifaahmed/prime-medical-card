@@ -36,6 +36,7 @@ class Membership extends Model implements HasMedia
         'work_place' => ['top' => 50.17, 'left' => 24.07, 'fontSize' => 2.2],
         'company' => ['top' => 60, 'left' => 8, 'fontSize' => 2.4],
         'date' => ['top' => 77, 'left' => 11, 'fontSize' => 2.8],
+        'membership_number' => ['top' => 85, 'left' => 11, 'fontSize' => 2.0],
         'photo' => ['top' => 22, 'left' => 74.2, 'width' => 18.4, 'height' => 36.5],
         'qr' => ['top' => 70.74, 'left' => 76.68, 'width' => 13.22, 'height' => 19.58],
     ];
@@ -59,6 +60,7 @@ class Membership extends Model implements HasMedia
         return collect($merged)
             ->map(fn ($section) => collect((array) $section)
                 ->map(fn ($v) => is_numeric($v) ? (float) $v : $v)
+                ->map(fn ($v, $k) => $k === 'hidden' ? filter_var($v, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE) ?? false : $v)
                 ->all())
             ->all();
     }
@@ -80,6 +82,7 @@ class Membership extends Model implements HasMedia
         'company_name',
         'card_first_name',
         'card_full_name',
+        'card_membership_number',
         'card_layout',
         'card_template_id',
     ];
