@@ -1,3 +1,4 @@
+import { useMemo, useState } from 'react';
 import type { FormEvent } from 'react';
 import InputError from '@/components/input-error';
 import { Input } from '@/components/ui/input';
@@ -15,6 +16,7 @@ import TranslatableInput from '@/pages/dashboard/_components/translatable-input'
 export interface OfferableOption {
     id: number;
     name: { en: string; ar: string };
+    facility_id?: number;
 }
 
 export interface OfferableGroup {
@@ -74,10 +76,25 @@ export default function OfferForm({
         (g) => g.type === data.offerable_type,
     );
 
+    const facilities = offerableTypes.find(
+        (g) => g.type.endsWith('\\Facility'),
+    )?.options ?? [];
+
+    const [facilityFilter, setFacilityFilter] = useState('');
+
+    const filteredBranches = useMemo(() => {
+        if (!facilityFilter) return currentGroup?.options ?? [];
+        return (currentGroup?.options ?? []).filter(
+            (o) => o.facility_id === Number(facilityFilter),
+        );
+    }, [currentGroup?.options, facilityFilter]);
+
+    const isBranchType = data.offerable_type.endsWith('\\FacilityBranch');
+
     return (
         <form onSubmit={submit} className="w-full space-y-6" dir="rtl">
             <div className="space-y-6 rounded-3xl border bg-card p-6 shadow-sm">
-                <div className="grid gap-3 md:grid-cols-2">
+                    <div className="grid gap-3 md:grid-cols-2">
                     <div className="grid gap-2">
                         <Label>
                             تابع لـ <span className="text-red-600">*</span>
@@ -87,6 +104,7 @@ export default function OfferForm({
                             onValueChange={(v) => {
                                 setData('offerable_type', v);
                                 setData('offerable_id', '');
+                                setFacilityFilter('');
                             }}
                         >
                             <SelectTrigger className="w-full">
@@ -103,6 +121,32 @@ export default function OfferForm({
                         <InputError message={errors.offerable_type} />
                     </div>
                     <div className="grid gap-2">
+                        {isBranchType && (
+                            <div className="mb-2">
+                                <Label>تصفية حسب المنشأة</Label>
+                                <Select
+                                    value={facilityFilter}
+                                    onValueChange={(v) => {
+                                        setFacilityFilter(v);
+                                        setData('offerable_id', '');
+                                    }}
+                                >
+                                    <SelectTrigger className="w-full">
+                                        <SelectValue placeholder="اختر المنشأة…" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {facilities.map((f) => (
+                                            <SelectItem
+                                                key={f.id}
+                                                value={String(f.id)}
+                                            >
+                                                {f.name.ar || f.name.en}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        )}
                         <Label>
                             السجل المرتبط{' '}
                             <span className="text-red-600">*</span>
@@ -112,13 +156,22 @@ export default function OfferForm({
                             onValueChange={(v) =>
                                 setData('offerable_id', Number(v))
                             }
-                            disabled={!currentGroup}
+                            disabled={!currentGroup || (isBranchType && !facilityFilter)}
                         >
                             <SelectTrigger className="w-full">
-                                <SelectValue placeholder="اختر…" />
+                                <SelectValue
+                                    placeholder={
+                                        isBranchType && !facilityFilter
+                                            ? 'اختر المنشأة أولاً…'
+                                            : 'اختر…'
+                                    }
+                                />
                             </SelectTrigger>
                             <SelectContent>
-                                {(currentGroup?.options ?? []).map((o) => (
+                                {(isBranchType
+                                    ? filteredBranches
+                                    : currentGroup?.options ?? []
+                                ).map((o) => (
                                     <SelectItem key={o.id} value={String(o.id)}>
                                         <span dir="rtl">
                                             {o.name.ar || o.name.en}

@@ -43,13 +43,20 @@ export default function AuthSimpleLayout({
                                 aria-label="برايم ميديكال كارد"
                                 className="inline-flex items-center"
                             >
-                                <img
-                                    src="/images/logos/logo-with-text-without-background.png"
-                                    alt="برايم ميديكال كارد"
-                                    className="h-14 w-auto max-w-[200px] object-contain"
-                                    loading="eager"
-                                    decoding="async"
-                                />
+                                <div className="flex items-center gap-3">
+                                    <div className="flex items-center justify-center rounded-xl bg-white/60 p-1.5 shadow-sm">
+                                        <img
+                                            src="/images/logos/logo-without-text-new.webp"
+                                            alt="برايم ميديكال كارد"
+                                            className="h-20 w-auto object-contain drop-shadow-md"
+                                            loading="eager"
+                                            decoding="async"
+                                        />
+                                    </div>
+                                    <span className="text-2xl font-bold leading-tight animate-text-shimmer">
+                                        Prime Medical<br />Card
+                                    </span>
+                                </div>
                             </Link>
 
                             <div className="space-y-2">
