@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Dashboard\AboutStatController;
+use App\Http\Controllers\Dashboard\CardTemplateController;
 use App\Http\Controllers\Dashboard\AboutTimelineEntryController;
 use App\Http\Controllers\Dashboard\AboutValueController;
 use App\Http\Controllers\Dashboard\CityController;
@@ -100,6 +101,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('memberships/{membership}/card/snapshot', [MembershipController::class, 'saveCardSnapshot'])->name('memberships.card.snapshot');
         Route::resource('memberships', MembershipController::class);
         Route::resource('page-seos', PageSeoController::class)->only(['index', 'edit', 'update']);
+        Route::resource('card-templates', CardTemplateController::class)->except('show');
         Route::resource('faqs', FaqController::class)->except('show');
         Route::resource('testimonials', TestimonialController::class)->except('show');
         Route::resource('pricing-plans', PricingPlanController::class)->except('show');

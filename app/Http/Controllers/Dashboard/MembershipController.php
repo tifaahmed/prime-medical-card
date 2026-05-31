@@ -5,7 +5,9 @@ namespace App\Http\Controllers\Dashboard;
 use App\Enums\MembershipFamily\RelationshipEnum;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Dashboard\MembershipRequest;
+use App\Http\Resources\Dashboard\CardTemplateResource;
 use App\Http\Resources\Dashboard\MembershipResource;
+use App\Models\CardTemplate;
 use App\Models\Membership;
 use App\Models\MembershipFamily;
 use App\Models\User;
@@ -76,6 +78,13 @@ class MembershipController extends Controller
         $membership = DB::transaction(function () use ($request, $data, $family, $photo, $photoRemove, $nameParts) {
             $user = $this->createPlaceholderUser($data['membership_number'], $nameParts);
             $data['user_id'] = $user->id;
+
+            if (! $data['card_template_id'] ?? null) {
+                $default = CardTemplate::getDefault();
+                if ($default) {
+                    $data['card_template_id'] = $default->id;
+                }
+            }
 
             $membership = Membership::create($data);
             $this->syncMembershipPhoto($membership, $photo, $photoRemove);
@@ -149,7 +158,14 @@ class MembershipController extends Controller
 
     public function card(Membership $membership): Response
     {
-        $membership->load(['media', 'user']);
+        $membership->load(['media', 'user', 'cardTemplate']);
+
+        $templates = CardTemplate::query()
+            ->orderBy('is_default', 'desc')
+            ->orderBy('id')
+            ->get()
+            ->map(fn ($t) => CardTemplateResource::make($t)->resolve(Request::capture()))
+            ->all();
 
         return Inertia::render('dashboard/memberships/card', [
             'membership' => [
@@ -168,7 +184,9 @@ class MembershipController extends Controller
                 'third_name' => $membership->user?->third_name,
                 'fourth_name' => $membership->user?->fourth_name,
                 'card_layout' => $membership->resolvedCardLayout(),
+                'card_template_id' => $membership->card_template_id,
             ],
+            'cardTemplates' => $templates,
             'default_card_layout' => Membership::DEFAULT_CARD_LAYOUT,
         ]);
     }
@@ -183,6 +201,7 @@ class MembershipController extends Controller
             'expiration_date' => ['nullable', 'date'],
             'photo' => ['nullable', 'image', 'max:4096'],
             'photo_remove' => ['nullable', 'boolean'],
+            'card_template_id' => ['nullable', 'exists:card_templates,id'],
             'card_layout' => ['nullable', 'array'],
             'card_layout.*' => ['array'],
             'card_layout.*.top' => ['nullable', 'numeric'],
@@ -204,6 +223,9 @@ class MembershipController extends Controller
         $jobTitle['en'] = $data['job_title_en'] ?? null;
         $membership->job_title = $jobTitle;
         $membership->company_name = $data['company_name'] ?? null;
+        if (array_key_exists('card_template_id', $data)) {
+            $membership->card_template_id = $data['card_template_id'];
+        }
         if (array_key_exists('card_layout', $data)) {
             $membership->card_layout = $data['card_layout'];
         }

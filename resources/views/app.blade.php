@@ -39,10 +39,8 @@
             }
         </style>
 
-        <link rel="icon" href="/images/logos/favicons/favicon.ico" sizes="any">
-        <link rel="icon" type="image/png" sizes="32x32" href="/images/logos/favicons/favicon-32x32.png">
-        <link rel="icon" type="image/png" sizes="16x16" href="/images/logos/favicons/favicon-16x16.png">
-        <link rel="apple-touch-icon" sizes="180x180" href="/images/logos/favicons/apple-touch-icon.png">
+        <link rel="icon" href="/images/logos/logo-without-text-new.webp" type="image/webp">
+        <link rel="apple-touch-icon" href="/images/logos/logo-without-text-new.webp">
         <link rel="manifest" href="/images/logos/favicons/site.webmanifest">
 
         <link rel="preconnect" href="https://fonts.bunny.net" crossorigin>

@@ -47,7 +47,14 @@ class Membership extends Model implements HasMedia
     public function resolvedCardLayout(): array
     {
         $stored = is_array($this->card_layout) ? $this->card_layout : [];
-        $merged = array_replace_recursive(self::DEFAULT_CARD_LAYOUT, $stored);
+        $base = self::DEFAULT_CARD_LAYOUT;
+
+        if ($this->cardTemplate) {
+            $tplLayout = is_array($this->cardTemplate->layout) ? $this->cardTemplate->layout : [];
+            $base = array_replace_recursive(self::DEFAULT_CARD_LAYOUT, $tplLayout);
+        }
+
+        $merged = array_replace_recursive($base, $stored);
 
         return collect($merged)
             ->map(fn ($section) => collect((array) $section)
@@ -74,6 +81,7 @@ class Membership extends Model implements HasMedia
         'card_first_name',
         'card_full_name',
         'card_layout',
+        'card_template_id',
     ];
 
     /**
@@ -113,6 +121,11 @@ class Membership extends Model implements HasMedia
     /**
      * Get the family members for the membership.
      */
+    public function cardTemplate(): BelongsTo
+    {
+        return $this->belongsTo(CardTemplate::class);
+    }
+
     public function family(): HasMany
     {
         return $this->hasMany(MembershipFamily::class);

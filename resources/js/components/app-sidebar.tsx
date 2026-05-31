@@ -6,6 +6,7 @@ import {
     CreditCard,
     HeartHandshake,
     HelpCircle,
+    ImageDownIcon,
     Landmark,
     Layers,
     LayoutGrid,
@@ -93,6 +94,12 @@ const membersNav: NavItem[] = [
         href: '/dashboard/memberships',
         icon: CreditCard,
         iconClassName: 'bg-rose-500/15 text-rose-300',
+    },
+    {
+        title: 'بطاقات العضوية',
+        href: '/dashboard/card-templates',
+        icon: ImageDownIcon,
+        iconClassName: 'bg-violet-500/15 text-violet-300',
     },
 ];
 
