@@ -39,16 +39,11 @@ createInertiaApp({
         }
     },
     setup({ el, App, props }) {
-        window.__inertiaSetupCount = (window.__inertiaSetupCount ?? 0) + 1;
-        const reuse = Boolean(window.__inertiaRoot);
-
-        if (!el) {
-            return;
+        if (typeof window !== 'undefined') {
+            window.__inertiaSetupCount = (window.__inertiaSetupCount ?? 0) + 1;
         }
 
-        const root = window.__inertiaRoot ?? createRoot(el);
-        window.__inertiaRoot = root;
-        root.render(
+        const app = (
             <StrictMode>
                 <Suspense fallback={null}>
                     <TooltipProvider delayDuration={0}>
@@ -60,6 +55,13 @@ createInertiaApp({
                 </Suspense>
             </StrictMode>
         );
+
+        if (!el) {
+            return app;
+        }
+
+        const root = createRoot(el);
+        root.render(app);
     },
     progress: {
         color: '#4B5563',

@@ -83,7 +83,7 @@ function Floater({
 export default function Hero() {
     const { open } = useSubscribeModal();
     const { hero_stats } = useSiteSettings();
-    const stats = hero_stats.filter(
+    const stats = (hero_stats ?? []).filter(
         (s) => s.value && s.label && s.value.trim() && s.label.trim(),
     );
     const eyebrow = usePageContent(
@@ -108,7 +108,7 @@ export default function Hero() {
     );
 
     return (
-        <section className="hero">
+        <section className="hero" style={{ backgroundImage: 'url(/images/homepage/1.webp)' }}>
             <OrbitingLogos />
             <div className="hero-grid container">
                 <div className="hero-text">
@@ -142,16 +142,18 @@ export default function Hero() {
                         </a>
                     </div>
 
-                    {stats.length > 0 && (
-                        <div className="hero-stats">
-                            {stats.map((s, i) => (
-                                <div key={i}>
-                                    <strong>{s.value}</strong>
-                                    <span>{s.label}</span>
-                                </div>
-                            ))}
-                        </div>
-                    )}
+                    <div className="hero-stats">
+                        {stats.length > 0 && (
+                            <>
+                                {stats.map((s, i) => (
+                                    <div key={i}>
+                                        <strong>{s.value}</strong>
+                                        <span>{s.label}</span>
+                                    </div>
+                                ))}
+                            </>
+                        )}
+                    </div>
                 </div>
 
                 <div className="hero-visual">

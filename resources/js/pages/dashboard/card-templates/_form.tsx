@@ -1,4 +1,5 @@
 import { useCallback, useState } from 'react';
+import { RotateCcwIcon } from 'lucide-react';
 import InputError from '@/components/input-error';
 import {
     CardFrontPreview,
@@ -14,6 +15,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import ImagePicker from '@/pages/dashboard/_components/image-picker';
+import { cn } from '@/lib/utils';
 
 export interface CardTemplateFormData {
     name: string;
@@ -40,6 +42,7 @@ interface Props {
         front_example_url?: string | null;
         back_url?: string | null;
     };
+    defaultLayout?: CardLayout;
 }
 
 export default function CardTemplateForm({
@@ -48,6 +51,7 @@ export default function CardTemplateForm({
     errors,
     processing,
     existingUrls,
+    defaultLayout,
 }: Props) {
     const [selected, setSelected] = useState<LayoutKey | null>(null);
 
@@ -182,22 +186,30 @@ export default function CardTemplateForm({
                         <h4 className="font-heading text-sm font-semibold">
                             التخطيط (الموقع والحجم)
                         </h4>
-                        <button
-                            type="button"
-                            className="text-xs text-muted-foreground underline"
-                            onClick={() => {
-                                /* reset handled by parent if needed */
-                            }}
-                        >
-                            إعادة تعيين
-                        </button>
+                        {defaultLayout && (
+                            <button
+                                type="button"
+                                className="flex items-center gap-1 text-xs text-muted-foreground underline"
+                                onClick={() => setData('layout', structuredClone(defaultLayout))}
+                            >
+                                <RotateCcwIcon className="size-3" />
+                                إعادة تعيين
+                            </button>
+                        )}
                     </div>
 
                     {/* Text items */}
                     {TEXT_KEYS.map((key) => {
                         const item = data.layout[key] as TextLayout;
                         return (
-                            <div key={key} className="rounded-xl border bg-background p-3">
+                            <div
+                                key={key}
+                                onClick={() => setSelected(key)}
+                                className={cn(
+                                    'rounded-xl border bg-background p-3 cursor-pointer transition-shadow',
+                                    selected === key && 'ring-2 ring-blue-500 shadow-sm',
+                                )}
+                            >
                                 <p className="mb-2 text-xs font-semibold text-foreground">
                                     {LABELS[key]}
                                 </p>
@@ -254,7 +266,14 @@ export default function CardTemplateForm({
                 {IMAGE_KEYS.map((key) => {
                         const item = data.layout[key] as ImageLayout;
                         return (
-                            <div key={key} className="rounded-xl border bg-background p-3">
+                            <div
+                                key={key}
+                                onClick={() => setSelected(key)}
+                                className={cn(
+                                    'rounded-xl border bg-background p-3 cursor-pointer transition-shadow',
+                                    selected === key && 'ring-2 ring-blue-500 shadow-sm',
+                                )}
+                            >
                                 <p className="mb-2 text-xs font-semibold text-foreground">
                                     {LABELS[key]}
                                 </p>

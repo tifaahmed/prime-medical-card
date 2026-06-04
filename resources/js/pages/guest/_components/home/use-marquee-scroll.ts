@@ -20,8 +20,9 @@ export function useMarqueeScroll<T extends HTMLElement>({
             return;
         }
 
-        const isRTL = getComputedStyle(el).direction === 'rtl';
-        const dirSign = isRTL ? -1 : 1;
+        if (typeof IntersectionObserver === 'undefined') {
+            return;
+        }
 
         let raf = 0;
         let hovered = false;
@@ -34,6 +35,10 @@ export function useMarqueeScroll<T extends HTMLElement>({
         let velocity = 0;
         let moved = false;
         let momentum = false;
+        let running = false;
+
+        const isRTL = getComputedStyle(el).direction === 'rtl';
+        const dirSign = isRTL ? -1 : 1;
 
         const wrap = () => {
             const half = el.scrollWidth / 2;
@@ -79,14 +84,33 @@ export function useMarqueeScroll<T extends HTMLElement>({
                 }
             }
 
+            if (running) {
+                raf = requestAnimationFrame(step);
+            }
+        };
+
+        const start = () => {
+            if (running) return;
+            running = true;
             raf = requestAnimationFrame(step);
         };
 
-        const onPointerDown = (e: PointerEvent) => {
-            if (e.pointerType === 'touch') {
-                return;
-            }
+        const stop = () => {
+            running = false;
+            cancelAnimationFrame(raf);
+        };
 
+        const observer = new IntersectionObserver(
+            ([entry]) => {
+                if (entry.isIntersecting) start();
+                else stop();
+            },
+            { rootMargin: '300px' },
+        );
+        observer.observe(el);
+
+        const onPointerDown = (e: PointerEvent) => {
+            if (e.pointerType === 'touch') return;
             dragActive = true;
             momentum = false;
             velocity = 0;
@@ -101,24 +125,15 @@ export function useMarqueeScroll<T extends HTMLElement>({
         };
 
         const onPointerMove = (e: PointerEvent) => {
-            if (!dragActive || pointerId !== e.pointerId) {
-                return;
-            }
-
+            if (!dragActive || pointerId !== e.pointerId) return;
             const dx = e.clientX - startX;
-
-            if (Math.abs(dx) > 4) {
-                moved = true;
-            }
-
+            if (Math.abs(dx) > 4) moved = true;
             const now = performance.now();
             const dt = now - lastTime;
-
             if (dt > 0) {
                 const instant = ((e.clientX - lastX) / dt) * 16;
                 velocity = velocity * 0.6 + instant * 0.4;
             }
-
             lastX = e.clientX;
             lastTime = now;
             el.scrollLeft = startScroll - dx;
@@ -126,18 +141,12 @@ export function useMarqueeScroll<T extends HTMLElement>({
         };
 
         const endDrag = (e: PointerEvent) => {
-            if (!dragActive || pointerId !== e.pointerId) {
-                return;
-            }
-
+            if (!dragActive || pointerId !== e.pointerId) return;
             el.releasePointerCapture(e.pointerId);
             el.classList.remove('is-dragging');
             dragActive = false;
             pointerId = null;
-
-            if (Math.abs(velocity) > 0.6) {
-                momentum = true;
-            }
+            if (Math.abs(velocity) > 0.6) momentum = true;
         };
 
         const onClickCapture = (e: MouseEvent) => {
@@ -148,15 +157,9 @@ export function useMarqueeScroll<T extends HTMLElement>({
             }
         };
 
-        const onEnter = () => {
-            hovered = true;
-        };
-        const onLeave = () => {
-            hovered = false;
-        };
-        const onVisibility = () => {
-            hovered = document.hidden ? true : hovered;
-        };
+        const onEnter = () => { hovered = true; };
+        const onLeave = () => { hovered = false; };
+        const onVisibility = () => { hovered = document.hidden ? true : hovered; };
 
         el.addEventListener('pointerdown', onPointerDown);
         el.addEventListener('pointermove', onPointerMove);
@@ -167,10 +170,9 @@ export function useMarqueeScroll<T extends HTMLElement>({
         el.addEventListener('pointerleave', onLeave);
         document.addEventListener('visibilitychange', onVisibility);
 
-        raf = requestAnimationFrame(step);
-
         return () => {
-            cancelAnimationFrame(raf);
+            stop();
+            observer.disconnect();
             el.removeEventListener('pointerdown', onPointerDown);
             el.removeEventListener('pointermove', onPointerMove);
             el.removeEventListener('pointerup', endDrag);

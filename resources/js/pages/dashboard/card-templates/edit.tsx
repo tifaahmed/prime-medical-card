@@ -20,6 +20,7 @@ import {
 import FormActions from '@/pages/dashboard/_components/form-actions';
 import ImagePicker from '@/pages/dashboard/_components/image-picker';
 import { dashboard } from '@/routes';
+import { cn } from '@/lib/utils';
 
 interface CardTemplate {
     id: number;
@@ -46,10 +47,12 @@ interface FormData {
 
 export default function CardTemplateEdit({
     template,
+    defaultLayout,
 }: {
     template: CardTemplate;
+    defaultLayout: CardLayout;
 }) {
-    const { data, setData, put, processing, errors } =
+    const { data, setData, submit: formSubmit, transform, processing, errors } =
         useForm<FormData>({
             name: template.name,
             is_default: template.is_default,
@@ -86,7 +89,8 @@ export default function CardTemplateEdit({
     };
 
     const save = (intent: 'stay' | 'return') => {
-        put(`/dashboard/card-templates/${template.id}?redirect=${intent}`, {
+        transform((formData) => ({ ...formData, _method: 'put' }));
+        formSubmit('post', `/dashboard/card-templates/${template.id}?redirect=${intent}`, {
             forceFormData: true,
         });
     };
@@ -189,11 +193,10 @@ export default function CardTemplateEdit({
                                     </h4>
                                     <button
                                         type="button"
-                                        className="text-xs text-muted-foreground underline"
-                                        onClick={() => {
-                                            /* reset */
-                                        }}
+                                        className="flex items-center gap-1 text-xs text-muted-foreground underline"
+                                        onClick={() => setData('layout', structuredClone(defaultLayout))}
                                     >
+                                        <RotateCcwIcon className="size-3" />
                                         إعادة تعيين
                                     </button>
                                 </div>
@@ -201,7 +204,14 @@ export default function CardTemplateEdit({
                                 {TEXT_KEYS.map((key) => {
                                     const item = data.layout[key] as TextLayout;
                                     return (
-                                        <div key={key} className="rounded-xl border bg-muted/20 p-3">
+                                        <div
+                                            key={key}
+                                            onClick={() => setSelected(key)}
+                                            className={cn(
+                                                'rounded-xl border bg-muted/20 p-3 cursor-pointer transition-shadow',
+                                                selected === key && 'ring-2 ring-blue-500 shadow-sm',
+                                            )}
+                                        >
                                             <p className="mb-2 text-xs font-semibold">{LABELS[key]}</p>
                                             <div className="grid grid-cols-3 gap-2">
                                                 <NumberField
@@ -241,7 +251,14 @@ export default function CardTemplateEdit({
                                 {IMAGE_KEYS.map((key) => {
                                     const item = data.layout[key] as ImageLayout;
                                     return (
-                                        <div key={key} className="rounded-xl border bg-muted/20 p-3">
+                                        <div
+                                            key={key}
+                                            onClick={() => setSelected(key)}
+                                            className={cn(
+                                                'rounded-xl border bg-muted/20 p-3 cursor-pointer transition-shadow',
+                                                selected === key && 'ring-2 ring-blue-500 shadow-sm',
+                                            )}
+                                        >
                                             <p className="mb-2 text-xs font-semibold">{LABELS[key]}</p>
                                             <div className="grid grid-cols-2 gap-2">
                                                 <NumberField

@@ -79,7 +79,7 @@ class MembershipController extends Controller
             $user = $this->createPlaceholderUser($data['membership_number'], $nameParts);
             $data['user_id'] = $user->id;
 
-            if (! $data['card_template_id'] ?? null) {
+            if (! ($data['card_template_id'] ?? null)) {
                 $default = CardTemplate::getDefault();
                 if ($default) {
                     $data['card_template_id'] = $default->id;
@@ -201,7 +201,7 @@ class MembershipController extends Controller
             'job_title_en' => ['nullable', 'string', 'max:255'],
             'company_name' => ['nullable', 'string', 'max:255'],
             'expiration_date' => ['nullable', 'date'],
-            'photo' => ['nullable', 'image', 'max:4096'],
+            'photo' => ['nullable', 'mimes:jpeg,png,jpg,gif,webp,avif', 'max:4096'],
             'photo_remove' => ['nullable', 'boolean'],
             'card_template_id' => ['nullable', 'exists:card_templates,id'],
             'card_layout' => ['nullable', 'array'],

@@ -34,8 +34,14 @@ class CardTemplateController extends Controller
 
     public function create(): Response
     {
+        $default = collect(Membership::DEFAULT_CARD_LAYOUT)
+            ->map(fn ($s) => collect($s)
+                ->map(fn ($v) => is_numeric($v) ? (float) $v : $v)
+                ->all())
+            ->all();
+
         return Inertia::render('dashboard/card-templates/create', [
-            'defaultLayout' => Membership::DEFAULT_CARD_LAYOUT,
+            'defaultLayout' => $default,
         ]);
     }
 
@@ -67,6 +73,11 @@ class CardTemplateController extends Controller
     {
         return Inertia::render('dashboard/card-templates/edit', [
             'template' => CardTemplateResource::make($cardTemplate)->resolve($request),
+            'defaultLayout' => collect(Membership::DEFAULT_CARD_LAYOUT)
+                ->map(fn ($s) => collect($s)
+                    ->map(fn ($v) => is_numeric($v) ? (float) $v : $v)
+                    ->all())
+                ->all(),
         ]);
     }
 

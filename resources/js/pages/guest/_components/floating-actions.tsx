@@ -3,19 +3,35 @@ import type { FormEvent } from 'react';
 import { useSiteSettings } from '@/hooks/use-site-settings';
 
 const floatingStyles = `
-  @keyframes fa-pulse-glow {
-    0%   { box-shadow: 0 0 0 0 rgba(232, 168, 74, 0.65), 0 10px 24px -8px rgba(11, 46, 44, 0.35); }
-    70%  { box-shadow: 0 0 0 14px rgba(232, 168, 74, 0),    0 10px 24px -8px rgba(11, 46, 44, 0.35); }
-    100% { box-shadow: 0 0 0 0 rgba(232, 168, 74, 0),       0 10px 24px -8px rgba(11, 46, 44, 0.35); }
+  .animate-pulse-glow {
+    box-shadow: 0 10px 24px -8px rgba(11, 46, 44, 0.35);
   }
-  .animate-pulse-glow { animation: fa-pulse-glow 2.2s ease-out infinite; }
-
-  @keyframes fa-pulse-glow-green {
-    0%   { box-shadow: 0 0 0 0 rgba(37, 211, 102, 0.6), 0 10px 24px -8px rgba(11, 46, 44, 0.35); }
-    70%  { box-shadow: 0 0 0 14px rgba(37, 211, 102, 0),  0 10px 24px -8px rgba(11, 46, 44, 0.35); }
-    100% { box-shadow: 0 0 0 0 rgba(37, 211, 102, 0),     0 10px 24px -8px rgba(11, 46, 44, 0.35); }
+  .animate-pulse-glow-green {
+    box-shadow: 0 10px 24px -8px rgba(11, 46, 44, 0.35);
   }
-  .animate-pulse-glow-green { animation: fa-pulse-glow-green 2.4s ease-out infinite; }
+  .pulse-ring {
+    position: absolute;
+    inset: -4px;
+    border-radius: 9999px;
+    pointer-events: none;
+    z-index: -1;
+  }
+  @keyframes fa-pulse-opacity {
+    0%, 100% { opacity: 0.65; }
+    50% { opacity: 0; }
+  }
+  @keyframes fa-pulse-opacity-green {
+    0%, 100% { opacity: 0.6; }
+    50% { opacity: 0; }
+  }
+  .animate-pulse-glow .pulse-ring {
+    background: rgba(232, 168, 74, 0.65);
+    animation: fa-pulse-opacity 2.2s ease-out infinite;
+  }
+  .animate-pulse-glow-green .pulse-ring {
+    background: rgba(37, 211, 102, 0.6);
+    animation: fa-pulse-opacity-green 2.4s ease-out infinite;
+  }
 `;
 
 export default function FloatingActions() {
@@ -34,8 +50,9 @@ export default function FloatingActions() {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="تواصل عبر واتساب"
-                className="animate-pulse-glow-green fixed bottom-40 left-4 z-[60] flex h-12 w-12 items-center justify-center rounded-full bg-[#25D366] text-white transition hover:scale-105 hover:bg-[#1fb358] sm:bottom-6 sm:left-6 sm:h-14 sm:w-14"
+                className="animate-pulse-glow-green fixed bottom-40 left-4 z-[60] flex h-12 w-12 items-center justify-center rounded-full bg-[#25D366] text-[#004d40] transition hover:scale-105 hover:bg-[#1fb358] sm:bottom-6 sm:left-6 sm:h-14 sm:w-14"
             >
+                <span className="pulse-ring" aria-hidden="true" />
                 <svg
                     viewBox="0 0 24 24"
                     fill="currentColor"
@@ -51,6 +68,7 @@ export default function FloatingActions() {
                 aria-label="احصل على استشارة مجانية"
                 className="animate-pulse-glow fixed top-1/2 left-0 z-[60] inline-flex -translate-y-1/2 flex-col items-center gap-1.5 rounded-l-none rounded-r-2xl bg-[var(--amber-500)] px-1.5 py-3 text-[10px] font-bold text-[var(--teal-900)] transition hover:scale-105 hover:bg-[var(--amber-400)] sm:top-auto sm:right-6 sm:bottom-6 sm:left-auto sm:translate-y-0 sm:flex-row sm:gap-2 sm:rounded-full sm:px-5 sm:py-3.5 sm:text-sm"
             >
+                <span className="pulse-ring" aria-hidden="true" />
                 <svg
                     viewBox="0 0 24 24"
                     fill="none"

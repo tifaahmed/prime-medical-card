@@ -35,7 +35,7 @@ class MembershipRequest extends FormRequest
             'job_title.en' => ['nullable', 'string', 'max:255'],
             'job_title.ar' => ['nullable', 'string', 'max:255'],
             'company_name' => ['nullable', 'string', 'max:255'],
-            'photo' => ['nullable', 'image', 'max:4096'],
+            'photo' => ['nullable', 'mimes:jpeg,png,jpg,gif,webp,avif', 'max:4096'],
             'photo_remove' => ['nullable', 'boolean'],
 
             'family' => ['nullable', 'array'],
@@ -47,7 +47,7 @@ class MembershipRequest extends FormRequest
             'family.*.phone' => ['nullable', 'string', 'max:50'],
             'family.*.email' => ['nullable', 'email', 'max:255'],
             'family.*.is_active' => ['nullable', 'boolean'],
-            'family.*.photo' => ['nullable', 'image', 'max:4096'],
+            'family.*.photo' => ['nullable', 'mimes:jpeg,png,jpg,gif,webp,avif', 'max:4096'],
             'family.*.photo_remove' => ['nullable', 'boolean'],
         ];
     }

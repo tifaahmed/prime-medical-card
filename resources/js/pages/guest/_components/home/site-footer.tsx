@@ -50,7 +50,7 @@ export default function SiteFooter() {
                     </div>
 
                     <div className="footer-col">
-                        <h4>روابط سريعة</h4>
+                        <h2 className="footer-col-heading">روابط سريعة</h2>
                         <ul>
                             {NAV_LINKS.map((l) => (
                                 <li key={l.label}>
@@ -61,7 +61,7 @@ export default function SiteFooter() {
                     </div>
 
                     <div className="footer-col">
-                        <h4>تواصل معنا</h4>
+                        <h2 className="footer-col-heading">تواصل معنا</h2>
                         <ul>
                             {s.contact_phone && (
                                 <li>

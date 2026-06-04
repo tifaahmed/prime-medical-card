@@ -1,12 +1,12 @@
 import { useEffect, useRef } from 'react';
 
 const LOGOS = [
-    '/images/homepage/logos/1774541281092_15.png',
-    '/images/homepage/logos/246366219_5122001357813970_3090785257126649927_n9ebdd6cb-e752-4bf7-8ee4-aeb4df0a6852.png',
-    '/images/homepage/logos/Al%20Mokhtabar.jpg',
-    '/images/homepage/logos/download.jpg',
-    '/images/homepage/logos/images.jpg',
-    '/images/homepage/logos/images.png',
+    '/images/homepage/logos/thumbs/1774541281092_15_png.webp',
+    '/images/homepage/logos/thumbs/246366219_5122001357813970_3090785257126649927_n9ebdd6cb-e752-4bf7-8ee4-aeb4df0a6852_png.webp',
+    '/images/homepage/logos/thumbs/Al%20Mokhtabar_jpg.webp',
+    '/images/homepage/logos/thumbs/download_jpg.webp',
+    '/images/homepage/logos/thumbs/images_jpg.webp',
+    '/images/homepage/logos/thumbs/images_png.webp',
 ];
 
 const styles = `
@@ -115,8 +115,11 @@ export default function OrbitingLogos() {
 
             img.src = src;
             img.alt = '';
-            img.loading = 'lazy';
             img.decoding = 'async';
+            if (i < 4) {
+                img.loading = 'eager';
+                if (i === 0) img.fetchPriority = 'high';
+            }
             img.onerror = () => {
                 el.style.display = 'none';
             };

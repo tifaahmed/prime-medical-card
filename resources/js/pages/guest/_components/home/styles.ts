@@ -20,7 +20,7 @@ export const homeStyles = `
 
     --font-display: 'Reem Kufi', 'Tajawal', system-ui, sans-serif;
     --font-body: 'Tajawal', system-ui, sans-serif;
-    --font-serif: 'Amiri', 'Tajawal', serif;
+    --font-serif: 'Tajawal', serif;
 
     --radius-sm: 10px;
     --radius-md: 18px;
@@ -227,7 +227,6 @@ export const homeStyles = `
     padding: 60px 0 100px;
     position: relative;
     overflow: hidden;
-    background-image: url('/images/homepage/1.jpg');
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
@@ -268,13 +267,21 @@ export const homeStyles = `
     height: 8px;
     border-radius: 50%;
     background: var(--amber-500);
-    box-shadow: 0 0 0 0 var(--amber-500);
-    animation: pm-pulse 2s infinite;
+    position: relative;
+  }
+  .pm-home .hero-eyebrow .pulse::before {
+    content: '';
+    position: absolute;
+    inset: -4px;
+    border-radius: 50%;
+    background: var(--amber-500);
+    opacity: 0.7;
+    animation: pm-pulse 2s ease-out infinite;
   }
   @keyframes pm-pulse {
-    0% { box-shadow: 0 0 0 0 rgba(232, 168, 74, 0.7); }
-    70% { box-shadow: 0 0 0 10px rgba(232, 168, 74, 0); }
-    100% { box-shadow: 0 0 0 0 rgba(232, 168, 74, 0); }
+    0% { transform: scale(1); opacity: 0.7; }
+    70% { transform: scale(2.5); opacity: 0; }
+    100% { transform: scale(2.5); opacity: 0; }
   }
 
   .pm-home .hero h1 {
@@ -313,7 +320,7 @@ export const homeStyles = `
   }
 
   .pm-home .hero-actions { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 48px; }
-  .pm-home .hero-stats { display: flex; gap: 40px; padding-top: 32px; border-top: 1px solid var(--line); }
+  .pm-home .hero-stats { display: flex; gap: 40px; padding-top: 32px; border-top: 1px solid var(--line); min-height: 88px; }
   .pm-home .hero-stats div strong {
     display: block;
     font-family: var(--font-display);
@@ -492,6 +499,7 @@ export const homeStyles = `
   .pm-home .partner:hover { opacity: 1; }
 
   .pm-home section { padding: 120px 0; position: relative; }
+  .pm-home section:not(.hero) { content-visibility: auto; contain-intrinsic-size: 600px; }
   .pm-home .section-header { max-width: 720px; margin: 0 auto 80px; text-align: center; }
   .pm-home .section-eyebrow {
     display: inline-block;
@@ -816,7 +824,7 @@ export const homeStyles = `
   }
   .pm-home .footer-social a:hover { background: var(--amber-500); color: var(--teal-900); transform: translateY(-3px); }
   .pm-home .footer-social svg { width: 18px; height: 18px; }
-  .pm-home .footer-col h4 { color: var(--cream); font-size: 14px; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 24px; font-weight: 600; }
+  .pm-home .footer-col h4, .pm-home .footer-col-heading { color: var(--cream); font-size: 14px; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 24px; font-weight: 600; }
   .pm-home .footer-col ul { display: flex; flex-direction: column; gap: 14px; }
   .pm-home .footer-col a { font-size: 14.5px; transition: color 0.3s var(--ease); }
   .pm-home .footer-col a:hover { color: var(--amber-400); }

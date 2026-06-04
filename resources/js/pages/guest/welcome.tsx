@@ -6,20 +6,19 @@ import SeoHead, {
 } from '@/pages/guest/_components/seo-head';
 import type { PageSeoProp } from '@/pages/guest/_components/seo-head';
 import AnnounceBar from '@/pages/guest/_components/home/announce-bar';
-import CtaBanner from '@/pages/guest/_components/home/cta-banner';
-import Faq from '@/pages/guest/_components/home/faq';
 import Hero from '@/pages/guest/_components/home/hero';
-import HowItWorks from '@/pages/guest/_components/home/how-it-works';
-import MobileBottomNav from '@/pages/guest/_components/home/mobile-bottom-nav';
-import PartnersMarquee from '@/pages/guest/_components/home/partners-marquee';
-import Pricing from '@/pages/guest/_components/home/pricing';
-import useRevealOnScroll from '@/pages/guest/_components/home/reveal-on-scroll';
-import Services from '@/pages/guest/_components/home/services';
-import SiteFooter from '@/pages/guest/_components/home/site-footer';
 import SiteNav from '@/pages/guest/_components/home/site-nav';
 import SpecialOffers from '@/pages/guest/_components/home/special-offers';
-import { homeStyles } from '@/pages/guest/_components/home/styles';
+import PartnersMarquee from '@/pages/guest/_components/home/partners-marquee';
+import HowItWorks from '@/pages/guest/_components/home/how-it-works';
+import Services from '@/pages/guest/_components/home/services';
+import Pricing from '@/pages/guest/_components/home/pricing';
 import Testimonials from '@/pages/guest/_components/home/testimonials';
+import Faq from '@/pages/guest/_components/home/faq';
+import CtaBanner from '@/pages/guest/_components/home/cta-banner';
+import SiteFooter from '@/pages/guest/_components/home/site-footer';
+import MobileBottomNav from '@/pages/guest/_components/home/mobile-bottom-nav';
+import { homeStyles } from '@/pages/guest/_components/home/styles';
 
 const FALLBACK_TITLE =
     'برايم ميديكال كارد — بطاقة الخصومات الطبية الأولى';
@@ -104,8 +103,6 @@ export default function Welcome({
     }>().props;
     const authUser = auth?.user ?? null;
 
-    useRevealOnScroll();
-
     return (
         <>
             <SeoHead
@@ -133,9 +130,7 @@ export default function Welcome({
                 ]}
             >
             </SeoHead>
-            <style dangerouslySetInnerHTML={{ __html: homeStyles }} />
-
-            <div className="pm-home" dir="rtl" lang="ar">
+            <main className="pm-home" dir="rtl" lang="ar">
                 <FloatingLogos />
                 <AnnounceBar />
                 <SiteNav authUser={authUser} />
@@ -151,7 +146,8 @@ export default function Welcome({
                 <SiteFooter />
                 <MobileBottomNav />
                 <FloatingActions />
-            </div>
+                <style dangerouslySetInnerHTML={{ __html: homeStyles }} />
+            </main>
         </>
     );
 }

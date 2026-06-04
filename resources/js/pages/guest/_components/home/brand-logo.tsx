@@ -4,9 +4,11 @@ export default function BrandLogo() {
             <div className="flex items-center gap-3">
                 <div className="flex items-center justify-center">
                     <img
-                        src="/images/logos/logo-without-text-new.webp"
+                        src="/images/logos/logo-without-text-sm.webp"
                         alt="برايم ميديكال كارد"
                         className="h-14 w-auto object-contain drop-shadow-md lg:h-16"
+                        width={150}
+                        height={100}
                         loading="eager"
                         decoding="async"
                     />
