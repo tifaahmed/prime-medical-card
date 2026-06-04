@@ -40,6 +40,7 @@ interface Props {
     ) => void;
     submit: (e: FormEvent) => void;
     onSave: (intent: 'stay' | 'return') => void;
+    onSaveCard?: () => void;
     onPersistFamily?: (family: FamilyItem[]) => Promise<void> | void;
     processing: boolean;
     errors: Record<string, string>;
@@ -53,6 +54,7 @@ export default function MembershipForm({
     setData,
     submit,
     onSave,
+    onSaveCard,
     onPersistFamily,
     processing,
     errors,
@@ -385,6 +387,7 @@ export default function MembershipForm({
                 processing={processing}
                 cancelHref={cancelHref}
                 onSave={onSave}
+                onSaveCard={onSaveCard}
                 primaryLabel={primaryLabel}
             />
         </form>

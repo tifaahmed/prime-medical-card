@@ -46,7 +46,7 @@ export default function MembershipCreate({
         family: [] as FamilyItem[],
     });
 
-    const save = (intent: 'stay' | 'return') => {
+    const save = (intent: 'stay' | 'return' | 'card') => {
         post(`/dashboard/memberships?redirect=${intent}`, {
             forceFormData: true,
         });
@@ -70,6 +70,7 @@ export default function MembershipCreate({
                     setData={setData as never}
                     submit={submit}
                     onSave={save}
+                    onSaveCard={() => save('card')}
                     processing={processing}
                     errors={errors as Record<string, string>}
                     relationships={relationships}

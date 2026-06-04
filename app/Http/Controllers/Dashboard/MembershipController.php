@@ -93,6 +93,10 @@ class MembershipController extends Controller
             return $membership;
         });
 
+        if ($request->input('redirect') === 'card') {
+            return to_route('dashboard.memberships.card', $membership);
+        }
+
         return $this->redirectAfterSave(
             $request,
             'dashboard.memberships.edit',

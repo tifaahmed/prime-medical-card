@@ -7,9 +7,14 @@ import {
     FileDownIcon,
     ImageDownIcon,
     Loader2Icon,
+    Maximize2Icon,
     MoveIcon,
     RotateCcwIcon,
+    RotateCwIcon,
     SaveIcon,
+    XIcon,
+    ZoomInIcon,
+    ZoomOutIcon,
 } from 'lucide-react';
 import { QRCodeCanvas } from 'qrcode.react';
 import {
@@ -20,10 +25,16 @@ import {
     useState,
     type CSSProperties,
     type FormEvent,
+    type PointerEvent as ReactPointerEvent,
 } from 'react';
 import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
+import {
+    Dialog,
+    DialogContent,
+    DialogTitle,
+} from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -156,6 +167,73 @@ export default function MembershipCard({
     const [downloading, setDownloading] = useState<
         'front-png' | 'back-png' | 'pdf' | 'qr-png' | 'save' | null
     >(null);
+
+    const [viewerOpen, setViewerOpen] = useState(false);
+    const [viewerZoom, setViewerZoom] = useState(1);
+    const [viewerRotation, setViewerRotation] = useState(0);
+    const [viewerPan, setViewerPan] = useState({ x: 0, y: 0 });
+    const viewerPointerRef = useRef<{
+        startX: number; startY: number; panX: number; panY: number;
+        pinching: boolean; pinchDist: number; pinchZoom: number;
+    }>({ startX: 0, startY: 0, panX: 0, panY: 0, pinching: false, pinchDist: 0, pinchZoom: 1 });
+
+    const openViewer = () => {
+        setViewerOpen(true);
+        setViewerZoom(1.4);
+        setViewerRotation(90);
+        setViewerPan({ x: 0, y: 0 });
+    };
+
+    const clampZoom = (z: number) => Math.min(Math.max(z, 0.3), 8);
+
+    const handleViewerPointerDown = (e: ReactPointerEvent<HTMLDivElement>) => {
+        if (e.button !== 0) return;
+        const p = viewerPointerRef.current;
+        p.startX = e.clientX;
+        p.startY = e.clientY;
+        p.panX = viewerPan.x;
+        p.panY = viewerPan.y;
+        p.pinching = false;
+        e.currentTarget.setPointerCapture(e.pointerId);
+    };
+
+    const handleViewerPointerMove = (e: ReactPointerEvent<HTMLDivElement>) => {
+        const p = viewerPointerRef.current;
+        if (p.pinching) return;
+        setViewerPan({
+            x: p.panX + (e.clientX - p.startX),
+            y: p.panY + (e.clientY - p.startY),
+        });
+    };
+
+    const handleViewerWheel = (e: React.WheelEvent) => {
+        e.preventDefault();
+        setViewerZoom(prev => clampZoom(prev - e.deltaY * 0.002));
+    };
+
+    const handleViewerTouchStart = (e: React.TouchEvent) => {
+        if (e.touches.length === 2) {
+            const p = viewerPointerRef.current;
+            p.pinching = true;
+            p.pinchDist = Math.hypot(
+                e.touches[0].clientX - e.touches[1].clientX,
+                e.touches[0].clientY - e.touches[1].clientY,
+            );
+            p.pinchZoom = viewerZoom;
+        }
+    };
+
+    const handleViewerTouchMove = (e: React.TouchEvent) => {
+        if (e.touches.length === 2) {
+            e.preventDefault();
+            const p = viewerPointerRef.current;
+            const dist = Math.hypot(
+                e.touches[0].clientX - e.touches[1].clientX,
+                e.touches[0].clientY - e.touches[1].clientY,
+            );
+            setViewerZoom(clampZoom(p.pinchZoom * (dist / p.pinchDist)));
+        }
+    };
 
     const frontWrapRef = useRef<HTMLDivElement | null>(null);
     const backWrapRef = useRef<HTMLDivElement | null>(null);
@@ -379,34 +457,11 @@ export default function MembershipCard({
                     </Button>
                 </div>
 
-                <section className="rounded-3xl border bg-card p-5 shadow-sm">
-                    <h3 className="mb-3 font-heading text-sm font-semibold text-muted-foreground">
-                        أسماء العضو
-                    </h3>
-                    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-                        <NameField
-                            label="الاسم الأول"
-                            value={membership.first_name}
-                        />
-                        <NameField
-                            label="الاسم الثاني"
-                            value={membership.second_name}
-                        />
-                        <NameField
-                            label="الاسم الثالث"
-                            value={membership.third_name}
-                        />
-                        <NameField
-                            label="الاسم الرابع"
-                            value={membership.fourth_name}
-                        />
-                    </div>
-                </section>
 
                 <div className="grid gap-6 lg:grid-cols-[minmax(0,360px)_1fr]">
                     <form
                         onSubmit={submit}
-                        className="space-y-4 rounded-3xl border bg-card p-6 shadow-sm"
+                        className="max-lg:hidden space-y-4 rounded-3xl border bg-card p-6 shadow-sm"
                     >
                         <h3 className="font-heading text-lg font-semibold">
                             بيانات البطاقة
@@ -549,9 +604,21 @@ export default function MembershipCard({
                     <div className="space-y-6">
                         <section className="space-y-3 rounded-3xl border bg-card shadow-sm">
                             <header className="flex flex-wrap items-center justify-between gap-2 px-6 pt-6">
-                                <h3 className="font-heading text-lg font-semibold">
-                                    معاينة البطاقة
-                                </h3>
+                                <div className="flex items-center gap-2">
+                                    <h3 className="font-heading text-lg font-semibold">
+                                        معاينة البطاقة
+                                    </h3>
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        size="icon"
+                                        className="size-7"
+                                        title="عرض كامل"
+                                        onClick={openViewer}
+                                    >
+                                        <Maximize2Icon className="size-3.5" />
+                                    </Button>
+                                </div>
                                 <div className="flex items-center gap-2 text-xs text-muted-foreground">
                                     <MoveIcon className="size-3.5" />
                                     اسحب العناصر لتغيير مكانها
@@ -672,7 +739,7 @@ export default function MembershipCard({
                             </div>
                         </section>
 
-                        <section className="space-y-4 rounded-3xl border bg-card p-6 shadow-sm">
+                        <section className="max-lg:hidden space-y-4 rounded-3xl border bg-card p-6 shadow-sm">
                             <header className="flex flex-wrap items-center justify-between gap-2">
                                 <h3 className="font-heading text-lg font-semibold">
                                     التخطيط (الموقع والحجم)
@@ -729,7 +796,7 @@ export default function MembershipCard({
                             </div>
                         </section>
 
-                        <section className="space-y-3 rounded-3xl border bg-card p-6 shadow-sm">
+                        <section className="max-lg:hidden space-y-3 rounded-3xl border bg-card p-6 shadow-sm">
                             <header className="flex items-center justify-between">
                                 <h3 className="font-heading text-lg font-semibold">
                                     الوجه الخلفي
@@ -749,7 +816,7 @@ export default function MembershipCard({
                             </div>
                         </section>
 
-                        <section className="space-y-3 rounded-3xl border bg-card p-6 shadow-sm">
+                        <section className="max-lg:hidden space-y-3 rounded-3xl border bg-card p-6 shadow-sm">
                             <header className="flex items-center justify-between">
                                 <h3 className="font-heading text-lg font-semibold">
                                     قالب مرجعي
@@ -772,29 +839,120 @@ export default function MembershipCard({
                     </div>
                 </div>
             </div>
+
+            <Dialog open={viewerOpen} onOpenChange={setViewerOpen}>
+                <DialogContent
+                    className="!max-w-[95vw] !w-[95vw] !h-[90vh] flex flex-col p-0 gap-0 overflow-hidden"
+                    aria-describedby={undefined}
+                >
+                    <DialogTitle className="sr-only">
+                        معاينة البطاقة - {membership.membership_number}
+                    </DialogTitle>
+                    <div className="flex items-center justify-between gap-2 border-b px-4 py-2 shrink-0">
+                        <div className="flex items-center gap-1">
+                            <Button
+                                type="button"
+                                variant="ghost"
+                                size="icon"
+                                className="size-8"
+                                onClick={() => setViewerZoom(prev => clampZoom(prev / 1.4))}
+                                title="تصغير"
+                            >
+                                <ZoomOutIcon className="size-4" />
+                            </Button>
+                            <span className="w-12 text-center text-xs tabular-nums text-muted-foreground">
+                                {Math.round(viewerZoom * 100)}%
+                            </span>
+                            <Button
+                                type="button"
+                                variant="ghost"
+                                size="icon"
+                                className="size-8"
+                                onClick={() => setViewerZoom(prev => clampZoom(prev * 1.4))}
+                                title="تكبير"
+                            >
+                                <ZoomInIcon className="size-4" />
+                            </Button>
+                            <span className="mx-1 h-5 w-px bg-border" />
+                            <Button
+                                type="button"
+                                variant="ghost"
+                                size="icon"
+                                className="size-8"
+                                onClick={() => setViewerRotation(prev => (prev + 90) % 360)}
+                                title="تدوير"
+                            >
+                                <RotateCwIcon className="size-4" />
+                            </Button>
+                            <span className="mx-1 h-5 w-px bg-border" />
+                            <Button
+                                type="button"
+                                variant="ghost"
+                                size="icon"
+                                className="size-8"
+                                onClick={() => {
+                                    setViewerZoom(1);
+                                    setViewerRotation(0);
+                                    setViewerPan({ x: 0, y: 0 });
+                                }}
+                                title="إعادة تعيين"
+                            >
+                                <RotateCcwIcon className="size-4" />
+                            </Button>
+                        </div>
+                        <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            className="size-8"
+                            onClick={() => setViewerOpen(false)}
+                            title="إغلاق"
+                        >
+                            <XIcon className="size-4" />
+                        </Button>
+                    </div>
+                    <div
+                        className="flex-1 overflow-hidden cursor-grab active:cursor-grabbing touch-none"
+                        onPointerDown={handleViewerPointerDown}
+                        onPointerMove={handleViewerPointerMove}
+                        onWheel={handleViewerWheel}
+                        onTouchStart={handleViewerTouchStart}
+                        onTouchMove={handleViewerTouchMove}
+                    >
+                        <div
+                            className="flex h-full w-full items-center justify-center"
+                            style={{
+                                transform: `translate(${viewerPan.x}px, ${viewerPan.y}px) scale(${viewerZoom}) rotate(${viewerRotation}deg)`,
+                                transition: 'transform 0.15s ease-out',
+                            }}
+                        >
+                            <div
+                                className="w-full max-w-[500px]"
+                                style={{ pointerEvents: 'none' }}
+                            >
+                                <CardFrontPreview
+                                    backgroundSrc={frontEmptySrc}
+                                    firstName={data.card_first_name}
+                                    fullName={data.card_full_name}
+                                    workPlace={data.job_title_en}
+                                    companyName={data.company_name}
+                                    expirationDate={data.expiration_date}
+                                    membershipNumber={data.card_membership_number}
+                                    photoUrl={displayedPhoto}
+                                    qrValue={cardUrl}
+                                    layout={data.card_layout}
+                                    onLayoutChange={() => {}}
+                                    selected={null}
+                                    onSelect={() => {}}
+                                />
+                            </div>
+                        </div>
+                    </div>
+                </DialogContent>
+            </Dialog>
         </>
     );
 }
-
-function NameField({
-    label,
-    value,
-}: {
-    label: string;
-    value: string | null;
-}) {
-    return (
-        <div className="rounded-2xl border bg-muted/30 px-3 py-2">
-            <p className="text-[11px] font-semibold tracking-wider text-muted-foreground">
-                {label}
-            </p>
-            <p className="mt-0.5 font-medium" dir="rtl">
-                {value || '—'}
-            </p>
-        </div>
-    );
-}
-
 
 function TextLayoutControls({
     label,
