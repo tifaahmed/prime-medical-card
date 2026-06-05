@@ -4,6 +4,7 @@ import { toPng } from 'html-to-image';
 import jsPDF from 'jspdf';
 import {
     ArrowRightIcon,
+    ChevronDownIcon,
     FileDownIcon,
     ImageDownIcon,
     Loader2Icon,
@@ -168,6 +169,9 @@ export default function MembershipCard({
         'front-png' | 'back-png' | 'pdf' | 'qr-png' | 'save' | null
     >(null);
 
+    const [layoutOpen, setLayoutOpen] = useState(false);
+    const [backOpen, setBackOpen] = useState(false);
+    const [refOpen, setRefOpen] = useState(false);
     const [viewerOpen, setViewerOpen] = useState(false);
     const [viewerZoom, setViewerZoom] = useState(1);
     const [viewerRotation, setViewerRotation] = useState(0);
@@ -461,7 +465,7 @@ export default function MembershipCard({
                 <div className="grid gap-6 lg:grid-cols-[minmax(0,360px)_1fr]">
                     <form
                         onSubmit={submit}
-                        className="max-lg:hidden space-y-4 rounded-3xl border bg-card p-6 shadow-sm"
+                        className="order-2 lg:order-none space-y-4 rounded-3xl border bg-card p-6 shadow-sm"
                     >
                         <h3 className="font-heading text-lg font-semibold">
                             بيانات البطاقة
@@ -601,7 +605,7 @@ export default function MembershipCard({
                         </Button>
                     </form>
 
-                    <div className="space-y-6">
+                    <div className="order-1 lg:order-none space-y-6">
                         <section className="space-y-3 rounded-3xl border bg-card shadow-sm">
                             <header className="flex flex-wrap items-center justify-between gap-2 px-6 pt-6">
                                 <div className="flex items-center gap-2">
@@ -739,12 +743,23 @@ export default function MembershipCard({
                             </div>
                         </section>
 
-                        <section className="max-lg:hidden space-y-4 rounded-3xl border bg-card p-6 shadow-sm">
-                            <header className="flex flex-wrap items-center justify-between gap-2">
-                                <h3 className="font-heading text-lg font-semibold">
-                                    التخطيط (الموقع والحجم)
-                                </h3>
-                                <div className="flex gap-2">
+                        <section className="space-y-4 rounded-3xl border bg-card p-6 shadow-sm">
+                            <header
+                                className="flex cursor-pointer flex-wrap items-center justify-between gap-2"
+                                onClick={() => setLayoutOpen(prev => !prev)}
+                            >
+                                <div className="flex items-center gap-2">
+                                    <ChevronDownIcon
+                                        className={cn(
+                                            'size-4 text-muted-foreground transition-transform',
+                                            layoutOpen && 'rotate-180',
+                                        )}
+                                    />
+                                    <h3 className="font-heading text-lg font-semibold">
+                                        التخطيط (الموقع والحجم)
+                                    </h3>
+                                </div>
+                                <div className="flex gap-2" onClick={e => e.stopPropagation()}>
                                     <Button
                                         type="button"
                                         variant="outline"
@@ -768,56 +783,78 @@ export default function MembershipCard({
                                 </div>
                             </header>
 
-                            <div className="grid gap-4 md:grid-cols-2">
-                                {TEXT_KEYS.map((key) => (
-                                    <TextLayoutControls
-                                        key={key}
-                                        label={LABELS[key]}
-                                        active={selected === key}
-                                        onActivate={() => setSelected(key)}
-                                        value={data.card_layout[key]}
-                                        onChange={(patch) =>
-                                            updateLayout(key, patch)
-                                        }
-                                    />
-                                ))}
-                                {IMAGE_KEYS.map((key) => (
-                                    <ImageLayoutControls
-                                        key={key}
-                                        label={LABELS[key]}
-                                        active={selected === key}
-                                        onActivate={() => setSelected(key)}
-                                        value={data.card_layout[key]}
-                                        onChange={(patch) =>
-                                            updateLayout(key, patch)
-                                        }
-                                    />
-                                ))}
-                            </div>
+                            {layoutOpen && (
+                                <div className="grid gap-4 md:grid-cols-2">
+                                    {TEXT_KEYS.map((key) => (
+                                        <TextLayoutControls
+                                            key={key}
+                                            label={LABELS[key]}
+                                            active={selected === key}
+                                            onActivate={() => setSelected(key)}
+                                            value={data.card_layout[key]}
+                                            onChange={(patch) =>
+                                                updateLayout(key, patch)
+                                            }
+                                        />
+                                    ))}
+                                    {IMAGE_KEYS.map((key) => (
+                                        <ImageLayoutControls
+                                            key={key}
+                                            label={LABELS[key]}
+                                            active={selected === key}
+                                            onActivate={() => setSelected(key)}
+                                            value={data.card_layout[key]}
+                                            onChange={(patch) =>
+                                                updateLayout(key, patch)
+                                            }
+                                        />
+                                    ))}
+                                </div>
+                            )}
                         </section>
 
-                        <section className="max-lg:hidden space-y-3 rounded-3xl border bg-card p-6 shadow-sm">
-                            <header className="flex items-center justify-between">
+                        <section className="space-y-3 rounded-3xl border bg-card p-6 shadow-sm">
+                            <header
+                                className="flex cursor-pointer items-center gap-2"
+                                onClick={() => setBackOpen(prev => !prev)}
+                            >
+                                <ChevronDownIcon
+                                    className={cn(
+                                        'size-4 text-muted-foreground transition-transform',
+                                        backOpen && 'rotate-180',
+                                    )}
+                                />
                                 <h3 className="font-heading text-lg font-semibold">
                                     الوجه الخلفي
                                 </h3>
                             </header>
-                            <div
-                                ref={backWrapRef}
-                                className="relative w-full overflow-hidden rounded-2xl border shadow-sm"
-                                style={{ aspectRatio: '1096 / 686' }}
-                            >
-                                <img
-                                    src={backSrc}
-                                    alt=""
-                                    crossOrigin="anonymous"
-                                    className="absolute inset-0 h-full w-full object-cover"
-                                />
-                            </div>
+                            {backOpen && (
+                                <div
+                                    ref={backWrapRef}
+                                    className="relative w-full overflow-hidden rounded-2xl border shadow-sm"
+                                    style={{ aspectRatio: '1096 / 686' }}
+                                >
+                                    <img
+                                        src={backSrc}
+                                        alt=""
+                                        crossOrigin="anonymous"
+                                        className="absolute inset-0 h-full w-full object-cover"
+                                    />
+                                </div>
+                            )}
                         </section>
 
-                        <section className="max-lg:hidden space-y-3 rounded-3xl border bg-card p-6 shadow-sm">
-                            <header className="flex items-center justify-between">
+                        <section className="space-y-3 rounded-3xl border bg-card p-6 shadow-sm">
+                            <header
+                                className="flex cursor-pointer items-center gap-2"
+                                onClick={() => setRefOpen(prev => !prev)}
+                            >
+                                <ChevronDownIcon
+                                    className={cn(
+                                        'size-4 text-muted-foreground transition-transform',
+                                        refOpen && 'rotate-180',
+                                    )}
+                                />
                                 <h3 className="font-heading text-lg font-semibold">
                                     قالب مرجعي
                                 </h3>
@@ -825,16 +862,18 @@ export default function MembershipCard({
                                     Example
                                 </span>
                             </header>
-                            <div
-                                className="relative w-full overflow-hidden rounded-2xl border shadow-sm"
-                                style={{ aspectRatio: '1096 / 686' }}
-                            >
-                                <img
-                                    src={frontExampleSrc}
-                                    alt=""
-                                    className="absolute inset-0 h-full w-full object-cover"
-                                />
-                            </div>
+                            {refOpen && (
+                                <div
+                                    className="relative w-full overflow-hidden rounded-2xl border shadow-sm"
+                                    style={{ aspectRatio: '1096 / 686' }}
+                                >
+                                    <img
+                                        src={frontExampleSrc}
+                                        alt=""
+                                        className="absolute inset-0 h-full w-full object-cover"
+                                    />
+                                </div>
+                            )}
                         </section>
                     </div>
                 </div>

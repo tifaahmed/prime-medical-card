@@ -74,7 +74,7 @@ export default function MembershipEdit({
     });
 
     const persist = (
-        intent: 'stay' | 'return',
+        intent: 'stay' | 'return' | 'card',
         overrides?: { family?: FamilyItem[] },
     ): Promise<void> => {
         const payload = { ...data, ...overrides, _method: 'put' };
@@ -120,6 +120,7 @@ export default function MembershipEdit({
                     setData={setData as never}
                     submit={submit}
                     onSave={save}
+                    onSaveCard={() => persist('card')}
                     onPersistFamily={(family) =>
                         persist('stay', { family })
                     }

@@ -18,7 +18,18 @@ export default function FormActions({
 }: Props) {
     return (
         <div className="flex flex-wrap items-center gap-2">
-            <Button type="submit" disabled={processing} className="gap-1.5">
+            {onSaveCard && (
+                <Button
+                    type="button"
+                    disabled={processing}
+                    onClick={onSaveCard}
+                    className="gap-1.5"
+                >
+                    <CreditCardIcon className="size-4" />
+                    {primaryLabel} والبطاقة
+                </Button>
+            )}
+            <Button type="submit" disabled={processing} variant="secondary" className="gap-1.5">
                 <CheckIcon className="size-4" />
                 {primaryLabel} والبقاء
             </Button>
@@ -32,18 +43,6 @@ export default function FormActions({
                 <ListIcon className="size-4" />
                 {primaryLabel} والعودة
             </Button>
-            {onSaveCard && (
-                <Button
-                    type="button"
-                    variant="secondary"
-                    disabled={processing}
-                    onClick={onSaveCard}
-                    className="gap-1.5"
-                >
-                    <CreditCardIcon className="size-4" />
-                    {primaryLabel} والبطاقة
-                </Button>
-            )}
             <Button asChild variant="outline" type="button">
                 <a href={cancelHref}>إلغاء</a>
             </Button>
