@@ -151,6 +151,7 @@ export function CardFrontPreview({
     onLayoutChange,
     selected,
     onSelect,
+    rotation = 0,
 }: {
     backgroundSrc: string;
     firstName: string;
@@ -168,6 +169,7 @@ export function CardFrontPreview({
     ) => void;
     selected: LayoutKey | null;
     onSelect: (key: LayoutKey | null) => void;
+    rotation?: number;
 }) {
     const cardRef = useRef<HTMLDivElement | null>(null);
     const formattedDate = formatDate(expirationDate);
@@ -187,6 +189,7 @@ export function CardFrontPreview({
     const layoutRef = useRef(layout);
     const selectedRef = useRef(selected);
     const onLayoutChangeRef = useRef(onLayoutChange);
+    const rotationRef = useRef(rotation);
     useEffect(() => {
         layoutRef.current = layout;
     }, [layout]);
@@ -196,6 +199,9 @@ export function CardFrontPreview({
     useEffect(() => {
         onLayoutChangeRef.current = onLayoutChange;
     }, [onLayoutChange]);
+    useEffect(() => {
+        rotationRef.current = rotation;
+    }, [rotation]);
 
     const resizeBy = useCallback((direction: number) => {
         const key = selectedRef.current;
@@ -311,12 +317,12 @@ export function CardFrontPreview({
         }
         e.preventDefault();
         e.stopPropagation();
+        e.currentTarget.setPointerCapture(e.pointerId);
         onSelect(key);
         const card = cardRef.current;
         if (!card) {
             return;
         }
-        const rect = card.getBoundingClientRect();
         const item = layout[key];
         const startX = e.clientX;
         const startY = e.clientY;
@@ -324,15 +330,21 @@ export function CardFrontPreview({
         const startLeft = item.left;
         const pointerId = e.pointerId;
 
+        const rad = (rotationRef.current * Math.PI) / 180;
+        const cos = Math.cos(rad);
+        const sin = Math.sin(rad);
+
         const onMove = (moveE: PointerEvent) => {
             if (moveE.pointerId !== pointerId) {
                 return;
             }
-            const dx = ((moveE.clientX - startX) / rect.width) * 100;
-            const dy = ((moveE.clientY - startY) / rect.height) * 100;
+            const dx = ((moveE.clientX - startX) / card.offsetWidth) * 100;
+            const dy = ((moveE.clientY - startY) / card.offsetHeight) * 100;
+            const rotatedDx = dx * cos + dy * sin;
+            const rotatedDy = -dx * sin + dy * cos;
             onLayoutChange(key, {
-                top: clamp(startTop + dy, 0, 100),
-                left: clamp(startLeft + dx, 0, 100),
+                top: clamp(startTop + rotatedDy, 0, 100),
+                left: clamp(startLeft + rotatedDx, 0, 100),
             } as Partial<CardLayout[typeof key]>);
         };
 
@@ -373,7 +385,7 @@ export function CardFrontPreview({
     return (
         <div
             ref={cardRef}
-            className="relative w-full overflow-hidden border shadow-sm select-none"
+            className="relative w-full overflow-hidden border shadow-sm select-none touch-none"
             style={{
                 aspectRatio: imgRatio ? `${imgRatio}` : '1096 / 686',
                 containerType: 'inline-size',

@@ -13,7 +13,6 @@ import {
     RotateCcwIcon,
     RotateCwIcon,
     SaveIcon,
-    XIcon,
     ZoomInIcon,
     ZoomOutIcon,
 } from 'lucide-react';
@@ -616,7 +615,7 @@ export default function MembershipCard({
                                         type="button"
                                         variant="outline"
                                         size="icon"
-                                        className="size-7"
+                                        className="size-7 lg:hidden"
                                         title="عرض كامل"
                                         onClick={openViewer}
                                     >
@@ -939,25 +938,8 @@ export default function MembershipCard({
                                 <RotateCcwIcon className="size-4" />
                             </Button>
                         </div>
-                        <Button
-                            type="button"
-                            variant="ghost"
-                            size="icon"
-                            className="size-8"
-                            onClick={() => setViewerOpen(false)}
-                            title="إغلاق"
-                        >
-                            <XIcon className="size-4" />
-                        </Button>
                     </div>
-                    <div
-                        className="flex-1 overflow-hidden cursor-grab active:cursor-grabbing touch-none"
-                        onPointerDown={handleViewerPointerDown}
-                        onPointerMove={handleViewerPointerMove}
-                        onWheel={handleViewerWheel}
-                        onTouchStart={handleViewerTouchStart}
-                        onTouchMove={handleViewerTouchMove}
-                    >
+                    <div className="flex-1 overflow-hidden touch-none">
                         <div
                             className="flex h-full w-full items-center justify-center"
                             style={{
@@ -965,10 +947,7 @@ export default function MembershipCard({
                                 transition: 'transform 0.15s ease-out',
                             }}
                         >
-                            <div
-                                className="w-full max-w-[500px]"
-                                style={{ pointerEvents: 'none' }}
-                            >
+                            <div className="w-full max-w-[500px]">
                                 <CardFrontPreview
                                     backgroundSrc={frontEmptySrc}
                                     firstName={data.card_first_name}
@@ -980,9 +959,10 @@ export default function MembershipCard({
                                     photoUrl={displayedPhoto}
                                     qrValue={cardUrl}
                                     layout={data.card_layout}
-                                    onLayoutChange={() => {}}
-                                    selected={null}
-                                    onSelect={() => {}}
+                                    onLayoutChange={updateLayout}
+                                    selected={selected}
+                                    onSelect={setSelected}
+                                    rotation={viewerRotation}
                                 />
                             </div>
                         </div>
